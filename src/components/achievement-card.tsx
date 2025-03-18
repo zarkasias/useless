@@ -89,6 +89,7 @@ export function AchievementCard({
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const generationAttemptedRef = useRef(false);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
   
   // Basic card styles without excessive animations
   const cardClass = `${typeColors[type]} ${typeBorderEffects[type]} ${achievementAnimations[type]}`;
@@ -107,6 +108,14 @@ export function AchievementCard({
       generateImage();
     }
   }, [showShareButton, imageUrl, isGeneratingImage]);
+
+  // Detect mobile devices on component mount
+  useEffect(() => {
+    const detectMobile = () => {
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    };
+    setIsMobileDevice(detectMobile());
+  }, []);
 
   // Generate image from the achievement card
   const generateImage = async () => {
@@ -357,11 +366,15 @@ export function AchievementCard({
     try {
       setSocialLoading('Copy');
       
-      // Check if Clipboard API is available
-      if (!navigator.clipboard || !navigator.clipboard.write) {
-        // Fallback for browsers that don't support clipboard.write with images
-        toast.info("Clipboard API not fully supported", {
-          description: "Download the image instead and manually copy it",
+      // Check if it's a mobile device
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      // Check if Clipboard API is available and properly supports images
+      if (!navigator.clipboard || !navigator.clipboard.write || isMobile) {
+        // Fallback for mobile devices or browsers that don't support clipboard.write with images
+        toast.info("Clipboard image copy not supported on your device", {
+          description: "Downloading the image instead. You can manually share it.",
+          duration: 4000
         });
         downloadImage();
         return;
@@ -384,7 +397,7 @@ export function AchievementCard({
     } catch (error) {
       console.error("Error copying image to clipboard:", error);
       toast.error("Failed to copy image", {
-        description: "Try downloading instead",
+        description: "Downloading instead for you to share manually",
       });
       // Offer download as fallback
       downloadImage();
@@ -562,7 +575,11 @@ export function AchievementCard({
               <Button
                 variant="outline"
                 onClick={downloadImage}
-                className="bg-gradient-to-r from-emerald-500/10 to-green-500/10 hover:from-emerald-500/20 hover:to-green-500/20 border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-medium transition-all"
+                className={`${
+                  isMobileDevice 
+                    ? "bg-gradient-to-r from-primary/10 to-blue-500/10 hover:from-primary/20 hover:to-blue-500/20 border-primary/20 text-primary font-medium transition-all" 
+                    : "bg-gradient-to-r from-emerald-500/10 to-green-500/10 hover:from-emerald-500/20 hover:to-green-500/20 border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-medium transition-all"
+                }`}
                 disabled={isGeneratingImage || !imageUrl || socialLoading === 'Copy'}
               >
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
@@ -570,28 +587,36 @@ export function AchievementCard({
                   <polyline points="7 10 12 15 17 10"/>
                   <line x1="12" y1="15" x2="12" y2="3"/>
                 </svg>
-                Download
+                {isMobileDevice ? "Save & Share" : "Download"}
               </Button>
               
-              <Button
-                variant="outline"
-                onClick={copyImageToClipboard}
-                className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 hover:from-blue-500/20 hover:to-indigo-500/20 border-blue-500/20 text-blue-700 dark:text-blue-400 font-medium transition-all"
-                disabled={isGeneratingImage || !imageUrl || !!socialLoading}
-              >
-                {socialLoading === 'Copy' ? (
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                  </svg>
-                )}
-                Copy to Clipboard
-              </Button>
+              {!isMobileDevice && (
+                <Button
+                  variant="outline"
+                  onClick={copyImageToClipboard}
+                  className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 hover:from-blue-500/20 hover:to-indigo-500/20 border-blue-500/20 text-blue-700 dark:text-blue-400 font-medium transition-all"
+                  disabled={isGeneratingImage || !imageUrl || !!socialLoading}
+                >
+                  {socialLoading === 'Copy' ? (
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                    </svg>
+                  )}
+                  Copy to Clipboard
+                </Button>
+              )}
+              
+              {isMobileDevice && imageUrl && (
+                <p className="text-xs text-muted-foreground text-center mt-1">
+                  Save the image and share it on your favorite social platforms
+                </p>
+              )}
             </div>
             
            
