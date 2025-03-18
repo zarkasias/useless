@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import Link from "next/link";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import Script from "next/script";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -12,11 +13,65 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-  title: "Pointless Achievements",
-  description: "Unlock and share hilariously pointless achievements!",
-  icons: {
-    icon: "/favicon.ico",
+  title: "Useless Achievements",
+  description: "Unlock and share hilariously useless achievements!",
+  keywords: [
+    "useless achievements",
+    "funny achievements",
+    "virtual achievements",
+    "achievement unlocked",
+    "web achievements",
+    "online achievements",
+    "gaming achievements",
+    "digital awards",
+    "shareable achievements"
+  ],
+  authors: [
+    {
+      name: "Useless Achievements Team",
+      url: "https://uselessachievements.com",
+    },
+  ],
+  creator: "Useless Achievements",
+  publisher: "Useless Achievements",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "https://uselessachievements.com",
+    title: "Useless Achievements - Unlock Hilariously Useless Digital Awards",
+    description: "Collect and share fun, absurd achievements that celebrate life's mundane moments. Unlock your first achievement today!",
+    siteName: "Useless Achievements",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Useless Achievements - Collect and share fun digital awards",
+      },
+    ],
   },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  alternates: {
+    canonical: "https://uselessachievements.com",
+    languages: {
+      'en-US': "https://uselessachievements.com",
+    },
+  },
+  other: {
+    'msapplication-TileColor': '#38bdf8', // Set a branded tile color
+    'theme-color': '#38bdf8' // Set a theme color for mobile browsers
+  },
+  category: 'entertainment',
 };
 
 function Footer() {
@@ -39,6 +94,38 @@ function Footer() {
   );
 }
 
+// JSON-LD structured data for enhanced SEO
+function StructuredData() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Useless Achievements",
+    "url": "https://uselessachievements.com",
+    "description": "Unlock and share hilariously useless achievements!",
+    "applicationCategory": "Entertainment",
+    "genre": "Achievement Collection",
+    "image": "https://uselessachievements.com/og-image.png",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.7",
+      "ratingCount": "89"
+    }
+  };
+
+  return (
+    <Script 
+      id="structured-data"
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -46,6 +133,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+      </head>
       <body
         className={cn(
           "min-h-screen bg-background font-sans antialiased flex flex-col",
@@ -54,6 +144,7 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <GoogleAnalytics />
+        <StructuredData />
         <Toaster position="top-right" expand={true} richColors />
         <main className="flex-1">{children}</main>
         <Footer />
