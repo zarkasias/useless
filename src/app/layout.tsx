@@ -15,6 +15,8 @@ const fontSans = FontSans({
 export const metadata: Metadata = {
   title: "Useless Achievements",
   description: "Unlock and share hilariously useless achievements!",
+  metadataBase: new URL("https://uselessachievements.com"),
+  manifest: "/manifest.json",
   keywords: [
     "useless achievements",
     "funny achievements",
@@ -72,6 +74,25 @@ export const metadata: Metadata = {
     'theme-color': '#38bdf8' // Set a theme color for mobile browsers
   },
   category: 'entertainment',
+  icons: {
+    icon: [
+      { url: "/favicons/favicon.ico", sizes: "any" },
+      { url: "/favicons/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicons/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicons/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/favicons/android-chrome-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/favicons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      {
+        rel: "mask-icon",
+        url: "/favicons/android-chrome-192x192.png",
+        color: "#38bdf8",
+      },
+    ],
+  },
 };
 
 function Footer() {
