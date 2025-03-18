@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Achievement } from '@/lib/supabase';
@@ -18,15 +18,7 @@ export function UnlockAchievement({
   onClose, 
   // isLoggedIn = false 
 }: UnlockAchievementProps) {
-  // Enhanced debugging for modal issues
-  useEffect(() => {
-    if (isOpen) {
-      console.log('Achievement modal should open:', { isOpen, hasAchievement: !!achievement });
-      if (achievement) {
-        console.log('Achievement data:', achievement);
-      }
-    }
-  }, [isOpen, achievement]);
+
 
   // Early return only if modal shouldn't be shown
   if (!isOpen) return null;
@@ -36,7 +28,6 @@ export function UnlockAchievement({
       open={isOpen} 
       onOpenChange={(open) => {
         if (!open) {
-          console.log('Modal closing via Dialog onOpenChange');
           onClose();
         }
       }}
@@ -81,7 +72,6 @@ export function UnlockAchievement({
           
           <Button 
             onClick={() => {
-              console.log('Closing modal via button click');
               onClose();
             }} 
             className="w-full bg-gradient-to-r from-primary/90 to-blue-500/90 hover:opacity-90 transition-all duration-300 text-white font-medium"

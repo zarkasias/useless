@@ -82,46 +82,37 @@ export default function Home() {
 
   const handleGetDailyAchievement = async () => {
     try {
-      console.log("Daily achievement button clicked");
       
       if (!user) {
-        // Generate a random achievement for non-logged in users
-        console.log("User not logged in, generating demo achievement");
         const randomAchievement = getRandomAchievement();
-        console.log("Generated achievement:", randomAchievement);
         
         // Make sure to set states in the correct order
         setUnlockedAchievement(randomAchievement);
         setShowAchievementModal(true);
         
         // Show toast notification
-        toast.info("Sign up to track your achievements and build a streak!", {
-          duration: 5000,
-          action: {
-            label: "Sign Up",
-            onClick: () => window.location.href = "/signup"
-          }
-        });
+        // toast.info("Sign up to track your achievements and build a streak!", {
+        //   duration: 5000,
+        //   action: {
+        //     label: "Sign Up",
+        //     onClick: () => window.location.href = "/signup"
+        //   }
+        // });
         return;
       }
 
-      console.log("User logged in, unlocking random achievement");
       const achievement = await unlockRandomAchievement(user.id);
-      console.log("Achievement result:", achievement);
       
       if (achievement) {
-        console.log("Setting achievement in state:", achievement);
         setUnlockedAchievement(achievement);
         
         // Ensure modal is opened after achievement is set
         setTimeout(() => {
-          console.log("Opening achievement modal");
           setShowAchievementModal(true);
         }, 0);
         
         toast.success("You've unlocked a random achievement!");
       } else {
-        console.log("Failed to unlock achievement");
         toast.error("Failed to unlock achievement. Please try again.");
       }
     } catch (error) {
@@ -132,15 +123,12 @@ export default function Home() {
 
   const handleGetRandomAchievement = () => {
     try {
-      console.log("Random achievement button clicked");
       // Demo mode - not requiring login to see an achievement
       const randomAchievement = getRandomAchievement();
-      console.log("Generated random achievement:", randomAchievement);
       
       // Set achievement first, then open modal
       setUnlockedAchievement(randomAchievement);
       setTimeout(() => {
-        console.log("Opening achievement modal for random achievement");
         setShowAchievementModal(true);
       }, 0);
     } catch (error) {
@@ -234,7 +222,7 @@ export default function Home() {
         <div className="container mx-auto max-w-5xl relative z-10">
           <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">How It Works</h2>
           <p className="text-center text-muted-foreground mb-16 max-w-2xl mx-auto">
-            Start claiming achievements right away - no account needed! Sign up to track your progress and build your collection.
+            Start claiming achievements right away!! Come back daily to claim a new achievement!
           </p>
           
           <div className="grid gap-10 md:grid-cols-2">
@@ -259,7 +247,7 @@ export default function Home() {
                 <span className="animate-pulse delay-100"><img src="/icons/two.png" alt="2" className="w-10 h-10" /></span>
               </div>
               <h3 className="text-xl font-bold">Share & Compare</h3>
-              <p className="text-muted-foreground">Show off your achievements to friends and compete on the leaderboard for ultimate bragging rights.</p>
+              <p className="text-muted-foreground">Show off your achievements to friends on the social media platform of your choice.</p>
             </div>
           </div>
         </div>
@@ -271,7 +259,6 @@ export default function Home() {
           achievement={unlockedAchievement}
           isOpen={showAchievementModal}
           onClose={() => {
-            console.log("Modal close callback triggered");
             setShowAchievementModal(false);
             // Optional: clear the achievement after closing
             // setTimeout(() => setUnlockedAchievement(null), 300);
