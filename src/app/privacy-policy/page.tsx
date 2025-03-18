@@ -9,7 +9,7 @@ export default function PrivacyPolicy() {
         <section>
           <h2 className="text-2xl font-semibold mb-3">1. Introduction</h2>
           <p className="mb-2">
-            Welcome to Pointless Achievements. We respect your privacy and are committed to protecting your personal data.
+            Welcome to Useless Achievements. We respect your privacy and are committed to protecting your personal data.
             This privacy policy explains how we collect, use, and share information about you when you use our website and services.
           </p>
           <p>
@@ -105,7 +105,7 @@ export default function PrivacyPolicy() {
         <section>
           <h2 className="text-2xl font-semibold mb-3">8. Contact Us</h2>
           <p>
-            If you have any questions about this privacy policy, please contact us at privacy@pointlessachievements.com.
+            If you have any questions about this privacy policy, please contact us at privacy@uselessachievements.com.
           </p>
         </section>
       </div>

@@ -9,14 +9,14 @@ export default function TermsOfService() {
         <section>
           <h2 className="text-2xl font-semibold mb-3">1. Acceptance of Terms</h2>
           <p className="mb-2">
-            By accessing or using Pointless Achievements, you agree to be bound by these Terms of Service. If you do not agree to all the terms and conditions, you must not access or use our services.
+            By accessing or using Useless Achievements, you agree to be bound by these Terms of Service. If you do not agree to all the terms and conditions, you must not access or use our services.
           </p>
         </section>
 
         <section>
           <h2 className="text-2xl font-semibold mb-3">2. Description of Service</h2>
           <p className="mb-2">
-            Pointless Achievements is a platform that allows users to unlock and share achievements. The service includes features such as user accounts, achievement tracking, and social sharing capabilities.
+            Useless Achievements is a platform that allows users to unlock and share achievements. The service includes features such as user accounts, achievement tracking, and social sharing capabilities.
           </p>
           <p>
             We reserve the right to modify, suspend, or discontinue any part of the service at any time, with or without notice.
@@ -64,7 +64,7 @@ export default function TermsOfService() {
         <section>
           <h2 className="text-2xl font-semibold mb-3">6. Intellectual Property</h2>
           <p className="mb-2">
-            The service and its original content, features, and functionality are owned by Pointless Achievements and are protected by copyright, trademark, and other intellectual property laws.
+            The service and its original content, features, and functionality are owned by Useless Achievements and are protected by copyright, trademark, and other intellectual property laws.
           </p>
         </section>
 
@@ -99,7 +99,7 @@ export default function TermsOfService() {
         <section>
           <h2 className="text-2xl font-semibold mb-3">11. Contact Us</h2>
           <p className="mb-2">
-            If you have any questions about these Terms of Service, please contact us at terms@pointlessachievements.com.
+            If you have any questions about these Terms of Service, please contact us at terms@uselessachievements.com.
           </p>
         </section>
       </div>
