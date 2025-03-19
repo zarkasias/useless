@@ -105,7 +105,7 @@ export default function PrivacyPolicy() {
         <section>
           <h2 className="text-2xl font-semibold mb-3">8. Contact Us</h2>
           <p>
-            If you have any questions about this privacy policy, please contact us at privacy@uselessachievements.com.
+            If you have any questions about this privacy policy, please contact us at info@uselessachievements.com.
           </p>
         </section>
       </div>

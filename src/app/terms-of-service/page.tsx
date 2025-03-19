@@ -99,7 +99,7 @@ export default function TermsOfService() {
         <section>
           <h2 className="text-2xl font-semibold mb-3">11. Contact Us</h2>
           <p className="mb-2">
-            If you have any questions about these Terms of Service, please contact us at terms@uselessachievements.com.
+            If you have any questions about these Terms of Service, please contact us at info@uselessachievements.com.
           </p>
         </section>
       </div>
