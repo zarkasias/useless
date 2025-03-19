@@ -13,7 +13,7 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-  title: "Useless Achievements",
+  title: "Useless Achievements - Unlock Hilariously Useless Digital Awards",
   description: "Unlock and share hilariously useless achievements!",
   metadataBase: new URL("https://uselessachievements.com"),
   manifest: "/manifest.json",
@@ -49,6 +49,18 @@ export const metadata: Metadata = {
         width: 1200,
         height: 630,
         alt: "Useless Achievements - Collect and share fun digital awards",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@zarkasias",
+    title: "Useless Achievements - Celebrate Life's Funniest Moments!",
+    description: "Unlock and share hilariously pointless milestones. Track your absurd achievements now!",
+    images: [
+      {
+        url: "/og-image.png",
+        alt: "Useless Achievements - Unlock and Share Hilarious Moments",
       },
     ],
   },
