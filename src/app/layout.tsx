@@ -159,6 +159,22 @@ function StructuredData() {
   );
 }
 
+function ProductHuntBadge() {
+  return (
+    <div className="fixed bottom-4 left-4 z-50">
+      <a href="https://www.producthunt.com/posts/useless-achievements?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-useless&#0045;achievements" target="_blank" rel="noopener noreferrer">
+        <img 
+          src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=943979&theme=neutral&t=1742414567377" 
+          alt="Useless&#0032;Achievements - Unlock&#0032;hilariously&#0032;useless&#0032;digital&#0032;awards | Product Hunt" 
+          style={{ width: "250px", height: "54px" }} 
+          width="250" 
+          height="54" 
+        />
+      </a>
+    </div>
+  );
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -181,6 +197,7 @@ export default function RootLayout({
         <Toaster position="top-right" expand={true} richColors />
         <main className="flex-1">{children}</main>
         <Footer />
+        <ProductHuntBadge />
       </body>
     </html>
   );
