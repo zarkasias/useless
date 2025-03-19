@@ -38,6 +38,31 @@ const achievementPool: Record<AchievementType, AchievementTitleAndDescription[]>
       description: "Cleared your browser history. What were you hiding?",
       emoji: "🧹"
     },
+    {
+      title: "Notification Enthusiast",
+      description: "Clicked on 10 notifications in a row. FOMO much?",
+      emoji: "🔔"
+    },
+    {
+      title: "Profile Pic Perfectionist",
+      description: "Changed your profile picture 5 times in an hour. Looking good!",
+      emoji: "🖼️"
+    },
+    {
+      title: "Apprentice Lurker",
+      description: "Visited the site 10 times without interacting. Just observing!",
+      emoji: "👀"
+    },
+    {
+      title: "Cookie Monster",
+      description: "Accepted all cookies without reading the policy. Yum!",
+      emoji: "🍪"
+    },
+    {
+      title: "Auto-Fill Fanatic",
+      description: "Used auto-fill for every form field. Efficiency at its finest!",
+      emoji: "⏩"
+    },
   ],
   RARE: [
     {
@@ -65,6 +90,32 @@ const achievementPool: Record<AchievementType, AchievementTitleAndDescription[]>
       description: "Changed your profile picture 3 times in one day. Identity crisis much?",
       emoji: "🔄"
     },
+    {
+      title: "Dark Mode Devotee",
+      description: "Switched to dark mode and never looked back. Your eyes thank you!",
+      emoji: "🌑"
+    },
+    {
+      title: "Emoji Overlord",
+      description: "Used 10 different emojis in a single message. Expressive much?",
+      emoji: "😎"
+    },
+    {
+      title: "Secret Agent",
+      description: "Used incognito mode for the first time. What are you hiding?",
+      emoji: "🕵️"
+    },
+    {
+      title: "Wi-Fi Wizard",
+      description: "Connected to 5 different Wi-Fi networks in one day. Nomad life!",
+      emoji: "📶"
+    },
+    {
+      title: "Battery Saver",
+      description: "Used low power mode for an entire day. Every percent counts!",
+      emoji: "🔋"
+    },
+  
   ],
   EPIC: [
     {
@@ -92,6 +143,31 @@ const achievementPool: Record<AchievementType, AchievementTitleAndDescription[]>
       description: "Reset your password 3 times in one week. Maybe write it down this time?",
       emoji: "🔑"
     },
+    {
+      title: "Multi-Tasking Maestro",
+      description: "Used the app while on a video call and cooking dinner. How do you do it?",
+      emoji: "🎭"
+    },
+    {
+      title: "Time Traveler",
+      description: "Changed your device's timezone just to test something. Dedication!",
+      emoji: "⏳"
+    },
+    {
+      title: "Screen Time Champion",
+      description: "Spent 10+ hours on the app in one day. That's a full-time job!",
+      emoji: "⏰"
+    },
+    {
+      title: "Notification Overload",
+      description: "Received 100+ notifications in one day. Your phone is buzzing!",
+      emoji: "📳"
+    },
+    {
+      title: "Data Saver Hero",
+      description: "Used less than 1MB of data in a day. Impressive restraint!",
+      emoji: "📉"
+    },
   ],
   LEGENDARY: [
     {
@@ -118,6 +194,31 @@ const achievementPool: Record<AchievementType, AchievementTitleAndDescription[]>
       title: "Achievement Hoarder",
       description: "Collected 90% of all possible achievements. You're basically playing a game at this point!",
       emoji: "🏆"
+    },
+    {
+      title: "App Whisperer",
+      description: "Found a hidden feature that even the developers didn't know about. How?!",
+      emoji: "🔮"
+    },
+    {
+      title: "Ultimate Multitasker",
+      description: "Used the app while skydiving. Priorities!",
+      emoji: "🪂"
+    },
+    {
+      title: "Memory Master",
+      description: "Remembered your password after 6 months. A true miracle!",
+      emoji: "🧠"
+    },
+    {
+      title: "Bug Hunter Extraordinaire",
+      description: "Reported 10 bugs in one day. Quality assurance owes you!",
+      emoji: "🐞"
+    },
+    {
+      title: "Eternal User",
+      description: "Used the app every single day for a year. No days off!",
+      emoji: "♾️"
     },
   ]
 };
@@ -168,6 +269,31 @@ const dailyAchievementPool: AchievementTitleAndDescription[] = [
     title: "Monday Masochist",
     description: "Active on a Monday. Starting the week with digital achievements!",
     emoji: "📅"
+  },
+  {
+    title: "App Whisperer",
+    description: "Found a hidden feature that even the developers didn't know about. How?!",
+    emoji: "🔮"
+  },
+  {
+    title: "Ultimate Multitasker",
+    description: "Used the app while skydiving. Priorities!",
+    emoji: "🪂"
+  },
+  {
+    title: "Memory Master",
+    description: "Remembered your password after 6 months. A true miracle!",
+    emoji: "🧠"
+  },
+  {
+    title: "Bug Hunter Extraordinaire",
+    description: "Reported 10 bugs in one day. Quality assurance owes you!",
+    emoji: "🐞"
+  },
+  {
+    title: "Eternal User",
+    description: "Used the app every single day for a year. No days off!",
+    emoji: "♾️"
   },
   {
     title: "Friday Celebrator",
