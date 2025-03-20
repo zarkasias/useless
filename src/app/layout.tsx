@@ -194,6 +194,13 @@ export default function RootLayout({
       >
         <GoogleAnalytics />
         <StructuredData />
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5732734926517492"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+          id="google-adsense"
+        />
         <Toaster position="top-right" expand={true} richColors />
         <main className="flex-1">{children}</main>
         <Footer />
