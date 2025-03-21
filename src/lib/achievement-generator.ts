@@ -63,6 +63,41 @@ const achievementPool: Record<AchievementType, AchievementTitleAndDescription[]>
       description: "Used auto-fill for every form field. Efficiency at its finest!",
       emoji: "⏩"
     },
+    {
+      title: "Ghost Typer",
+      description: "Typed 100 characters and then deleted them all. Commitment issues?",
+      emoji: "👻"
+    },
+    {
+      title: "Mute Master",
+      description: "Muted a video within 3 seconds of it playing. Ad avoidance expert!",
+      emoji: "🔇"
+    },
+    {
+      title: "Loading Screen Philosopher",
+      description: "Stared at a loading screen for over a minute. Did you find meaning?",
+      emoji: "🌀"
+    },
+    {
+      title: "FAQ Ghost",
+      description: "Opened the FAQ section but didn't read it. Classic move!",
+      emoji: "📘"
+    },
+    {
+      title: "Swipeaholic",
+      description: "Swiped left/right 50 times in a row. Dating app reject?",
+      emoji: "💫"
+    },
+    {
+      title: "Zoom Wizard",
+      description: "Accidentally zoomed in/out 10 times. Pinch perfection!",
+      emoji: "🔍"
+    },
+    {
+      title: "Password Pretender",
+      description: "Typed 'password' as your password. So meta!",
+      emoji: "🕶️"
+    },
   ],
   RARE: [
     {
@@ -114,6 +149,31 @@ const achievementPool: Record<AchievementType, AchievementTitleAndDescription[]>
       title: "Battery Saver",
       description: "Used low power mode for an entire day. Every percent counts!",
       emoji: "🔋"
+    },
+    {
+      title: "Airplane Mode Adventurer",
+      description: "Used the app offline for 30 minutes. Who needs internet?",
+      emoji: "✈️"
+    },
+    {
+      title: "Ctrl+Z Fanatic",
+      description: "Undid 20 actions in a row. Second thoughts much?",
+      emoji: "⏪"
+    },
+    {
+      title: "Link Collector",
+      description: "Shared 10 links in one day. Viral potential!",
+      emoji: "🔗"
+    },
+    {
+      title: "Font Fashionista",
+      description: "Changed text style 5 times in one document. Stylish!",
+      emoji: "🅰️"
+    },
+    {
+      title: "Mouse Mileage",
+      description: "Moved cursor 1km worth of screen distance. Marathon runner!",
+      emoji: "🏁"
     },
   
   ],
@@ -168,6 +228,41 @@ const achievementPool: Record<AchievementType, AchievementTitleAndDescription[]>
       description: "Used less than 1MB of data in a day. Impressive restraint!",
       emoji: "📉"
     },
+    {
+      title: "Infinite Scroll",
+      description: "Scrolled equivalent of 100 pages. Journey to nowhere!",
+      emoji: "🎢"
+    },
+    {
+      title: "All-Nighter",
+      description: "Used from sunset to sunrise. Vampire mode activated!",
+      emoji: "🌃"
+    },
+    {
+      title: "Time Zone Hopper",
+      description: "Used in 3 different time zones in 24hrs. Jet setter!",
+      emoji: "🌐"
+    },
+    {
+      title: "Data Dragon",
+      description: "Used 1GB of mobile data in a day. Buffering champion!",
+      emoji: "🐉"
+    },
+    {
+      title: "Clipboard Overlord",
+      description: "Copied 100 items to clipboard. Remember to paste!",
+      emoji: "📋"
+    },
+    {
+      title: "GIFsaurus Rex",
+      description: "Sent 50 GIFs in one conversation. Motion sickness!",
+      emoji: "🦖"
+    },
+    {
+      title: "Undo Apocalypse",
+      description: "Undid 100 changes in a row. Temporal paradox!",
+      emoji: "🌀"
+    },
   ],
   LEGENDARY: [
     {
@@ -219,6 +314,41 @@ const achievementPool: Record<AchievementType, AchievementTitleAndDescription[]>
       title: "Eternal User",
       description: "Used the app every single day for a year. No days off!",
       emoji: "♾️"
+    },
+    {
+      title: "404 Guardian",
+      description: "Triggered 50 error messages in one session. Chaos agent!",
+      emoji: "🚨"
+    },
+    {
+      title: "Password Phoenix",
+      description: "Recovered account from 10-year-old credentials. Archeology win!",
+      emoji: "🦅"
+    },
+    {
+      title: "Offline Survivor",
+      description: "Used app for 24hrs without internet. Hermit mode!",
+      emoji: "🏕️"
+    },
+    {
+      title: "Hack Attempt Prankster",
+      description: "Entered 'admin' as username 50 times. Nice try!",
+      emoji: "🎭"
+    },
+    {
+      title: "Pixel Pioneer",
+      description: "Found hidden Easter egg. Developer's favorite!",
+      emoji: "🥚"
+    },
+    {
+      title: "Battery Immortal",
+      description: "Used app for 8hrs on 5% battery. Dark magic!",
+      emoji: "🧙"
+    },
+    {
+      title: "Cloud Defier",
+      description: "Deleted 1TB of data. Point of no return!",
+      emoji: "☁️"
     },
   ]
 };
@@ -299,7 +429,42 @@ const dailyAchievementPool: AchievementTitleAndDescription[] = [
     title: "Friday Celebrator",
     description: "Visited on Friday. Celebrating the weekend with pointless achievements!",
     emoji: "🎊"
-  }
+  },
+  {
+    title: "Midnight Oil",
+    description: "Active between 12-1 AM. Burning that late-night fuel!",
+    emoji: "⛽"
+  },
+  {
+    title: "Hump Day Hero",
+    description: "Logged in on Wednesday. Over the weekly hill!",
+    emoji: "🐫"
+  },
+  {
+    title: "First Footer",
+    description: "Visited on January 1st. New Year's resolutionist!",
+    emoji: "🎆"
+  },
+  {
+    title: "Leap Day Legend",
+    description: "Active on February 29th. Once every 4 years!",
+    emoji: "🐸"
+  },
+  {
+    title: "Solstice Surfer",
+    description: "Logged in during summer/winter solstice. Sun worshipper!",
+    emoji: "🌞"
+  },
+  {
+    title: "Time Zone Bender",
+    description: "Used in 3 time zones in one day. Temporal explorer!",
+    emoji: "⏰"
+  },
+  {
+    title: "New Year, New Tab",
+    description: "Opened a fresh tab on January 1st. Clean slate!",
+    emoji: "🗓️"
+  },
 ];
 
 // Get a random achievement from a specific type
