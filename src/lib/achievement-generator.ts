@@ -98,6 +98,76 @@ const achievementPool: Record<AchievementType, AchievementTitleAndDescription[]>
       description: "Typed 'password' as your password. So meta!",
       emoji: "🕶️"
     },
+    {
+      title: "Right-Click Explorer",
+      description: "Right-clicked 20 times just to see what happens. Curiosity killed the cat!",
+      emoji: "🖱️"
+    },
+    {
+      title: "Back Button Bouncer",
+      description: "Hit the back button 15 times trying to find something. Lost in digital space!",
+      emoji: "⬅️"
+    },
+    {
+      title: "Form Field Wanderer",
+      description: "Tabbed through every form field without filling anything. Efficiency expert!",
+      emoji: "⌨️"
+    },
+    {
+      title: "Search Bar Philosopher",
+      description: "Typed in the search bar then cleared it without searching. Deep thoughts!",
+      emoji: "🔍"
+    },
+    {
+      title: "Copy Paste Champion",
+      description: "Copied and pasted the same thing 10 times. Consistency is key!",
+      emoji: "📋"
+    },
+    {
+      title: "Hover Master",
+      description: "Hovered over 30 different elements. Just exploring tooltips!",
+      emoji: "👆"
+    },
+    {
+      title: "Double-Click Dilettante",
+      description: "Double-clicked something that only needs a single click. Old habits die hard!",
+      emoji: "👆"
+    },
+    {
+      title: "Select All Specialist",
+      description: "Accidentally selected all text 5 times. Ctrl+A is tempting!",
+      emoji: "📝"
+    },
+    {
+      title: "Scroll Wheel Warrior",
+      description: "Spun your scroll wheel like a fidget spinner. The sound is so satisfying!",
+      emoji: "🎡"
+    },
+    {
+      title: "Refresh Button Friend",
+      description: "Clicked refresh just to see the loading animation. Mesmerizing!",
+      emoji: "🔄"
+    },
+    {
+      title: "Link Preview Peeker",
+      description: "Hovered over 20 links to see previews. Commitment issues much?",
+      emoji: "👁️"
+    },
+    {
+      title: "Escape Key Addict",
+      description: "Pressed escape 10 times expecting something to close. Muscle memory!",
+      emoji: "🚪"
+    },
+    {
+      title: "Window Resizer",
+      description: "Resized the browser window 5 times. Goldilocks syndrome!",
+      emoji: "📐"
+    },
+    {
+      title: "Drag Drop Disaster",
+      description: "Tried to drag something that wasn't draggable. Optimism at its finest!",
+      emoji: "✋"
+    },
   ],
   RARE: [
     {
@@ -175,7 +245,76 @@ const achievementPool: Record<AchievementType, AchievementTitleAndDescription[]>
       description: "Moved cursor 1km worth of screen distance. Marathon runner!",
       emoji: "🏁"
     },
-  
+    {
+      title: "Screenshot Collector",
+      description: "Took 15 screenshots of things you'll never need again. Just in case!",
+      emoji: "📸"
+    },
+    {
+      title: "Download Dabbler",
+      description: "Downloaded 10 files and immediately forgot what they were. Mystery files!",
+      emoji: "📥"
+    },
+    {
+      title: "Fullscreen Fanatic",
+      description: "Toggled fullscreen mode 5 times in one session. Can't decide?",
+      emoji: "🖥️"
+    },
+    {
+      title: "Bookmark Browser",
+      description: "Opened your bookmarks folder just to look at all the tabs. Nostalgia trip!",
+      emoji: "⭐"
+    },
+    {
+      title: "History Hopper",
+      description: "Went through your browser history from 3 months ago. What were you doing?",
+      emoji: "📚"
+    },
+    {
+      title: "Reader Mode Reader",
+      description: "Used reader mode to make an article look cleaner. Aesthetic goals!",
+      emoji: "📖"
+    },
+    {
+      title: "Translate Trickster",
+      description: "Translated a page into a language you don't speak. Adventure!",
+      emoji: "🌍"
+    },
+    {
+      title: "Print Preview Pro",
+      description: "Opened print preview just to see how it would look. Planning ahead!",
+      emoji: "🖨️"
+    },
+    {
+      title: "Desktop Screenshot Saver",
+      description: "Saved your desktop as a screenshot. Backing up your icons?",
+      emoji: "💾"
+    },
+    {
+      title: "URL Copier",
+      description: "Copied the URL to send to yourself later. You'll never actually send it!",
+      emoji: "🔗"
+    },
+    {
+      title: "Inspect Element Investigator",
+      description: "Right-clicked 'Inspect' just to see what it does. Developer curiosity!",
+      emoji: "🔬"
+    },
+    {
+      title: "Cache Clearer",
+      description: "Cleared your cache hoping it would fix something. IT support move!",
+      emoji: "🧹"
+    },
+    {
+      title: "Zoom In/Out Artist",
+      description: "Zoomed to 200% then back to 50% repeatedly. Finding that sweet spot!",
+      emoji: "🔍"
+    },
+    {
+      title: "Task Manager Checker",
+      description: "Opened task manager just to see what's running. Performance anxiety!",
+      emoji: "📊"
+    },
   ],
   EPIC: [
     {
@@ -263,6 +402,71 @@ const achievementPool: Record<AchievementType, AchievementTitleAndDescription[]>
       description: "Undid 100 changes in a row. Temporal paradox!",
       emoji: "🌀"
     },
+    {
+      title: "Tab Apocalypse Survivor",
+      description: "Had 50+ tabs open simultaneously. Your browser is a warrior!",
+      emoji: "🗂️"
+    },
+    {
+      title: "Session Time Traveler",
+      description: "Left the app open for 48 hours without closing. Digital camping!",
+      emoji: "⛺"
+    },
+    {
+      title: "Notification Necromancer",
+      description: "Enabled notifications for 20 different things. Your phone never sleeps!",
+      emoji: "🔔"
+    },
+    {
+      title: "Dark Pattern Detector",
+      description: "Spotted and avoided 10 different dark patterns. Skepticism level: Expert!",
+      emoji: "🕵️"
+    },
+    {
+      title: "Cookie Policy Reader",
+      description: "Actually read a cookie policy from start to finish. Legal scholar!",
+      emoji: "📜"
+    },
+    {
+      title: "Browser Extension Collector",
+      description: "Installed 15 browser extensions. Your browser is now a Swiss army knife!",
+      emoji: "🔧"
+    },
+    {
+      title: "Form Completion Master",
+      description: "Filled out 5 multi-page forms in one sitting. Endurance champion!",
+      emoji: "📝"
+    },
+    {
+      title: "Video Speed Watcher",
+      description: "Watched videos at 2x speed for 3 hours. Time efficiency wizard!",
+      emoji: "⏩"
+    },
+    {
+      title: "Archive Explorer",
+      description: "Found something in your archives from 2 years ago. Digital archaeology!",
+      emoji: "📦"
+    },
+    {
+      title: "Multi-Device Master",
+      description: "Used the app on 5 different devices in one day. Digital nomad!",
+      emoji: "📱"
+    },
+    {
+      title: "Error Message Collector",
+      description: "Encountered 25 different error messages. Quality assurance expert!",
+      emoji: "⚠️"
+    },
+    {
+      title: "Browser War Veteran",
+      description: "Switched browsers 3 times in one week. Can't find the perfect one!",
+      emoji: "🌐"
+    },
+    {
+      title: "Shortcut Memorizer",
+      description: "Used keyboard shortcuts exclusively for an hour. Power user mode!",
+      emoji: "⌨️"
+    },
   ],
   LEGENDARY: [
     {
@@ -349,6 +553,66 @@ const achievementPool: Record<AchievementType, AchievementTitleAndDescription[]>
       title: "Cloud Defier",
       description: "Deleted 1TB of data. Point of no return!",
       emoji: "☁️"
+    },
+    {
+      title: "Code Commenter",
+      description: "Read through the page source code looking for secrets. Developer mindset!",
+      emoji: "💻"
+    },
+    {
+      title: "API Explorer",
+      description: "Found and used an undocumented API endpoint. Hacker level unlocked!",
+      emoji: "🔓"
+    },
+    {
+      title: "Local Storage Legend",
+      description: "Stored 100MB of data in localStorage. Browser memory champ!",
+      emoji: "💾"
+    },
+    {
+      title: "Network Tab Navigator",
+      description: "Spent an hour analyzing network requests. Performance optimization guru!",
+      emoji: "📡"
+    },
+    {
+      title: "Console Command Master",
+      description: "Used browser console to execute 50 commands. JavaScript wizard!",
+      emoji: "⚡"
+    },
+    {
+      title: "Service Worker Whisperer",
+      description: "Manually registered a service worker. PWA enthusiast!",
+      emoji: "👨‍💻"
+    },
+    {
+      title: "Cookie Manipulator",
+      description: "Manually edited cookies to test something. Technical explorer!",
+      emoji: "🍪"
+    },
+    {
+      title: "WebSocket Warrior",
+      description: "Kept a WebSocket connection open for 12 hours. Persistent dedication!",
+      emoji: "🔌"
+    },
+    {
+      title: "Cross-Origin Crusader",
+      description: "Solved a CORS issue through creative workarounds. Problem solver!",
+      emoji: "🚫"
+    },
+    {
+      title: "Localhost Legend",
+      description: "Ran localhost on a port ending in 69. Nice!",
+      emoji: "😎"
+    },
+    {
+      title: "Git Commit Master",
+      description: "Made 100 commits in a single day. Productivity overload!",
+      emoji: "📦"
+    },
+    {
+      title: "Dependency Debugger",
+      description: "Resolved a dependency conflict that broke everything. Hero move!",
+      emoji: "🧩"
     },
   ]
 };
@@ -464,6 +728,76 @@ const dailyAchievementPool: AchievementTitleAndDescription[] = [
     title: "New Year, New Tab",
     description: "Opened a fresh tab on January 1st. Clean slate!",
     emoji: "🗓️"
+  },
+  {
+    title: "Tuesday Tinkerer",
+    description: "Active on a Tuesday. Just another day in paradise!",
+    emoji: "📅"
+  },
+  {
+    title: "Thursday Thinker",
+    description: "Visited on Thursday. Almost there to Friday!",
+    emoji: "🤔"
+  },
+  {
+    title: "Saturday Stroller",
+    description: "Logged in on Saturday. Weekend warrior mode!",
+    emoji: "🚶"
+  },
+  {
+    title: "Sunday Surfer",
+    description: "Active on Sunday. Pre-Monday blues preparation!",
+    emoji: "🏄"
+  },
+  {
+    title: "Dawn Patrol",
+    description: "Logged in before sunrise. Early morning productivity!",
+    emoji: "🌅"
+  },
+  {
+    title: "Afternoon Advocate",
+    description: "Visited during the afternoon slump. Powering through!",
+    emoji: "☕"
+  },
+  {
+    title: "Evening Explorer",
+    description: "Active during dinner hours. Multitasking master!",
+    emoji: "🍽️"
+  },
+  {
+    title: "Valentine's Visitor",
+    description: "Logged in on February 14th. Priorities straight!",
+    emoji: "💝"
+  },
+  {
+    title: "Halloween Haunter",
+    description: "Active on October 31st. Spooky achievement hunting!",
+    emoji: "🎃"
+  },
+  {
+    title: "Christmas Clicker",
+    description: "Visited on December 25th. Holiday achievement enthusiast!",
+    emoji: "🎄"
+  },
+  {
+    title: "Birthday Browser",
+    description: "Logged in on your birthday. Self-care looks different for everyone!",
+    emoji: "🎂"
+  },
+  {
+    title: "Equinox Explorer",
+    description: "Active during spring or fall equinox. Seasonal balance!",
+    emoji: "⚖️"
+  },
+  {
+    title: "Dusk Dabbler",
+    description: "Visited during twilight hours. Between day and night!",
+    emoji: "🌆"
+  },
+  {
+    title: "Pre-Dawn Pioneer",
+    description: "Logged in before 6 AM. The early bird gets the achievement!",
+    emoji: "🌄"
   },
 ];
 

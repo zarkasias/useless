@@ -11,7 +11,6 @@ import { getRandomAchievement } from '@/lib/achievement-generator';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { LoginForm } from '@/components/auth/login-form';
 import { toast } from 'sonner';
-// import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 
 export default function Home() {
@@ -150,7 +149,7 @@ export default function Home() {
           <div className="absolute bottom-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-500"></div>
         </div>
         
-        <div className="container mx-auto max-w-5xl relative z-10">
+        <div className="container mx-auto max-w-6xl relative z-10">
           <div className="grid gap-12 md:grid-cols-2 items-center">
             <div className="space-y-6">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold">
@@ -160,6 +159,7 @@ export default function Home() {
                 Celebrate the mundane, embrace the absurd! Our achievements validate your 
                 everyday digital existence with humor and absolutely zero practical value.
               </p>
+              <p className="text-xl text-red-500 font-bold">Updated with brand new achievements!</p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button 
                   size="lg" 
@@ -172,7 +172,7 @@ export default function Home() {
                 </Button>
                 {/* {!user && (
                   <Button size="lg" variant="outline" asChild 
-                    className="border-primary/30 bg-white/30 backdrop-blur-sm hover:bg-primary/10 hover:text-primary transition-all duration-300 shadow-sm hover:shadow-md">
+                    className="bg-gradient-to-r from-purple-500 to-blue-500 hover:opacity-90 hover:scale-105 transition-all duration-300 text-white border-0 shadow-md hover:shadow-xl hover:shadow-purple-500/20">
                     <Link href="/signup">Sign Up to Track Progress</Link>
                   </Button>
                 )} */}
@@ -228,7 +228,7 @@ export default function Home() {
           <div className="grid gap-10 md:grid-cols-2">
             {/* <div className="text-center space-y-4 group hover:scale-105 transition-all duration-300">
               <div className="mx-auto bg-gradient-to-br from-primary/20 to-blue-500/20 w-20 h-20 rounded-full flex items-center justify-center text-2xl group-hover:shadow-lg group-hover:shadow-primary/20 transition-all duration-300">
-                <span className="animate-bounce">3️⃣</span>
+                <span className="animate-pulse"><img src="/icons/number-1.png" alt="1" className="w-10 h-10" /></span>
               </div>
               <h3 className="text-xl font-bold">Sign Up</h3>
               <p className="text-muted-foreground">Create a free account to start unlocking and tracking your meaningless achievements.</p>
