@@ -11,11 +11,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { UserAchievement, AchievementType } from '@/lib/supabase';
+import { Achievement, AchievementType } from '@/lib/supabase';
 import { ChevronDown, Search } from 'lucide-react';
 
 interface AchievementsGridProps {
-  achievements: UserAchievement[];
+  achievements: Achievement[];
 }
 
 type SortOption = 'newest' | 'oldest' | 'rarity';
@@ -54,10 +54,8 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
   const [search, setSearch] = useState<string>('');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
 
-  // Filter achievements based on active tab and search
-  const filteredAchievements = achievements.filter(({ achievement }) => {
-    if (!achievement) return false;
-    
+
+  const filteredAchievements = achievements.filter((achievement) => {
     // Filter by type (tab)
     if (activeTab !== 'all' && achievement.type !== activeTab) {
       return false;
@@ -72,14 +70,16 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
     return true;
   });
 
+  console.log('filteredAchievements', filteredAchievements);
+
   // Sort achievements
   const sortedAchievements = [...filteredAchievements].sort((a, b) => {
-    if (!a.achievement || !b.achievement) return 0;
+    if (!a.created_at || !b.created_at) return 0;
 
     if (sortBy === 'newest') {
-      return new Date(b.unlocked_at).getTime() - new Date(a.unlocked_at).getTime();
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     } else if (sortBy === 'oldest') {
-      return new Date(a.unlocked_at).getTime() - new Date(b.unlocked_at).getTime();
+      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
     } else if (sortBy === 'rarity') {
       const rarityOrder: Record<AchievementType, number> = {
         COMMON: 1,
@@ -87,7 +87,7 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
         EPIC: 3,
         LEGENDARY: 4
       };
-      return rarityOrder[b.achievement.type] - rarityOrder[a.achievement.type];
+      return rarityOrder[b.type] - rarityOrder[a.type];
     }
     return 0;
   });
@@ -142,12 +142,12 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
       </div>
 
       <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-5 mb-8 bg-background/50 backdrop-blur-sm border border-primary/20 p-1">
+        <TabsList className="flex flex-wrap gap-2 mb-4 sm:mb-8 bg-background/50 backdrop-blur-sm border border-primary/20 p-2">
           {Object.entries(tabStyles).map(([value, style]) => (
             <TabsTrigger 
               key={value} 
               value={value}
-              className={`data-[state=active]:${style.gradient} data-[state=active]:${style.color} data-[state=active]:shadow-sm transition-all duration-300 data-[state=active]:border-b-2 data-[state=active]:border-b-primary/50`}
+              className={`flex-1 sm:flex-none min-w-[120px] px-3 py-2 text-sm sm:text-base data-[state=active]:${style.gradient} data-[state=active]:${style.color} data-[state=active]:shadow-sm transition-all duration-300`}
             >
               <span className="mr-1">{style.emoji}</span> 
               {value === 'all' ? 'All' : value.charAt(0) + value.slice(1).toLowerCase()}
@@ -157,24 +157,22 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
 
         <TabsContent value={activeTab} className="mt-0">
           {sortedAchievements.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {sortedAchievements.map((userAchievement, index) => (
-                userAchievement.achievement && (
-                  <div 
-                    key={userAchievement.id} 
-                    className="transform transition-all duration-500"
-                    style={{ 
-                      animationDelay: `${index * 100}ms`,
-                      animation: 'fadeIn 0.5s ease-out forwards'
-                    }}
-                  >
-                    <AchievementCard
-                      achievement={userAchievement.achievement}
-                      unlockedAt={userAchievement.unlocked_at}
-                      showShareButton
-                    />
-                  </div>
-                )
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+              {sortedAchievements.map((achievement, index) => (
+                <div 
+                  key={achievement.id} 
+                  className="transform transition-all duration-500"
+                  style={{ 
+                    animationDelay: `${index * 100}ms`,
+                    animation: 'fadeIn 0.5s ease-out forwards'
+                  }}
+                >
+                  <AchievementCard
+                    ingrid={true}
+                    achievement={achievement}
+                    showShareButton
+                  />
+                </div>
               ))}
             </div>
           ) : (

@@ -1,8 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { UserAchievement, AchievementType } from '@/lib/supabase';
+import { Achievement, AchievementType } from '@/lib/supabase';
 
 interface DashboardStatsProps {
-  userAchievements: UserAchievement[];
+  userAchievements: Achievement[];
   currentStreak: number;
 }
 
@@ -43,7 +43,7 @@ export function DashboardStats({ userAchievements, currentStreak }: DashboardSta
   const totalAchievements = userAchievements.length;
   
   // Count achievements by type
-  const achievementsByType = userAchievements.reduce((acc, { achievement }) => {
+  const achievementsByType = userAchievements.reduce((acc, achievement) => {
     if (achievement) {
       acc[achievement.type] = (acc[achievement.type] || 0) + 1;
     }
@@ -58,7 +58,7 @@ export function DashboardStats({ userAchievements, currentStreak }: DashboardSta
   // Get the most recent achievement
   const mostRecentAchievement = userAchievements.length > 0 
     ? userAchievements.sort((a, b) => 
-        new Date(b.unlocked_at).getTime() - new Date(a.unlocked_at).getTime()
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       )[0]
     : null;
 
@@ -115,20 +115,20 @@ export function DashboardStats({ userAchievements, currentStreak }: DashboardSta
         </CardHeader>
         <CardContent>
           <div className="text-md font-bold truncate">
-            {mostRecentAchievement?.achievement 
+            {mostRecentAchievement
               ? (
                 <div className="flex items-center gap-1">
-                  <span>{mostRecentAchievement.achievement.emoji}</span>
+                  <span>{mostRecentAchievement.emoji}</span>
                   <span className="bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-emerald-500">
-                    {mostRecentAchievement.achievement.title}
+                    {mostRecentAchievement.title}
                   </span>
                 </div>
               ) 
               : 'None yet'}
           </div>
           <p className="text-xs text-muted-foreground truncate mt-1">
-            {mostRecentAchievement?.achievement
-              ? mostRecentAchievement.achievement.description.substring(0, 40) + '...'
+            {mostRecentAchievement
+              ? mostRecentAchievement.description.substring(0, 40) + '...'
               : 'Unlock your first achievement!'}
           </p>
         </CardContent>

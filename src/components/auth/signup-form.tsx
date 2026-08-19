@@ -1,10 +1,11 @@
-import { useState } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import * as z from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+"use client";
+import { useState } from "react";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Form,
   FormControl,
@@ -12,80 +13,79 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { supabase } from '@/lib/supabase';
+} from "@/components/ui/form";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
-const formSchema = z.object({
-  username: z.string().min(3).max(20),
-  email: z.string().email(),
-  password: z.string().min(6).max(100),
-  confirmPassword: z.string().min(6),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const formSchema = z
+  .object({
+    username: z.string().min(3).max(20),
+    email: z.string().email(),
+    password: z.string().min(6).max(100),
+    confirmPassword: z.string().min(6),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
-interface SignupFormProps {
-  onSuccess: () => void;
-}
-
-export function SignupForm({ onSuccess }: SignupFormProps) {
+export function SignupForm() {
   const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+
+  const supabase = createClient();
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: '',
-      email: '',
-      password: '',
-      confirmPassword: '',
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setError(null);
+    setMessage(null);
     setIsLoading(true);
 
     try {
-      // 1. Create the user in Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
           data: {
             username: values.username,
           },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
-      if (authError) {
-        setError(authError.message);
+      if (error) {
+        setError(error.message);
         return;
       }
 
-      if (authData.user) {
-        // 2. Create a user profile in the database
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: authData.user.id,
-            username: values.username,
-            avatar_url: '',
-            streak_count: 0,
-            created_at: new Date().toISOString(),
-          });
-
-        if (profileError) {
-          setError(profileError.message);
-          return;
-        }
-
-        onSuccess();
+      if (!data.user) {
+        setError("Unable to create account");
+        return;
       }
+
+      if (data.session) {
+        router.push("/dashboard");
+        router.refresh();
+        return;
+      }
+
+      setMessage(
+        "Account created! Please check your email to confirm your account.",
+      );
     } catch (err) {
-      setError('An unexpected error occurred');
-      console.error(err);
+      console.error("Signup error:", err);
+      setError("An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -102,7 +102,7 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
 
       {error && (
         <Alert variant="destructive">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{message}</AlertDescription>
         </Alert>
       )}
 
@@ -161,17 +161,20 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
             )}
           />
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? 'Creating account...' : 'Sign Up'}
+            {isLoading ? "Creating account..." : "Sign Up"}
           </Button>
         </form>
       </Form>
 
       <div className="text-center text-sm">
         <span className="text-muted-foreground">Already have an account? </span>
-        <a href="/login" className="underline underline-offset-4 hover:text-primary">
+        <a
+          href="/login"
+          className="underline underline-offset-4 hover:text-primary"
+        >
           Log in
         </a>
       </div>
     </div>
   );
-} 
+}

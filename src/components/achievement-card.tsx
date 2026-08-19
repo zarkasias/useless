@@ -73,13 +73,15 @@ const achievementAnimations: Record<AchievementType, string> = {
 interface AchievementCardProps {
   achievement: Achievement;
   unlockedAt?: string;
+  ingrid?: boolean;
   showShareButton?: boolean;
 }
 
 export function AchievementCard({ 
   achievement, 
   unlockedAt, 
-  showShareButton = false
+  showShareButton = false,
+  ingrid = false
 }: AchievementCardProps) {
   const { title, description, type, emoji, is_daily } = achievement;
   const cardRef = useRef<HTMLDivElement>(null);
@@ -126,10 +128,11 @@ export function AchievementCard({
     try {
       setIsGeneratingImage(true);
       
-      // Show toast for longer operations
-      toastId = toast.loading("Preparing achievement to share...", {
-        description: "This will only take a moment",
-      });
+      if (!ingrid) {
+        toastId = toast.loading("Preparing achievement to share...", {
+          description: "This will only take a moment",
+        });
+      }
       
       // Get device pixel ratio for better quality on high-DPI displays
       const pixelRatio = window.devicePixelRatio || 1;
@@ -251,9 +254,11 @@ export function AchievementCard({
       // Make sure to dismiss the toast ID that was created earlier
       if (toastId) toast.dismiss(toastId);
       
-      toast.success("Achievement ready to share!", {
-        description: "Use the buttons below to share your achievement",
-      });
+      if (!ingrid) {
+        toast.success("Achievement ready to share!", {
+          description: "Use the buttons below to share your achievement",
+        });
+      }
       
     } catch (error) {
       console.error("Error generating image:", error);
@@ -261,9 +266,11 @@ export function AchievementCard({
       // Make sure to dismiss the loading toast in case of error
       if (toastId) toast.dismiss(toastId);
       
-      toast.error("Failed to prepare image", {
-        description: "Try switching between light/dark mode or using a different browser",
-      });
+      if (!ingrid) {
+        toast.error("Failed to prepare image", {
+          description: "Try switching between light/dark mode or using a different browser",
+        });
+      }
     } finally {
       setIsGeneratingImage(false);
     }
