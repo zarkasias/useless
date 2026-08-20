@@ -404,6 +404,96 @@ export async function claimDailyAchievementForAnonymousUser(
 }
 
 /**
+ * Get all achievements belonging to an anonymous user.
+ */
+export async function getAnonymousUserAchievements(
+  anonymousId: string,
+): Promise<Achievement[]> {
+  const anonymousUser = await getAnonymousUser(anonymousId);
+
+  if (!anonymousUser) {
+    return [];
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from("anonymous_achievements")
+    .select(
+      `
+      id,
+      anonymous_user_id,
+      achievement_id,
+      created_at,
+      achievement_date,
+      achievements (
+        id,
+        title,
+        description,
+        type,
+        emoji,
+        created_at,
+        is_daily
+      )
+    `,
+    )
+    .eq("anonymous_user_id", anonymousUser.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching anonymous user achievements:", error);
+
+    return [];
+  }
+
+  if (!data) {
+    return [];
+  }
+
+  return data
+    .filter((record) => record.achievements)
+    .map((record) => {
+      const achievement = Array.isArray(record.achievements)
+        ? record.achievements[0]
+        : record.achievements;
+
+      return {
+        id: achievement.id,
+        title: achievement.title,
+        description: achievement.description,
+        type: achievement.type,
+        emoji: achievement.emoji,
+        created_at: record.created_at,
+        is_daily: achievement.is_daily,
+      };
+    });
+}
+
+/**
+ * Count achievements claimed by an anonymous user (for the free-tier paywall).
+ */
+export async function getAnonymousAchievementCount(
+  anonymousId: string,
+): Promise<number> {
+  const anonymousUser = await getAnonymousUser(anonymousId);
+
+  if (!anonymousUser) {
+    return 0;
+  }
+
+  const { count, error } = await supabaseAdmin
+    .from("anonymous_achievements")
+    .select("*", { count: "exact", head: true })
+    .eq("anonymous_user_id", anonymousUser.id);
+
+  if (error) {
+    console.error("Error counting anonymous achievements:", error);
+
+    return 0;
+  }
+
+  return count ?? 0;
+}
+
+/**
  * Legacy achievement unlock.
  *
  * Keep this temporarily because other existing UI/code may

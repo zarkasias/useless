@@ -8,12 +8,21 @@ import {
   getAuthenticatedUser,
   unlockAchievementForCurrentUser,
   claimDailyAchievementForAnonymousUser,
+  claimDailyAchievementForAuthenticatedUser,
+  getAnonymousAchievementCount,
 } from "@/lib/achievement-service-server";
 
 import { createAnonymousUser } from "@/lib/anonymous-user";
 import { getRandomAchievement } from "@/lib/achievement-generator";
 
 const ANONYMOUS_COOKIE = "anonymous_user_id";
+const FREE_ANONYMOUS_LIMIT = 5;
+
+export interface ClaimResult {
+  achievement: Achievement | null;
+  paywalled: boolean;
+  remaining: number;
+}
 
 /*
  * Existing action.
@@ -27,16 +36,27 @@ export async function unlockRandomAchievementAction(): Promise<Achievement | nul
   return await unlockAchievementForCurrentUser(achievement);
 }
 
-export async function claimDailyAchievementAction(): Promise<Achievement | null> {
+/**
+ * Claim a daily achievement from the database.
+ *
+ * - Authenticated users: claim directly (no paywall).
+ * - Anonymous users: 5 free claims, then a paywall prompts sign-up.
+ */
+export async function claimDailyAchievementAction(): Promise<ClaimResult> {
   const user = await getAuthenticatedUser();
 
   // --------------------------------------------------
-  // Authenticated user
+  // Authenticated user — no paywall
   // --------------------------------------------------
 
   if (user) {
-    // We'll add the authenticated daily claim logic next.
-    return null;
+    const achievement = await claimDailyAchievementForAuthenticatedUser();
+
+    return {
+      achievement,
+      paywalled: false,
+      remaining: Infinity,
+    };
   }
 
   // --------------------------------------------------
@@ -67,5 +87,45 @@ export async function claimDailyAchievementAction(): Promise<Achievement | null>
     });
   }
 
-  return await claimDailyAchievementForAnonymousUser(anonymousId);
+  // Paywall: enforce the free limit
+  const count = await getAnonymousAchievementCount(anonymousId);
+
+  if (count >= FREE_ANONYMOUS_LIMIT) {
+    return {
+      achievement: null,
+      paywalled: true,
+      remaining: 0,
+    };
+  }
+
+  const achievement = await claimDailyAchievementForAnonymousUser(anonymousId);
+
+  return {
+    achievement,
+    paywalled: false,
+    remaining: FREE_ANONYMOUS_LIMIT - (count + (achievement ? 1 : 0)),
+  };
+}
+
+/**
+ * Get the number of free achievements remaining for the current visitor.
+ * Authenticated users get Infinity; anonymous users get 5 minus claimed.
+ */
+export async function getFreeAchievementsRemainingAction(): Promise<number> {
+  const user = await getAuthenticatedUser();
+
+  if (user) {
+    return Infinity;
+  }
+
+  const cookieStore = await cookies();
+  const anonymousId = cookieStore.get(ANONYMOUS_COOKIE)?.value;
+
+  if (!anonymousId) {
+    return FREE_ANONYMOUS_LIMIT;
+  }
+
+  const count = await getAnonymousAchievementCount(anonymousId);
+
+  return Math.max(0, FREE_ANONYMOUS_LIMIT - count);
 }

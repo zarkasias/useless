@@ -6,8 +6,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/navbar";
 import { UnlockAchievement } from "@/components/unlock-achievement";
 import { Achievement, UserProfile } from "@/lib/supabase";
-import { unlockRandomAchievement } from "@/lib/achievement-service";
-import { getRandomAchievement } from "@/lib/achievement-generator";
+import {
+  claimDailyAchievementAction,
+  getFreeAchievementsRemainingAction,
+} from "@/app/actions/achievement-actions";
 import {
   Sheet,
   SheetContent,
@@ -25,6 +27,8 @@ export default function Home() {
     useState<Achievement | null>(null);
   const [showAchievementModal, setShowAchievementModal] = useState(false);
   const [isAuthSheetOpen, setIsAuthSheetOpen] = useState(false);
+  const [freeRemaining, setFreeRemaining] = useState<number | null>(null);
+  const [isClaiming, setIsClaiming] = useState(false);
 
   // Check if user is logged in
   useEffect(() => {
@@ -46,6 +50,7 @@ export default function Home() {
     };
 
     checkUser();
+    refreshFreeRemaining();
 
     // Set up auth state change listener
     const {
@@ -61,8 +66,10 @@ export default function Home() {
         if (profile) {
           setUser(profile as UserProfile);
         }
+        setFreeRemaining(null);
       } else if (event === "SIGNED_OUT") {
         setUser(null);
+        refreshFreeRemaining();
       }
     });
 
@@ -71,6 +78,15 @@ export default function Home() {
     };
   }, []);
 
+  const refreshFreeRemaining = async () => {
+    try {
+      const remaining = await getFreeAchievementsRemainingAction();
+      setFreeRemaining(remaining);
+    } catch {
+      setFreeRemaining(null);
+    }
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     setUser(null);
@@ -78,59 +94,66 @@ export default function Home() {
   };
 
   const handleGetDailyAchievement = async () => {
+    if (isClaiming) return;
+    setIsClaiming(true);
+
     try {
-      if (!user) {
-        const randomAchievement = getRandomAchievement();
+      const result = await claimDailyAchievementAction();
 
-        // Make sure to set states in the correct order
-        setUnlockedAchievement(randomAchievement);
-        setShowAchievementModal(true);
-
-        // Show toast notification
-        toast.info("Sign up to track your achievements and build a streak!", {
-          duration: 5000,
-          action: {
-            label: "Sign Up",
-            onClick: () => (window.location.href = "/signup"),
+      if (result.paywalled) {
+        toast.info(
+          "You've used all 5 free achievements! Sign up to keep going.",
+          {
+            duration: 6000,
+            action: {
+              label: "Sign Up",
+              onClick: () => (window.location.href = "/signup"),
+            },
           },
-        });
+        );
         return;
       }
 
-      const achievement = await unlockRandomAchievement(user.id);
+      if (result.achievement) {
+        setUnlockedAchievement(result.achievement);
+        setShowAchievementModal(true);
 
-      if (achievement) {
-        setUnlockedAchievement(achievement);
-
-        // Ensure modal is opened after achievement is set
-        setTimeout(() => {
-          setShowAchievementModal(true);
-        }, 0);
-
-        toast.success("You've unlocked a random achievement!");
+        if (!user) {
+          refreshFreeRemaining();
+          if (result.remaining <= 2) {
+            toast.info(
+              `Only ${result.remaining} free achievement${
+                result.remaining === 1 ? "" : "s"
+              } left! Sign up to keep tracking.`,
+              {
+                duration: 5000,
+                action: {
+                  label: "Sign Up",
+                  onClick: () => (window.location.href = "/signup"),
+                },
+              },
+            );
+          } else {
+            toast.success(
+              `${result.remaining} free achievements remaining!`,
+            );
+          }
+        } else {
+          toast.success("You've unlocked a daily achievement!");
+        }
       } else {
-        toast.error("Failed to unlock achievement. Please try again.");
+        toast.info("You've already claimed today's achievement. Come back tomorrow!");
       }
     } catch (error) {
-      console.error("Error unlocking random achievement:", error);
+      console.error("Error claiming achievement:", error);
       toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsClaiming(false);
     }
   };
 
   const handleGetRandomAchievement = () => {
-    try {
-      // Demo mode - not requiring login to see an achievement
-      const randomAchievement = getRandomAchievement();
-
-      // Set achievement first, then open modal
-      setUnlockedAchievement(randomAchievement);
-      setTimeout(() => {
-        setShowAchievementModal(true);
-      }, 0);
-    } catch (error) {
-      console.error("Error generating random achievement:", error);
-      toast.error("Failed to generate achievement. Please try again.");
-    }
+    handleGetDailyAchievement();
   };
 
   return (
@@ -168,6 +191,7 @@ export default function Home() {
                 <Button
                   size="lg"
                   onClick={handleGetDailyAchievement}
+                  disabled={isClaiming}
                   className="group bg-gradient-to-r from-primary to-blue-500 hover:opacity-90 hover:scale-105 transition-all duration-300 text-white border-0 shadow-md hover:shadow-xl hover:shadow-primary/20"
                 >
                   <span className="mr-2 text-2xl group-hover:animate-bounce">
@@ -182,6 +206,15 @@ export default function Home() {
                     →
                   </span>
                 </Button>
+                {!user && freeRemaining !== null && freeRemaining !== Infinity && (
+                  <p className="text-sm text-muted-foreground">
+                    {freeRemaining > 0
+                      ? `${freeRemaining} free achievement${
+                          freeRemaining === 1 ? "" : "s"
+                        } remaining — sign up to keep going!`
+                      : "No free achievements left — sign up to continue!"}
+                  </p>
+                )}
                 {!user && (
                   <Button
                     size="lg"
