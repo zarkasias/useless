@@ -1,32 +1,52 @@
-import { createClient } from "@/lib/supabase/server";
+"use client";
 
-export default async function AuthTestPage() {
-  const supabase = await createClient();
+import { useState } from "react";
 
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+import { Achievement } from "@/lib/supabase";
+import { claimDailyAchievementAction } from "@/app/actions/achievement-actions";
+
+export default function AuthTestPage() {
+  const [achievement, setAchievement] = useState<Achievement | null>(null);
+
+  const [message, setMessage] = useState("");
+
+  async function handleClaim() {
+    setMessage("Claiming...");
+
+    try {
+      const result = await claimDailyAchievementAction();
+
+      if (!result) {
+        setMessage("You have already claimed today's achievement.");
+        return;
+      }
+
+      setAchievement(result);
+      setMessage("Achievement claimed!");
+    } catch (error) {
+      console.error(error);
+      setMessage("Error claiming achievement.");
+    }
+  }
 
   return (
     <div className="p-8">
-      <h1 className="text-2xl font-bold">Auth Test</h1>
+      <h1 className="text-2xl font-bold">Achievement Claim Test</h1>
 
-      <pre className="mt-4">
-        {JSON.stringify(
-          {
-            user: user
-              ? {
-                  id: user.id,
-                  email: user.email,
-                }
-              : null,
-            error: error?.message ?? null,
-          },
-          null,
-          2,
-        )}
-      </pre>
+      <button
+        onClick={handleClaim}
+        className="mt-6 rounded bg-blue-600 px-4 py-2 text-white"
+      >
+        Claim Todays Achievement
+      </button>
+
+      <p className="mt-4">{message}</p>
+
+      {achievement && (
+        <pre className="mt-6 rounded bg-muted p-4">
+          {JSON.stringify(achievement, null, 2)}
+        </pre>
+      )}
     </div>
   );
 }
