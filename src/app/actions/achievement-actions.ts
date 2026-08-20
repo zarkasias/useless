@@ -7,7 +7,9 @@ import { Achievement } from "@/lib/supabase";
 import {
   getAuthenticatedUser,
   unlockAchievementForCurrentUser,
+  claimDailyAchievementForAuthenticatedUser,
   claimDailyAchievementForAnonymousUser,
+  mergeAnonymousAchievementsIntoCurrentUser,
 } from "@/lib/achievement-service-server";
 
 import { createAnonymousUser } from "@/lib/anonymous-user";
@@ -35,8 +37,7 @@ export async function claimDailyAchievementAction(): Promise<Achievement | null>
   // --------------------------------------------------
 
   if (user) {
-    // We'll add the authenticated daily claim logic next.
-    return null;
+    return await claimDailyAchievementForAuthenticatedUser();
   }
 
   // --------------------------------------------------
@@ -68,4 +69,36 @@ export async function claimDailyAchievementAction(): Promise<Achievement | null>
   }
 
   return await claimDailyAchievementForAnonymousUser(anonymousId);
+}
+
+// --------------------------------------------------
+// merge achievement actions
+// --------------------------------------------------
+
+export async function migrateAnonymousAchievementsAction(): Promise<{
+  migrated: number;
+  skipped: number;
+}> {
+  const user = await getAuthenticatedUser();
+
+  if (!user) {
+    throw new Error(
+      "User must be logged in before migrating anonymous achievements.",
+    );
+  }
+
+  const cookieStore = await cookies();
+
+  const anonymousId = cookieStore.get(ANONYMOUS_COOKIE)?.value;
+
+  if (!anonymousId) {
+    return {
+      migrated: 0,
+      skipped: 0,
+    };
+  }
+
+  const result = await mergeAnonymousAchievementsIntoCurrentUser(anonymousId);
+
+  return result;
 }

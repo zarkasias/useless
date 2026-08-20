@@ -8,6 +8,7 @@ import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { migrateAnonymousAchievementsAction } from "@/app/actions/achievement-actions";
 
 import {
   Form,
@@ -59,6 +60,12 @@ export function LoginForm() {
       if (!data.user) {
         setError("Unable to log in");
         return;
+      }
+
+      try {
+        await migrateAnonymousAchievementsAction();
+      } catch (migrationError) {
+        console.error("Anonymous achievement migration error:", migrationError);
       }
 
       router.push("/dashboard");

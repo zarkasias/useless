@@ -14,6 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { migrateAnonymousAchievementsAction } from "@/app/actions/achievement-actions";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -75,6 +76,14 @@ export function SignupForm() {
       }
 
       if (data.session) {
+        try {
+          await migrateAnonymousAchievementsAction();
+        } catch (migrationError) {
+          console.error(
+            "Anonymous achievement migration error:",
+            migrationError,
+          );
+        }
         router.push("/dashboard");
         router.refresh();
         return;
@@ -102,6 +111,12 @@ export function SignupForm() {
 
       {error && (
         <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+
+      {message && (
+        <Alert>
           <AlertDescription>{message}</AlertDescription>
         </Alert>
       )}

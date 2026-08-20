@@ -316,6 +316,12 @@ export async function claimDailyAchievementForAnonymousUser(
     return null;
   }
 
+  // This browser has previously been linked to an account.
+  // Do not allow it to start a fresh anonymous achievement history.
+  if (anonymousUser.linked_user_id) {
+    return null;
+  }
+
   const today = getToday();
 
   // --------------------------------------------------
@@ -440,5 +446,153 @@ export async function unlockAchievementForCurrentUser(
     ...achievement,
     user_id: user.id,
     created_at: data.created_at,
+  };
+}
+
+// --------------------------------------------------
+// Merge anonymous acheivements into your user achievements on login
+// --------------------------------------------------
+
+export async function mergeAnonymousAchievementsIntoCurrentUser(
+  anonymousId: string,
+): Promise<{
+  migrated: number;
+  skipped: number;
+}> {
+  const user = await getAuthenticatedUser();
+
+  if (!user) {
+    throw new Error(
+      "User must be authenticated before migrating achievements.",
+    );
+  }
+
+  const anonymousUser = await getAnonymousUser(anonymousId);
+
+  if (!anonymousUser) {
+    return {
+      migrated: 0,
+      skipped: 0,
+    };
+  }
+
+  // Get all achievements earned while anonymous.
+  const { data: anonymousClaims, error: anonymousClaimsError } =
+    await supabaseAdmin
+      .from("anonymous_achievements")
+      .select(
+        `
+        id,
+        achievement_id,
+        achievement_date,
+        created_at
+        `,
+      )
+      .eq("anonymous_user_id", anonymousUser.id)
+      .order("achievement_date", { ascending: true });
+
+  if (anonymousClaimsError) {
+    console.error(
+      "Error fetching anonymous achievements for migration:",
+      anonymousClaimsError,
+    );
+
+    throw new Error("Unable to migrate anonymous achievements.");
+  }
+
+  let migrated = 0;
+  let skipped = 0;
+
+  for (const claim of anonymousClaims ?? []) {
+    // Check for either type of conflict:
+    //
+    // 1. User already has an achievement for this date.
+    // 2. User already owns this exact achievement.
+    const { data: existingClaims, error: existingClaimError } =
+      await supabaseAdmin
+        .from("user_achievements")
+        .select("id, achievement_id, achievement_date")
+        .eq("user_id", user.id)
+        .or(
+          `achievement_date.eq.${claim.achievement_date},achievement_id.eq.${claim.achievement_id}`,
+        );
+
+    if (existingClaimError) {
+      console.error(
+        "Error checking existing user achievements during migration:",
+        existingClaimError,
+      );
+
+      throw new Error("Unable to migrate anonymous achievements.");
+    }
+
+    if (existingClaims && existingClaims.length > 0) {
+      skipped++;
+      continue;
+    }
+
+    const { error: insertError } = await supabaseAdmin
+      .from("user_achievements")
+      .insert({
+        user_id: user.id,
+        achievement_id: claim.achievement_id,
+        achievement_date: claim.achievement_date,
+
+        // Preserve when the anonymous achievement was originally earned.
+        created_at: claim.created_at,
+      });
+
+    if (insertError) {
+      console.error("Error migrating anonymous achievement:", insertError);
+
+      throw new Error("Unable to migrate anonymous achievements.");
+    }
+
+    migrated++;
+  }
+
+  // Migration completed successfully.
+  // Remove the temporary anonymous achievement rows now that
+  // they have been processed.
+  const { error: deleteClaimsError } = await supabaseAdmin
+    .from("anonymous_achievements")
+    .delete()
+    .eq("anonymous_user_id", anonymousUser.id);
+
+  if (deleteClaimsError) {
+    console.error(
+      "Error cleaning up anonymous achievements:",
+      deleteClaimsError,
+    );
+
+    throw new Error(
+      "Achievements migrated, but anonymous claim cleanup failed.",
+    );
+  }
+
+  // Keep the anonymous browser identity, but permanently associate
+  // it with the authenticated account.
+  const { error: linkError } = await supabaseAdmin
+    .from("anonymous_users")
+    .update({
+      linked_user_id: user.id,
+      last_seen_at: new Date().toISOString(),
+    })
+    .eq("id", anonymousUser.id);
+
+  if (linkError) {
+    console.error(
+      "Error linking anonymous user to authenticated user:",
+      linkError,
+    );
+
+    throw new Error(
+      "Achievements migrated, but browser identity linking failed.",
+    );
+  }
+
+  return {
+    migrated,
+    skipped,
   };
 }
