@@ -60,11 +60,11 @@ export function DashboardStats({ userAchievements }: DashboardStatsProps) {
             </div>
 
             <div className="flex size-10 items-center justify-center rounded-lg">
-              <Trophy className="size-5 text-yellow-500" />
+              <Trophy className="size-8 text-yellow-500" />
             </div>
           </div>
 
-          <p className="mt-4 text-sm text-muted-foreground">
+          <p className="mt-3 text-sm text-muted-foreground">
             Useless accomplishments collected
           </p>
         </CardContent>
@@ -85,16 +85,31 @@ export function DashboardStats({ userAchievements }: DashboardStatsProps) {
             </div>
 
             <div className="flex size-10 items-center justify-center rounded-lg">
-              <Gem className="size-5 text-blue-500" />
+              <Gem className="size-8 text-blue-500" />
             </div>
           </div>
 
-          <div className="mt-4 flex gap-3 text-sm text-muted-foreground">
-            <span>{rareCount} rare</span>
+          <div className="mt-3 flex gap-2 text-sm text-muted-foreground">
+            <span>
+              <span className="text-lg font-semibold text-blue-600">
+                {rareCount}
+              </span>{" "}
+              rare
+            </span>
             <span>·</span>
-            <span>{epicCount} epic</span>
+            <span>
+              <span className="text-lg font-semibold text-purple-600">
+                {epicCount}
+              </span>{" "}
+              epic
+            </span>
             <span>·</span>
-            <span>{legendaryCount} legendary</span>
+            <span>
+              <span className="text-lg font-semibold text-amber-600">
+                {legendaryCount}
+              </span>{" "}
+              legendary
+            </span>
           </div>
         </CardContent>
       </Card>
@@ -108,17 +123,17 @@ export function DashboardStats({ userAchievements }: DashboardStatsProps) {
                 Latest achievement
               </p>
 
-              <p className="mt-2 text-gray-700 truncate text-lg font-semibold">
+              <p className="mt-2 text-gray-700 truncate text-xl font-semibold">
                 {mostRecentAchievement?.title ?? "None yet"}
               </p>
             </div>
 
             <div className="flex size-10 shrink-0 items-center justify-center rounded-lg">
-              <Sparkles className="size-5 text-purple-500" />
+              <Sparkles className="size-8 text-purple-500" />
             </div>
           </div>
 
-          <p className="mt-4 line-clamp-2 text-sm text-muted-foreground">
+          <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">
             {mostRecentAchievement?.description ??
               "Claim your first achievement to get started."}
           </p>
