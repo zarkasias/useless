@@ -6,7 +6,6 @@ import { Achievement } from "@/lib/supabase";
 
 import {
   getAuthenticatedUser,
-  unlockAchievementForCurrentUser,
   claimDailyAchievementForAuthenticatedUser,
   claimDailyAchievementForAnonymousUser,
   mergeAnonymousAchievementsIntoCurrentUser,
@@ -16,21 +15,8 @@ import {
 import type { AchievementStreakData } from "@/lib/achievement-service-server";
 
 import { createAnonymousUser } from "@/lib/anonymous-user";
-import { getRandomAchievement } from "@/lib/achievement-generator";
 
 const ANONYMOUS_COOKIE = "anonymous_user_id";
-
-/*
- * Existing action.
- *
- * Keep this for the current dashboard until we replace
- * the button with the new daily claim flow.
- */
-export async function unlockRandomAchievementAction(): Promise<Achievement | null> {
-  const achievement = getRandomAchievement();
-
-  return await unlockAchievementForCurrentUser(achievement);
-}
 
 export async function claimDailyAchievementAction(): Promise<Achievement | null> {
   const user = await getAuthenticatedUser();
