@@ -166,7 +166,7 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
 
       {/* Results */}
       {sortedAchievements.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3">
           {sortedAchievements.map((achievement) => (
             <AchievementCard
               key={achievement.id}

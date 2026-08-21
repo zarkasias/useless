@@ -74,7 +74,7 @@ export default function DashboardClient({
     <div className="min-h-screen bg-muted/20">
       <Navbar user={user} onLogout={handleLogout} />
 
-      <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-screen px-4 py-8 sm:px-6 lg:px-8">
         <div className="space-y-3">
           {/* Header */}
           <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
