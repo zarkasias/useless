@@ -1,156 +1,210 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Navbar } from "@/components/navbar";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { AchievementsGrid } from "@/components/dashboard/achievements-grid";
 import { UnlockAchievement } from "@/components/unlock-achievement";
 import { Button } from "@/components/ui/button";
 import { Achievement, UserProfile } from "@/lib/supabase";
-import { getUserAchievements } from "@/lib/achievement-service";
 
-import { unlockRandomAchievementAction } from "@/app/actions/achievement-actions";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { LoginForm } from "@/components/auth/login-form";
+  claimDailyAchievementAction,
+  getStreakDataAction,
+} from "@/app/actions/achievement-actions";
+import type { AchievementStreakData } from "@/lib/achievement-service-server";
+
 import { toast } from "sonner";
 import { logout } from "@/lib/auth-actions";
 
 interface DashboardClientProps {
   initialProfile: UserProfile;
+  initialAchievements: Achievement[];
+  initialStreakData: AchievementStreakData;
 }
 
 export default function DashboardClient({
   initialProfile,
+  initialAchievements,
+  initialStreakData,
 }: DashboardClientProps) {
   const [user] = useState<UserProfile | null>(initialProfile);
-  const [userAchievements, setUserAchievements] = useState<Achievement[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [userAchievements, setUserAchievements] =
+    useState<Achievement[]>(initialAchievements);
+
+  const [streakData, setStreakData] =
+    useState<AchievementStreakData>(initialStreakData);
   const [unlockedAchievement, setUnlockedAchievement] =
     useState<Achievement | null>(null);
   const [showAchievementModal, setShowAchievementModal] = useState(false);
-  const [isAuthSheetOpen, setIsAuthSheetOpen] = useState(false);
-
-  useEffect(() => {
-    const loadAchievements = async () => {
-      setIsLoading(true);
-
-      const achievements = await getUserAchievements(initialProfile.id);
-
-      setUserAchievements(achievements);
-      setIsLoading(false);
-    };
-
-    loadAchievements();
-  }, [initialProfile.id]);
 
   const handleLogout = async () => {
     await logout();
   };
 
-  const handleTestAchievement = async () => {
+  const handleDailyAchievement = async () => {
     if (!user) return;
 
     try {
-      const achievement = await unlockRandomAchievementAction();
+      const achievement = await claimDailyAchievementAction();
 
-      if (achievement) {
-        setUnlockedAchievement(achievement);
-        setShowAchievementModal(true);
-
-        // Refresh achievements list
-        const achievements = await getUserAchievements(user.id);
-        setUserAchievements(achievements);
+      if (!achievement) {
+        toast.info("You've already claimed today's achievement.");
+        return;
       }
+
+      setUnlockedAchievement(achievement);
+      setShowAchievementModal(true);
+
+      setUserAchievements((current) => [achievement, ...current]);
+
+      const updatedStreakData = await getStreakDataAction();
+
+      setStreakData(updatedStreakData);
+
+      toast.success("Today's achievement unlocked!");
     } catch (error) {
-      console.error("Error unlocking test achievement:", error);
+      console.error("Error claiming daily achievement:", error);
+
       toast.error("Something went wrong");
     }
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="min-h-screen bg-muted/20">
       <Navbar user={user} onLogout={handleLogout} />
 
-      <div className="container mx-auto px-4 py-8 max-w-6xl relative">
-        {/* Background decorative elements */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"></div>
-        </div>
+      <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="space-y-3">
+          {/* Header */}
+          <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                Welcome back
+              </p>
 
-        <div className="flex flex-col gap-8 relative z-10">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h1 className="text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">
-              Your Dashboard
-            </h1>
-            <Button
-              onClick={handleTestAchievement}
-              variant="outline"
-              className="border-primary/30 bg-white/30 backdrop-blur-sm hover:bg-primary/10 hover:text-primary transition-all duration-300 group"
-            >
-              <span className="mr-2">🎯</span>
-              Unlock Random Achievement
-              <span className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                →
+              <h1 className="text-2xl font-bold text-gray-700 tracking-tight sm:text-4xl">
+                {user?.username ?? "Your Dashboard"}
+              </h1>
+
+              <p className="mt-1 max-w-xl text-muted-foreground">
+                Keep your streak alive, grow your collection, and continue
+                accomplishing absolutely nothing useful.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2 rounded-full border bg-background px-4 py-2 shadow-sm">
+              <span className="text-lg">🔥</span>
+
+              <span className="text-sm text-gray-700 font-medium">
+                {streakData.currentStreak} day
+                {streakData.currentStreak === 1 ? "" : "s"} streak
               </span>
-            </Button>
-          </div>
+            </div>
+          </section>
 
-          {isLoading ? (
-            <div className="text-center py-20">
-              <div className="inline-block relative">
-                <div className="w-16 h-16 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-                <p className="mt-4 text-muted-foreground">
-                  Loading your achievements...
-                </p>
+          {/* Today's Achievement */}
+          <section className="overflow-hidden rounded-l border bg-background shadow-sm">
+            <div className="grid gap-0 lg:grid-cols-[1.4fr_0.6fr]">
+              <div className="p-6">
+                <div className="mb-3 inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
+                  Today
+                </div>
+
+                {streakData.claimedToday ? (
+                  <>
+                    <h2 className="text-2xl text-gray-700 font-semibold tracking-tight">
+                      You&apos;re done for today
+                    </h2>
+
+                    <p className="mt-2 max-w-lg text-muted-foreground">
+                      Today&apos;s useless achievement is safely in your
+                      collection. Come back tomorrow to keep your streak going.
+                    </p>
+
+                    <div className="mt-6 inline-flex items-center gap-2 rounded-lg bg-muted px-4 py-3 text-sm font-medium">
+                      <span>✓</span>
+                      Achievement claimed
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <h2 className="text-2xl text-gray-700 font-semibold tracking-tight">
+                      Today&apos;s achievement is waiting
+                    </h2>
+
+                    <p className="mt-2 max-w-lg text-muted-foreground">
+                      Claim one new achievement today and keep your streak
+                      alive.
+                    </p>
+
+                    <Button
+                      onClick={handleDailyAchievement}
+                      size="lg"
+                      className="mt-6"
+                    >
+                      <span className="mr-2">🎯</span>
+                      Claim Today&apos;s Achievement
+                    </Button>
+                  </>
+                )}
+              </div>
+
+              <div className="flex items-center justify-center border-t bg-muted/40 p-8 lg:border-l lg:border-t-0">
+                <div className="text-center">
+                  <div className="text-5xl text-gray-700 font-bold tracking-tight">
+                    {streakData.currentStreak}
+                  </div>
+
+                  <div className="mt-1 text-sm font-medium text-muted-foreground">
+                    Current streak
+                  </div>
+
+                  <div className="mt-5 border-t pt-5">
+                    <div className="text-2xl text-gray-800 font-semibold">
+                      {streakData.longestStreak}
+                    </div>
+
+                    <div className="text-xs text-muted-foreground">
+                      Best streak
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          ) : (
-            <>
-              <DashboardStats
-                userAchievements={userAchievements}
-                currentStreak={user?.streak_count || 0}
-              />
+          </section>
 
-              <div className="mt-8">
-                <div className="bg-gradient-to-r from-primary/10 to-blue-500/10 p-4 rounded-lg mb-6 backdrop-blur-sm">
-                  <h2 className="text-xl font-bold mb-1 flex items-center">
-                    <span className="mr-2">🏆</span> Your Achievement Collection
-                  </h2>
-                </div>
-                <AchievementsGrid achievements={userAchievements} />
+          {/* Stats */}
+          <section>
+            <DashboardStats userAchievements={userAchievements} />
+          </section>
+
+          {/* Achievement Collection */}
+          <section className="space-y-4">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <h2 className="text-2xl text-gray-700 font-semibold tracking-tight">
+                  Your achievements{" "}
+                  <span className="-mt-[1px] text-[16px] text-muted-foreground">
+                    ({userAchievements.length})
+                  </span>
+                </h2>
               </div>
-            </>
-          )}
-        </div>
-      </div>
+            </div>
 
-      {/* Achievement unlock modal */}
+            <div className="rounded-l border bg-background p-4 shadow-sm sm:p-6">
+              <AchievementsGrid achievements={userAchievements} />
+            </div>
+          </section>
+        </div>
+      </main>
+
       <UnlockAchievement
         achievement={unlockedAchievement}
         isOpen={showAchievementModal}
         onClose={() => setShowAchievementModal(false)}
         isLoggedIn={!!user}
       />
-
-      {/* Auth sheet */}
-      <Sheet open={isAuthSheetOpen} onOpenChange={setIsAuthSheetOpen}>
-        <SheetContent className="bg-gradient-to-br from-background to-muted border-l-primary/20">
-          <SheetHeader>
-            <SheetTitle className="text-xl bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">
-              Login
-            </SheetTitle>
-          </SheetHeader>
-          <div className="py-4">
-            <LoginForm />
-          </div>
-        </SheetContent>
-      </Sheet>
     </div>
   );
 }

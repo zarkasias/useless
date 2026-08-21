@@ -1,45 +1,49 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Achievement, AchievementType } from '@/lib/supabase';
-import { formatDistanceToNow } from 'date-fns';
-import { toast } from 'sonner';
+import React, { useRef, useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Copy, Download, LoaderCircle, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Achievement, AchievementType } from "@/lib/supabase";
+import { formatDistanceToNow } from "date-fns";
+import { toast } from "sonner";
 
 // Define achievement type colors with more vibrant gradients
-const typeColors: Record<AchievementType, string> = {
-  COMMON: 'border-gray-400 bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-800 dark:to-gray-700',
-  RARE: 'border-blue-400 bg-gradient-to-br from-blue-100 to-cyan-200 dark:from-blue-900 dark:to-cyan-800',
-  EPIC: 'border-purple-400 bg-gradient-to-br from-purple-100 to-pink-200 dark:from-purple-900 dark:to-pink-800',
-  LEGENDARY: 'border-amber-400 bg-gradient-to-br from-amber-100 to-orange-200 dark:from-amber-900 dark:to-orange-800',
-};
 
-const typeBorderEffects: Record<AchievementType, string> = {
-  COMMON: 'border-2',
-  RARE: 'border-2 border-opacity-60 shadow-sm shadow-blue-300 dark:shadow-blue-900',
-  EPIC: 'border-2 border-opacity-70 shadow-md shadow-purple-300 dark:shadow-purple-900',
-  LEGENDARY: 'border-2 border-opacity-80 shadow-lg shadow-amber-300 dark:shadow-amber-900',
+const typeColors: Record<AchievementType, string> = {
+  COMMON:
+    "border-gray-300 bg-gray-100/70 dark:border-gray-700 dark:bg-gray-900/40",
+
+  RARE: "border-blue-300 bg-blue-100/60 dark:border-blue-800 dark:bg-blue-950/20",
+
+  EPIC: "border-purple-300 bg-purple-100/60 dark:border-purple-800 dark:bg-purple-950/20",
+
+  LEGENDARY:
+    "border-amber-300 bg-amber-100/60 dark:border-amber-800 dark:bg-amber-950/20",
 };
 
 const typeBadgeColors: Record<AchievementType, string> = {
-  COMMON: 'bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200',
-  RARE: 'bg-blue-200 text-blue-800 dark:bg-blue-700 dark:text-blue-200',
-  EPIC: 'bg-purple-200 text-purple-800 dark:bg-purple-700 dark:text-purple-200',
-  LEGENDARY: 'bg-amber-200 text-amber-800 dark:bg-amber-700 dark:text-amber-200',
+  COMMON:
+    "border-gray-300 text-gray-600 dark:border-gray-700 dark:text-gray-300",
+
+  RARE: "border-blue-300 text-blue-600 dark:border-blue-800 dark:text-blue-400",
+
+  EPIC: "border-purple-300 text-purple-600 dark:border-purple-800 dark:text-purple-400",
+
+  LEGENDARY:
+    "border-amber-300 text-amber-600 dark:border-amber-800 dark:text-amber-400",
 };
 
 const typeNames: Record<AchievementType, string> = {
-  COMMON: 'Common',
-  RARE: 'Rare',
-  EPIC: 'Epic',
-  LEGENDARY: 'Legendary',
-};
-
-// Simpler hover animations for achievements
-const achievementAnimations: Record<AchievementType, string> = {
-  COMMON: 'hover:shadow-md transition-all duration-300',
-  RARE: 'hover:shadow-md hover:shadow-blue-300 dark:hover:shadow-blue-900 transition-all duration-300',
-  EPIC: 'hover:shadow-md hover:shadow-purple-300 dark:hover:shadow-purple-900 transition-all duration-300',
-  LEGENDARY: 'hover:shadow-lg hover:shadow-amber-300 dark:hover:shadow-amber-900 transition-all duration-300',
+  COMMON: "Common",
+  RARE: "Rare",
+  EPIC: "Epic",
+  LEGENDARY: "Legendary",
 };
 
 // Social media configurations
@@ -77,11 +81,11 @@ interface AchievementCardProps {
   showShareButton?: boolean;
 }
 
-export function AchievementCard({ 
-  achievement, 
-  unlockedAt, 
+export function AchievementCard({
+  achievement,
+  unlockedAt,
   showShareButton = false,
-  ingrid = false
+  ingrid = false,
 }: AchievementCardProps) {
   const { title, description, type, emoji, is_daily } = achievement;
   const cardRef = useRef<HTMLDivElement>(null);
@@ -92,20 +96,44 @@ export function AchievementCard({
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const generationAttemptedRef = useRef(false);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
-  
-  // Basic card styles without excessive animations
-  const cardClass = `${typeColors[type]} ${typeBorderEffects[type]} ${achievementAnimations[type]}`;
-  const tagClass = `inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${typeBadgeColors[type]}`;
-  
+
+  const cardClass = `
+  ${typeColors[type]}
+  h-full
+  rounded-lg
+  border
+  py-4
+  shadow-sm
+  transition-shadow
+  hover:shadow-md
+`;
+
+  const tagClass = `
+  inline-flex
+  items-center
+  rounded-full
+  border
+  px-2.5
+  py-1
+  text-xs
+  font-medium
+  ${typeBadgeColors[type]}
+`;
+
   // Format the unlocked time if available
-  const timeAgo = unlockedAt 
-    ? formatDistanceToNow(new Date(unlockedAt), { addSuffix: true }) 
-    : '';
-  
+  const timeAgo = unlockedAt
+    ? formatDistanceToNow(new Date(unlockedAt), { addSuffix: true })
+    : "";
+
   // Automatically generate image when component mounts
   useEffect(() => {
     // Only generate once and only if sharing is enabled
-    if (showShareButton && !imageUrl && !isGeneratingImage && !generationAttemptedRef.current) {
+    if (
+      showShareButton &&
+      !imageUrl &&
+      !isGeneratingImage &&
+      !generationAttemptedRef.current
+    ) {
       generationAttemptedRef.current = true;
       generateImage();
     }
@@ -114,7 +142,9 @@ export function AchievementCard({
   // Detect mobile devices on component mount
   useEffect(() => {
     const detectMobile = () => {
-      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+        navigator.userAgent,
+      );
     };
     setIsMobileDevice(detectMobile());
   }, []);
@@ -122,168 +152,176 @@ export function AchievementCard({
   // Generate image from the achievement card
   const generateImage = async () => {
     if (!cardRef.current || isGeneratingImage) return;
-    
+
     let toastId: string | number | undefined;
-    
+
     try {
       setIsGeneratingImage(true);
-      
+
       if (!ingrid) {
         toastId = toast.loading("Preparing achievement to share...", {
           description: "This will only take a moment",
         });
       }
-      
+
       // Get device pixel ratio for better quality on high-DPI displays
       const pixelRatio = window.devicePixelRatio || 1;
       const scale = Math.max(2, pixelRatio); // At least 2x for good quality
-      
+
       // Skip html2canvas entirely - Use Canvas API directly
       // Create a simple canvas directly
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       const width = 350;
       const height = 200;
       canvas.width = width * scale;
       canvas.height = height * scale;
-      
-      const ctx = canvas.getContext('2d');
+
+      const ctx = canvas.getContext("2d");
       if (!ctx) throw new Error("Could not get canvas context");
-      
+
       // Scale for high DPI
       ctx.scale(scale, scale);
-      
+
       // Detect dark mode
-      const isDarkMode = document.documentElement.classList.contains('dark');
-      
+      const isDarkMode = document.documentElement.classList.contains("dark");
+
       // Set background and text colors based on achievement type and theme mode
       const bgColors = {
         COMMON: {
-          light: '#f8f9fa',
-          dark: '#1f2937',
-          border: isDarkMode ? '#4b5563' : '#d1d5db',
-          tag: isDarkMode ? '#4b5563' : '#e5e7eb',
-          tagText: isDarkMode ? '#f3f4f6' : '#111827'
+          light: "#f8f9fa",
+          dark: "#1f2937",
+          border: isDarkMode ? "#4b5563" : "#d1d5db",
+          tag: isDarkMode ? "#4b5563" : "#e5e7eb",
+          tagText: isDarkMode ? "#f3f4f6" : "#111827",
         },
         RARE: {
-          light: '#e0f7fa',
-          dark: '#075985',
-          border: isDarkMode ? '#0284c7' : '#7dd3fc',
-          tag: isDarkMode ? '#0369a1' : '#bae6fd',
-          tagText: isDarkMode ? '#f3f4f6' : '#075985'
+          light: "#e0f7fa",
+          dark: "#075985",
+          border: isDarkMode ? "#0284c7" : "#7dd3fc",
+          tag: isDarkMode ? "#0369a1" : "#bae6fd",
+          tagText: isDarkMode ? "#f3f4f6" : "#075985",
         },
         EPIC: {
-          light: '#f3e5f5',
-          dark: '#581c87',
-          border: isDarkMode ? '#7e22ce' : '#d8b4fe',
-          tag: isDarkMode ? '#7e22ce' : '#e9d5ff',
-          tagText: isDarkMode ? '#f3f4f6' : '#6b21a8'
+          light: "#f3e5f5",
+          dark: "#581c87",
+          border: isDarkMode ? "#7e22ce" : "#d8b4fe",
+          tag: isDarkMode ? "#7e22ce" : "#e9d5ff",
+          tagText: isDarkMode ? "#f3f4f6" : "#6b21a8",
         },
         LEGENDARY: {
-          light: '#fff8e1',
-          dark: '#78350f',
-          border: isDarkMode ? '#d97706' : '#fcd34d',
-          tag: isDarkMode ? '#d97706' : '#fde68a',
-          tagText: isDarkMode ? '#f3f4f6' : '#92400e'
-        }
+          light: "#fff8e1",
+          dark: "#78350f",
+          border: isDarkMode ? "#d97706" : "#fcd34d",
+          tag: isDarkMode ? "#d97706" : "#fde68a",
+          tagText: isDarkMode ? "#f3f4f6" : "#92400e",
+        },
       };
-      
+
       // Draw background
-      const bgColor = isDarkMode 
-        ? bgColors[type]?.dark || '#1f2937'
-        : bgColors[type]?.light || '#f8f9fa';
-      
+      const bgColor = isDarkMode
+        ? bgColors[type]?.dark || "#1f2937"
+        : bgColors[type]?.light || "#f8f9fa";
+
       // Draw rounded rectangle for background
       ctx.fillStyle = bgColor;
       roundRect(ctx, 0, 0, width, height, 8);
       ctx.fill();
-      
+
       // Draw border
-      ctx.strokeStyle = bgColors[type]?.border || '#d1d5db';
+      ctx.strokeStyle = bgColors[type]?.border || "#d1d5db";
       ctx.lineWidth = 2;
-      roundRect(ctx, 1, 1, width-2, height-2, 7);
+      roundRect(ctx, 1, 1, width - 2, height - 2, 7);
       ctx.stroke();
-      
+
       // Draw tag background
-      const tagText = is_daily ? 'Daily' : typeNames[type];
-      ctx.font = '500 12px system-ui, -apple-system, sans-serif';
+      const tagText = is_daily ? "Daily" : typeNames[type];
+      ctx.font = "500 12px system-ui, -apple-system, sans-serif";
       const tagWidth = ctx.measureText(tagText).width + 20;
-      
-      ctx.fillStyle = bgColors[type]?.tag || (isDarkMode ? '#4b5563' : '#e5e7eb');
+
+      ctx.fillStyle =
+        bgColors[type]?.tag || (isDarkMode ? "#4b5563" : "#e5e7eb");
       roundRect(ctx, 20, 20, tagWidth, 24, 12);
       ctx.fill();
-      
+
       // Draw tag text
-      ctx.fillStyle = bgColors[type]?.tagText || (isDarkMode ? '#f3f4f6' : '#111827');
+      ctx.fillStyle =
+        bgColors[type]?.tagText || (isDarkMode ? "#f3f4f6" : "#111827");
       ctx.fillText(tagText, 30, 36);
-      
+
       // Draw emoji
-      ctx.font = '32px system-ui, -apple-system, sans-serif';
+      ctx.font = "32px system-ui, -apple-system, sans-serif";
       ctx.fillText(emoji, width - 50, 40);
-      
+
       // Draw title
-      ctx.fillStyle = isDarkMode ? '#f3f4f6' : '#111827';
-      ctx.font = 'bold 16px system-ui, -apple-system, sans-serif';
+      ctx.fillStyle = isDarkMode ? "#f3f4f6" : "#111827";
+      ctx.font = "bold 16px system-ui, -apple-system, sans-serif";
       ctx.fillText(title, 20, 60);
-      
+
       // Draw description (with wrapping)
-      ctx.fillStyle = isDarkMode ? '#d1d5db' : '#4b5563';
-      ctx.font = '12px system-ui, -apple-system, sans-serif';
+      ctx.fillStyle = isDarkMode ? "#d1d5db" : "#4b5563";
+      ctx.font = "12px system-ui, -apple-system, sans-serif";
       wrapText(ctx, description, 20, 90, width - 20, 16);
-      
+
       // Draw unlocked time if available
       if (unlockedAt) {
-        ctx.fillStyle = isDarkMode ? '#9ca3af' : '#6b7280';
-        ctx.font = '12px system-ui, -apple-system, sans-serif';
+        ctx.fillStyle = isDarkMode ? "#9ca3af" : "#6b7280";
+        ctx.font = "12px system-ui, -apple-system, sans-serif";
         ctx.fillText(`Unlocked ${timeAgo}`, 10, height - 30);
       }
-      
+
       // Draw site URL
-      ctx.fillStyle = isDarkMode ? 'rgba(156, 163, 175, 0.9)' : 'rgba(107, 114, 128, 0.9)';
-      ctx.font = '9px system-ui, -apple-system, sans-serif';
+      ctx.fillStyle = isDarkMode
+        ? "rgba(156, 163, 175, 0.9)"
+        : "rgba(107, 114, 128, 0.9)";
+      ctx.font = "9px system-ui, -apple-system, sans-serif";
       wrapText(ctx, getShareText(), 20, height - 40, width - 20, 16);
-      
+
       // Convert to data URL and set
-      const dataUrl = canvas.toDataURL('image/png', 1.0);
+      const dataUrl = canvas.toDataURL("image/png", 1.0);
       setImageUrl(dataUrl);
-      
+
       // Convert to blob and File for sharing
       const blob = await (await fetch(dataUrl)).blob();
-      const file = new File([blob], `achievement-${title.toLowerCase().replace(/\s+/g, '-')}.png`, { type: 'image/png' });
+      const file = new File(
+        [blob],
+        `achievement-${title.toLowerCase().replace(/\s+/g, "-")}.png`,
+        { type: "image/png" },
+      );
       setImageFile(file);
-      
+
       // Make sure to dismiss the toast ID that was created earlier
       if (toastId) toast.dismiss(toastId);
-      
+
       if (!ingrid) {
         toast.success("Achievement ready to share!", {
           description: "Use the buttons below to share your achievement",
         });
       }
-      
     } catch (error) {
       console.error("Error generating image:", error);
-      
+
       // Make sure to dismiss the loading toast in case of error
       if (toastId) toast.dismiss(toastId);
-      
+
       if (!ingrid) {
         toast.error("Failed to prepare image", {
-          description: "Try switching between light/dark mode or using a different browser",
+          description:
+            "Try switching between light/dark mode or using a different browser",
         });
       }
     } finally {
       setIsGeneratingImage(false);
     }
   };
-  
+
   // Helper function to draw rounded rectangles on canvas
   const roundRect = (
-    ctx: CanvasRenderingContext2D, 
-    x: number, 
-    y: number, 
-    width: number, 
-    height: number, 
-    radius: number
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number,
   ) => {
     ctx.beginPath();
     ctx.moveTo(x + radius, y);
@@ -297,59 +335,60 @@ export function AchievementCard({
     ctx.quadraticCurveTo(x, y, x + radius, y);
     ctx.closePath();
   };
-  
+
   // Helper function to wrap text on canvas
   const wrapText = (
-    ctx: CanvasRenderingContext2D, 
-    text: string, 
-    x: number, 
-    y: number, 
-    maxWidth: number, 
-    lineHeight: number
+    ctx: CanvasRenderingContext2D,
+    text: string,
+    x: number,
+    y: number,
+    maxWidth: number,
+    lineHeight: number,
   ) => {
-    const words = text.split(' ');
-    let line = '';
-    let testLine = '';
+    const words = text.split(" ");
+    let line = "";
+    let testLine = "";
     let lineCount = 0;
-    
+
     for (let n = 0; n < words.length; n++) {
-      testLine = line + words[n] + ' ';
+      testLine = line + words[n] + " ";
       const metrics = ctx.measureText(testLine);
       const testWidth = metrics.width;
-      
+
       if (testWidth > maxWidth && n > 0) {
-        ctx.fillText(line, x, y + (lineCount * lineHeight));
-        line = words[n] + ' ';
+        ctx.fillText(line, x, y + lineCount * lineHeight);
+        line = words[n] + " ";
         lineCount++;
       } else {
         line = testLine;
       }
     }
-    
-    ctx.fillText(line, x, y + (lineCount * lineHeight));
+
+    ctx.fillText(line, x, y + lineCount * lineHeight);
   };
 
   // Share text and basic information for social media
-  const getShareText = () => `I just unlocked "${title}" on Useless Achievements!\nCheck it out: ${window.location.origin}`;
+  const getShareText = () =>
+    `I just unlocked "${title}" on Useless Achievements!\nCheck it out: ${window.location.origin}`;
   // const getShareUrl = () => window.location.origin;
 
   // Function to download the generated image
   const downloadImage = () => {
     if (!imageUrl) {
-      toast.error("Image not ready yet", { 
-        description: "Please wait for the image to generate"
+      toast.error("Image not ready yet", {
+        description: "Please wait for the image to generate",
       });
       return;
     }
-    
+
     try {
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = imageUrl;
-      link.download = `achievement-${title.toLowerCase().replace(/\s+/g, '-')}.png`;
+      link.download = `achievement-${title.toLowerCase().replace(/\s+/g, "-")}.png`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       toast.success("Image downloaded!", {
         description: "Achievement saved to your device",
       });
@@ -364,42 +403,47 @@ export function AchievementCard({
   // Function to copy image to clipboard for pasting into social media
   const copyImageToClipboard = async () => {
     if (!imageUrl) {
-      toast.error("Image not ready yet", { 
-        description: "Please wait for the image to generate"
+      toast.error("Image not ready yet", {
+        description: "Please wait for the image to generate",
       });
       return;
     }
-    
+
     try {
-      setSocialLoading('Copy');
-      
+      setSocialLoading("Copy");
+
       // Check if it's a mobile device
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      
+      const isMobile =
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+          navigator.userAgent,
+        );
+
       // Check if Clipboard API is available and properly supports images
       if (!navigator.clipboard || !navigator.clipboard.write || isMobile) {
         // Fallback for mobile devices or browsers that don't support clipboard.write with images
         toast.info("Clipboard image copy not supported on your device", {
-          description: "Downloading the image instead. You can manually share it.",
-          duration: 4000
+          description:
+            "Downloading the image instead. You can manually share it.",
+          duration: 4000,
         });
         downloadImage();
         return;
       }
-      
+
       // Create a blob from the data URL
       const res = await fetch(imageUrl);
       const blob = await res.blob();
-      
+
       // Copy the image to clipboard
       await navigator.clipboard.write([
         new ClipboardItem({
-          [blob.type]: blob
-        })
+          [blob.type]: blob,
+        }),
       ]);
-      
+
       toast.success("Image copied to clipboard!", {
-        description: "Now you can paste it directly into your social media post",
+        description:
+          "Now you can paste it directly into your social media post",
       });
     } catch (error) {
       console.error("Error copying image to clipboard:", error);
@@ -453,7 +497,7 @@ export function AchievementCard({
   //     setSocialLoading(null);
   //   }
   // };
-  
+
   // const shareTwitter = async () => {
   //   setSocialLoading('Twitter');
   //   try {
@@ -461,7 +505,7 @@ export function AchievementCard({
   //     const textToShare = `I just unlocked "${title}" ${emoji} on Useless Achievements!`;
   //     const url = getShareUrl();
   //     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(textToShare)}&url=${encodeURIComponent(url)}&hashtags=UselessAchievements,GameAchievement`, '_blank');
-      
+
   //     toast.info("X/Twitter share dialog opened", {
   //       description: "Download the image to add it to your tweet",
   //     });
@@ -476,7 +520,7 @@ export function AchievementCard({
   //     setSocialLoading(null);
   //   }
   // };
-  
+
   // const shareLinkedIn = async () => {
   //   setSocialLoading('LinkedIn');
   //   try {
@@ -484,7 +528,7 @@ export function AchievementCard({
   //     const url = getShareUrl();
   //     const shareTitle = `I unlocked "${title}" on Useless Achievements!`;
   //     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&title=${encodeURIComponent(shareTitle)}&summary=${encodeURIComponent(description)}`, '_blank', 'width=600,height=400');
-      
+
   //     toast.info("LinkedIn share dialog opened", {
   //       description: "Download the image to add it to your post",
   //     });
@@ -499,7 +543,7 @@ export function AchievementCard({
   //     setSocialLoading(null);
   //   }
   // };
-  
+
   // const shareInstagram = async () => {
   //   setSocialLoading('Instagram');
   //   try {
@@ -519,7 +563,7 @@ export function AchievementCard({
   //     setSocialLoading(null);
   //   }
   // };
-  
+
   // Create a map of share functions by platform name
   // const shareFunctions = {
   //   'Facebook': shareFacebook,
@@ -542,23 +586,37 @@ export function AchievementCard({
     <div className="relative w-full">
       {/* Main achievement card */}
       <Card ref={cardRef} className={cardClass}>
-        <CardHeader className="pb-2">
-          <div className="flex justify-between items-start">
+        <CardHeader className="pb-3">
+          <div className="flex items-start justify-between gap-4">
             <span className={tagClass}>
-              {is_daily ? 'Daily' : typeNames[type]}
+              {is_daily ? "Daily" : typeNames[type]}
             </span>
-            <span className="text-4xl" role="img" aria-label="achievement emoji">
+
+            <span
+              className="text-3xl"
+              role="img"
+              aria-label={`${title} achievement`}
+            >
               {emoji}
             </span>
           </div>
-          <CardTitle className="text-xl mt-2 font-bold">{title}</CardTitle>
-          <CardDescription className="text-sm">{description}</CardDescription>
+
+          <div className="space-y-2 pt-2">
+            <CardTitle className="text-lg font-semibold tracking-tight text-gray-700 dark:text-gray-200">
+              {title}
+            </CardTitle>
+
+            <CardDescription className="line-clamp-3 text-sm leading-6">
+              {description}
+            </CardDescription>
+          </div>
         </CardHeader>
-        <CardContent>
-          {unlockedAt && (
-            <p className="text-sm text-muted-foreground">Unlocked {timeAgo}</p>
-          )}
-        </CardContent>
+
+        {unlockedAt && (
+          <CardContent className="pt-0">
+            <p className="text-xs text-muted-foreground">Unlocked {timeAgo}</p>
+          </CardContent>
+        )}
         {showShareButton && (
           <CardFooter className="flex flex-col pt-0 gap-4">
             {/* Image Preview (if available) */}
@@ -576,57 +634,45 @@ export function AchievementCard({
                 </div>
               </div>
             )} */}
-            
+
             {/* Download and Copy Buttons */}
             <div className="grid grid-cols-1 gap-2 w-full">
               <Button
                 variant="outline"
                 onClick={downloadImage}
-                className={`${
-                  isMobileDevice 
-                    ? "bg-gradient-to-r from-primary/10 to-blue-500/10 hover:from-primary/20 hover:to-blue-500/20 border-primary/20 text-primary font-medium transition-all" 
-                    : "bg-gradient-to-r from-emerald-500/10 to-green-500/10 hover:from-emerald-500/20 hover:to-green-500/20 border-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-medium transition-all"
-                }`}
-                disabled={isGeneratingImage || !imageUrl || socialLoading === 'Copy'}
+                className="w-full"
+                disabled={
+                  isGeneratingImage || !imageUrl || socialLoading === "Copy"
+                }
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="7 10 12 15 17 10"/>
-                  <line x1="12" y1="15" x2="12" y2="3"/>
-                </svg>
+                <Download className="mr-2 size-4" />
+
                 {isMobileDevice ? "Save & Share" : "Download"}
               </Button>
-              
+
               {!isMobileDevice && (
                 <Button
                   variant="outline"
                   onClick={copyImageToClipboard}
-                  className="bg-gradient-to-r from-blue-500/10 to-indigo-500/10 hover:from-blue-500/20 hover:to-indigo-500/20 border-blue-500/20 text-blue-700 dark:text-blue-400 font-medium transition-all"
+                  className="w-full"
                   disabled={isGeneratingImage || !imageUrl || !!socialLoading}
                 >
-                  {socialLoading === 'Copy' ? (
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                  {socialLoading === "Copy" ? (
+                    <LoaderCircle className="mr-2 size-4 animate-spin" />
                   ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg>
+                    <Copy className="mr-2 size-4" />
                   )}
                   Copy to Clipboard
                 </Button>
               )}
-              
+
               {isMobileDevice && imageUrl && (
                 <p className="text-xs text-muted-foreground text-center mt-1">
                   Save the image and share it on your favorite social platforms
                 </p>
               )}
             </div>
-            
-           
+
             {/* Social Media Buttons */}
             {/* <div className="grid grid-cols-4 gap-2 w-full">
               {socialPlatforms.map((platform) => (
@@ -657,33 +703,30 @@ export function AchievementCard({
             </div> */}
 
             {/* Regenerate button if image generation failed */}
-            {!imageUrl && !isGeneratingImage && generationAttemptedRef.current && (
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  generationAttemptedRef.current = false;
-                  generateImage();
-                }}
-                className="mt-2 text-sm"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                  <path d="M21 2v6h-6"></path>
-                  <path d="M3 12a9 9 0 0 1 15-6.7L21 8"></path>
-                  <path d="M3 22v-6h6"></path>
-                  <path d="M21 12a9 9 0 0 1-15 6.7L3 16"></path>
-                </svg>
-                Try Again
-              </Button>
-            )}
+            {!imageUrl &&
+              !isGeneratingImage &&
+              generationAttemptedRef.current && (
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    generationAttemptedRef.current = false;
+                    generateImage();
+                  }}
+                  className="mt-2 text-sm"
+                >
+                  <RefreshCw className="mr-2 size-4" />
+                  Try Again
+                </Button>
+              )}
 
             {/* Loading indicator when generating image */}
             {isGeneratingImage && (
-              <div className="w-full flex items-center justify-center space-x-2 mt-2">
-                <svg className="animate-spin h-4 w-4 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span className="text-xs text-muted-foreground">Preparing your achievement...</span>
+              <div className="mt-2 flex w-full items-center justify-center gap-2">
+                <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
+
+                <span className="text-xs text-muted-foreground">
+                  Preparing your achievement...
+                </span>
               </div>
             )}
           </CardFooter>
@@ -703,9 +746,9 @@ declare global {
           href?: string;
           quote?: string;
           hashtag?: string;
-        }, 
-        callback: (response: {error_message?: string}) => void
+        },
+        callback: (response: { error_message?: string }) => void,
       ) => void;
     };
   }
-} 
+}

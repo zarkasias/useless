@@ -1,7 +1,17 @@
-import React, { useState } from 'react';
-import { AchievementCard } from '@/components/achievement-card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
+import { useMemo, useState } from "react";
+import {
+  Gem,
+  CalendarArrowDown,
+  CalendarArrowUp,
+  ChevronDown,
+  Search,
+  SlidersHorizontal,
+  Trophy,
+} from "lucide-react";
+
+import { AchievementCard } from "@/components/achievement-card";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,192 +19,178 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { Achievement, AchievementType } from '@/lib/supabase';
-import { ChevronDown, Search } from 'lucide-react';
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { Achievement, AchievementType } from "@/lib/supabase";
 
 interface AchievementsGridProps {
   achievements: Achievement[];
 }
 
-type SortOption = 'newest' | 'oldest' | 'rarity';
+type SortOption = "newest" | "oldest" | "rarity";
 
-// Tab theme styles
-const tabStyles: Record<string, { color: string, gradient: string, emoji: string }> = {
-  all: {
-    color: 'text-primary',
-    gradient: 'bg-gradient-to-r from-primary/20 to-blue-500/20',
-    emoji: '🌈'
-  },
-  COMMON: {
-    color: 'text-gray-600 dark:text-gray-300',
-    gradient: 'bg-gradient-to-r from-gray-300/20 to-gray-400/20',
-    emoji: '🔹'
-  },
-  RARE: {
-    color: 'text-blue-600 dark:text-blue-300',
-    gradient: 'bg-gradient-to-r from-blue-300/20 to-cyan-400/20',
-    emoji: '💫'
-  },
-  EPIC: {
-    color: 'text-purple-600 dark:text-purple-300',
-    gradient: 'bg-gradient-to-r from-purple-300/20 to-pink-400/20',
-    emoji: '✨'
-  },
-  LEGENDARY: {
-    color: 'text-amber-600 dark:text-amber-300',
-    gradient: 'bg-gradient-to-r from-amber-300/20 to-orange-400/20',
-    emoji: '🌟'
-  }
+const tabs: Array<{
+  value: "all" | AchievementType;
+  label: string;
+}> = [
+  { value: "all", label: "All" },
+  { value: "COMMON", label: "Common" },
+  { value: "RARE", label: "Rare" },
+  { value: "EPIC", label: "Epic" },
+  { value: "LEGENDARY", label: "Legendary" },
+];
+
+const rarityOrder: Record<AchievementType, number> = {
+  COMMON: 1,
+  RARE: 2,
+  EPIC: 3,
+  LEGENDARY: 4,
+};
+
+const sortLabels: Record<SortOption, string> = {
+  newest: "Newest first",
+  oldest: "Oldest first",
+  rarity: "Highest rarity",
 };
 
 export function AchievementsGrid({ achievements }: AchievementsGridProps) {
-  const [activeTab, setActiveTab] = useState<string>('all');
-  const [search, setSearch] = useState<string>('');
-  const [sortBy, setSortBy] = useState<SortOption>('newest');
+  const [activeTab, setActiveTab] = useState<string>("all");
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState<SortOption>("newest");
 
+  const sortedAchievements = useMemo(() => {
+    const filtered = achievements.filter((achievement) => {
+      if (activeTab !== "all" && achievement.type !== activeTab) {
+        return false;
+      }
 
-  const filteredAchievements = achievements.filter((achievement) => {
-    // Filter by type (tab)
-    if (activeTab !== 'all' && achievement.type !== activeTab) {
-      return false;
-    }
-    
-    // Filter by search term
-    if (search && !achievement.title.toLowerCase().includes(search.toLowerCase()) && 
-        !achievement.description.toLowerCase().includes(search.toLowerCase())) {
-      return false;
-    }
-    
-    return true;
-  });
+      if (!search.trim()) {
+        return true;
+      }
 
-  console.log('filteredAchievements', filteredAchievements);
+      const query = search.toLowerCase();
 
-  // Sort achievements
-  const sortedAchievements = [...filteredAchievements].sort((a, b) => {
-    if (!a.created_at || !b.created_at) return 0;
+      return (
+        achievement.title.toLowerCase().includes(query) ||
+        achievement.description.toLowerCase().includes(query)
+      );
+    });
 
-    if (sortBy === 'newest') {
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    } else if (sortBy === 'oldest') {
-      return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-    } else if (sortBy === 'rarity') {
-      const rarityOrder: Record<AchievementType, number> = {
-        COMMON: 1,
-        RARE: 2,
-        EPIC: 3,
-        LEGENDARY: 4
-      };
-      return rarityOrder[b.type] - rarityOrder[a.type];
-    }
-    return 0;
-  });
+    return [...filtered].sort((a, b) => {
+      if (sortBy === "rarity") {
+        return rarityOrder[b.type] - rarityOrder[a.type];
+      }
+
+      const aDate = new Date(a.created_at).getTime();
+      const bDate = new Date(b.created_at).getTime();
+
+      return sortBy === "newest" ? bDate - aDate : aDate - bDate;
+    });
+  }, [achievements, activeTab, search, sortBy]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between gap-4">
+    <div className="space-y-5">
+      {/* Search and sort */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <Search className="absolute left-2 top-2.5 h-4 w-4 text-primary/70" />
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+
           <Input
-            placeholder="Search achievements..."
-            className="pl-8 border-primary/20 focus:border-primary/50 bg-white/50 dark:bg-background/50 backdrop-blur-sm"
+            placeholder="Search your achievements..."
+            className="pl-9"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(event) => setSearch(event.target.value)}
           />
         </div>
-        
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button 
-              variant="outline" 
-              className="flex items-center gap-1 border-primary/30 bg-white/30 backdrop-blur-sm hover:bg-primary/10 transition-all duration-300"
+            <Button
+              variant="outline"
+              className="justify-between gap-2 sm:min-w-44"
             >
-              <span className="mr-1">🔄</span> 
-              Sort by: {sortBy.charAt(0).toUpperCase() + sortBy.slice(1)}
-              <ChevronDown className="h-4 w-4 ml-1 text-primary" />
+              <SlidersHorizontal className="size-4" />
+
+              <span>{sortLabels[sortBy]}</span>
+
+              <ChevronDown className="ml-auto size-4 text-muted-foreground" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="border-primary/20 bg-background/95 backdrop-blur">
-            <DropdownMenuLabel className="text-primary">Sort Options</DropdownMenuLabel>
+
+          <DropdownMenuContent align="end" className="w-52">
+            <DropdownMenuLabel>Sort achievements</DropdownMenuLabel>
+
             <DropdownMenuSeparator />
-            <DropdownMenuItem 
-              onClick={() => setSortBy('newest')}
-              className="hover:bg-primary/10 cursor-pointer flex items-center gap-2"
+
+            <DropdownMenuItem
+              onClick={() => setSortBy("newest")}
+              className="cursor-pointer gap-2"
             >
-              <span className="text-primary text-sm">🕒</span> Newest First
+              <CalendarArrowDown className="size-4" />
+              Newest first
             </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => setSortBy('oldest')}
-              className="hover:bg-primary/10 cursor-pointer flex items-center gap-2"
+
+            <DropdownMenuItem
+              onClick={() => setSortBy("oldest")}
+              className="cursor-pointer gap-2"
             >
-              <span className="text-primary text-sm">📜</span> Oldest First
+              <CalendarArrowUp className="size-4" />
+              Oldest first
             </DropdownMenuItem>
-            <DropdownMenuItem 
-              onClick={() => setSortBy('rarity')}
-              className="hover:bg-primary/10 cursor-pointer flex items-center gap-2"
+
+            <DropdownMenuItem
+              onClick={() => setSortBy("rarity")}
+              className="cursor-pointer gap-2"
             >
-              <span className="text-primary text-sm">💎</span> By Rarity
+              <Gem className="size-4" />
+              Highest rarity
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      <Tabs defaultValue="all" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="flex flex-wrap gap-2 mb-4 sm:mb-8 bg-background/50 backdrop-blur-sm border border-primary/20 p-2">
-          {Object.entries(tabStyles).map(([value, style]) => (
-            <TabsTrigger 
-              key={value} 
-              value={value}
-              className={`flex-1 sm:flex-none min-w-[120px] px-3 py-2 text-sm sm:text-base data-[state=active]:${style.gradient} data-[state=active]:${style.color} data-[state=active]:shadow-sm transition-all duration-300`}
+      {/* Type filters */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="h-auto w-full justify-start gap-1 overflow-x-auto rounded-lg bg-muted/50 p-1">
+          {tabs.map((tab) => (
+            <TabsTrigger
+              key={tab.value}
+              value={tab.value}
+              className="shrink-0 px-4 py-2 text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm"
             >
-              <span className="mr-1">{style.emoji}</span> 
-              {value === 'all' ? 'All' : value.charAt(0) + value.slice(1).toLowerCase()}
+              {tab.label}
             </TabsTrigger>
           ))}
         </TabsList>
-
-        <TabsContent value={activeTab} className="mt-0">
-          {sortedAchievements.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
-              {sortedAchievements.map((achievement, index) => (
-                <div 
-                  key={achievement.id} 
-                  className="transform transition-all duration-500"
-                  style={{ 
-                    animationDelay: `${index * 100}ms`,
-                    animation: 'fadeIn 0.5s ease-out forwards'
-                  }}
-                >
-                  <AchievementCard
-                    ingrid={true}
-                    achievement={achievement}
-                    showShareButton
-                  />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-16 bg-gradient-to-br from-background to-primary/5 rounded-lg border-2 border-primary/10">
-              <p className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">No achievements found</p>
-              <p className="text-muted-foreground mt-2">
-                {search ? 'Try a different search term' : 'You haven\'t unlocked any achievements in this category yet'}
-              </p>
-              <div className="mt-6">
-                <span className="text-5xl animate-bounce inline-block">🔍</span>
-              </div>
-            </div>
-          )}
-        </TabsContent>
       </Tabs>
 
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-      `}</style>
+      {/* Results */}
+      {sortedAchievements.length > 0 ? (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {sortedAchievements.map((achievement) => (
+            <AchievementCard
+              key={achievement.id}
+              ingrid
+              achievement={achievement}
+              showShareButton
+            />
+          ))}
+        </div>
+      ) : (
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-16 text-center">
+          <Trophy className="size-9 text-muted-foreground" />
+
+          <h3 className="mt-4 text-base font-semibold">
+            No achievements found
+          </h3>
+
+          <p className="mt-1 max-w-sm text-sm text-muted-foreground">
+            {search
+              ? "Try another search term or choose a different category."
+              : "You haven't unlocked any achievements in this category yet."}
+          </p>
+        </div>
+      )}
     </div>
   );
-} 
+}

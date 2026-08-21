@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 import {
   getAuthenticatedUser,
   getAuthenticatedUserProfile,
+  getAuthenticatedUserAchievements,
+  getAuthenticatedUserStreakData,
 } from "@/lib/achievement-service-server";
 import DashboardClient from "./dashboard-client";
 
@@ -18,5 +20,14 @@ export default async function DashboardPage() {
     redirect("/");
   }
 
-  return <DashboardClient initialProfile={profile} />;
+  const achievements = await getAuthenticatedUserAchievements();
+  const streakData = await getAuthenticatedUserStreakData();
+
+  return (
+    <DashboardClient
+      initialProfile={profile}
+      initialAchievements={achievements}
+      initialStreakData={streakData}
+    />
+  );
 }

@@ -10,7 +10,10 @@ import {
   claimDailyAchievementForAuthenticatedUser,
   claimDailyAchievementForAnonymousUser,
   mergeAnonymousAchievementsIntoCurrentUser,
+  getAuthenticatedUserStreakData,
 } from "@/lib/achievement-service-server";
+
+import type { AchievementStreakData } from "@/lib/achievement-service-server";
 
 import { createAnonymousUser } from "@/lib/anonymous-user";
 import { getRandomAchievement } from "@/lib/achievement-generator";
@@ -101,4 +104,8 @@ export async function migrateAnonymousAchievementsAction(): Promise<{
   const result = await mergeAnonymousAchievementsIntoCurrentUser(anonymousId);
 
   return result;
+}
+
+export async function getStreakDataAction(): Promise<AchievementStreakData> {
+  return await getAuthenticatedUserStreakData();
 }
