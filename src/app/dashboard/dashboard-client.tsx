@@ -4,8 +4,10 @@ import { useState } from "react";
 import { Navbar } from "@/components/navbar";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { AchievementsGrid } from "@/components/dashboard/achievements-grid";
+import { StreakCalendar } from "@/components/dashboard/streak-calendar";
 import { UnlockAchievement } from "@/components/unlock-achievement";
 import { Button } from "@/components/ui/button";
+import { Flame, Trophy } from "lucide-react";
 import { Achievement, UserProfile } from "@/lib/supabase";
 
 import {
@@ -87,89 +89,112 @@ export default function DashboardClient({
                 {user?.username ?? "Your Dashboard"}
               </h1>
 
-              <p className="mt-1 max-w-xl text-muted-foreground">
+              <p className="mt-1 max-w-xl text-xs text-muted-foreground">
                 Keep your streak alive, grow your collection, and continue
                 accomplishing absolutely nothing useful.
               </p>
             </div>
 
-            <div className="flex items-center gap-2 rounded-full border bg-background px-4 py-2 shadow-sm">
+            {/* <div className="flex items-center gap-2 rounded-full border bg-background px-4 py-2 shadow-sm">
               <span className="text-lg">🔥</span>
 
               <span className="text-sm text-gray-700 font-medium">
                 {streakData.currentStreak} day
                 {streakData.currentStreak === 1 ? "" : "s"} streak
               </span>
-            </div>
+            </div> */}
           </section>
 
           {/* Today's Achievement */}
-          <section className="overflow-hidden rounded-l border bg-background shadow-sm">
-            <div className="grid gap-0 lg:grid-cols-[1.4fr_0.6fr]">
-              <div className="p-6">
-                <div className="mb-3 inline-flex items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-                  Today
+          <section className="overflow-hidden rounded-lg border bg-background shadow-sm">
+            <div className="grid gap-0 lg:grid-cols-[1.5fr_0.85fr]">
+              <div className="flex h-full flex-col">
+                {/* Main content */}
+                <div className="p-4">
+                  <div className="mb-3 inline-flex w-fit items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
+                    Today
+                  </div>
+
+                  {streakData.claimedToday ? (
+                    <>
+                      <h2 className="text-2xl font-semibold tracking-tight text-gray-700">
+                        You&apos;re done for today
+                      </h2>
+
+                      <p className="mt-2 max-w-lg text-muted-foreground">
+                        Today&apos;s useless achievement is safely in your
+                        collection. Come back tomorrow to keep your streak
+                        going.
+                      </p>
+
+                      <div className="mt-6 inline-flex w-fit items-center gap-2 rounded-lg bg-muted px-4 py-3 text-sm font-medium">
+                        <span>✓</span>
+                        Achievement claimed
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <h2 className="text-2xl font-semibold tracking-tight text-gray-700">
+                        Today&apos;s achievement is waiting
+                      </h2>
+
+                      <p className="mt-2 max-w-lg text-muted-foreground">
+                        Claim one new achievement today and keep your streak
+                        alive.
+                      </p>
+
+                      <Button
+                        onClick={handleDailyAchievement}
+                        size="lg"
+                        className="mt-6"
+                      >
+                        <span className="mr-2">🎯</span>
+                        Claim Today&apos;s Achievement
+                      </Button>
+                    </>
+                  )}
                 </div>
 
-                {streakData.claimedToday ? (
-                  <>
-                    <h2 className="text-2xl text-gray-700 font-semibold tracking-tight">
-                      You&apos;re done for today
-                    </h2>
-
-                    <p className="mt-2 max-w-lg text-muted-foreground">
-                      Today&apos;s useless achievement is safely in your
-                      collection. Come back tomorrow to keep your streak going.
-                    </p>
-
-                    <div className="mt-6 inline-flex items-center gap-2 rounded-lg bg-muted px-4 py-3 text-sm font-medium">
-                      <span>✓</span>
-                      Achievement claimed
+                {/* Streak footer */}
+                <div className="mt-auto grid grid-cols-2 divide-x divide-white/10 bg-gray-600 text-white">
+                  <div className="flex items-center gap-3 px-6 py-4">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-orange-400/80">
+                      <Flame className="size-4 text-white" />
                     </div>
-                  </>
-                ) : (
-                  <>
-                    <h2 className="text-2xl text-gray-700 font-semibold tracking-tight">
-                      Today&apos;s achievement is waiting
-                    </h2>
 
-                    <p className="mt-2 max-w-lg text-muted-foreground">
-                      Claim one new achievement today and keep your streak
-                      alive.
-                    </p>
+                    <div className="min-w-0">
+                      <div className="text-lg font-semibold leading-none">
+                        {streakData.currentStreak}
+                      </div>
 
-                    <Button
-                      onClick={handleDailyAchievement}
-                      size="lg"
-                      className="mt-6"
-                    >
-                      <span className="mr-2">🎯</span>
-                      Claim Today&apos;s Achievement
-                    </Button>
-                  </>
-                )}
+                      <div className="mt-1 text-xs font-bold text-slate-300">
+                        Current streak
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 px-6 py-4">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-400/80">
+                      <Trophy className="size-4 text-white" />
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="text-lg font-semibold leading-none">
+                        {streakData.longestStreak}
+                      </div>
+
+                      <div className="mt-1 text-xs font-bold text-slate-300">
+                        Best streak
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="flex items-center justify-center border-t bg-muted/40 p-8 lg:border-l lg:border-t-0">
-                <div className="text-center">
-                  <div className="text-5xl text-gray-700 font-bold tracking-tight">
-                    {streakData.currentStreak}
-                  </div>
-
-                  <div className="mt-1 text-sm font-medium text-muted-foreground">
-                    Current streak
-                  </div>
-
-                  <div className="mt-5 border-t pt-5">
-                    <div className="text-2xl text-gray-800 font-semibold">
-                      {streakData.longestStreak}
-                    </div>
-
-                    <div className="text-xs text-muted-foreground">
-                      Best streak
-                    </div>
-                  </div>
-                </div>
+              <div className="border-t bg-slate-100/70 dark:bg-slate-900/30 p-4 lg:border-l lg:border-t-0">
+                <StreakCalendar
+                  achievementDates={streakData.achievementDates}
+                />
               </div>
             </div>
           </section>
