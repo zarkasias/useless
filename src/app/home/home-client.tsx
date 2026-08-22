@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { Card, CardContent } from "@/components/ui/card";
 import { Navbar } from "@/components/navbar";
 import { UnlockAchievement } from "@/components/unlock-achievement";
@@ -109,9 +110,11 @@ export default function HomeClient({ initialProfile }: HomeClientProps) {
                   className="group bg-gradient-to-r from-primary to-blue-500 hover:opacity-90 hover:scale-105 transition-all duration-300 text-white border-0 shadow-md hover:shadow-xl hover:shadow-primary/20"
                 >
                   <span className="mr-2 text-2xl group-hover:animate-bounce">
-                    <img
+                    <Image
                       src="/icons/trophy.png"
                       alt="trophy"
+                      width={32}
+                      height={32}
                       className="w-8 h-8"
                     />
                   </span>
@@ -174,9 +177,11 @@ export default function HomeClient({ initialProfile }: HomeClientProps) {
                         role="img"
                         aria-label="achievement emoji"
                       >
-                        <img
+                        <Image
                           src="/icons/trophy.png"
                           alt="trophy"
+                          width={40}
+                          height={40}
                           className="w-10 h-10"
                         />
                       </span>
@@ -216,9 +221,11 @@ export default function HomeClient({ initialProfile }: HomeClientProps) {
             <div className="text-center space-y-4 group hover:scale-105 transition-all duration-300">
               <div className="mx-auto bg-gradient-to-br from-primary/20 to-blue-500/20 w-20 h-20 rounded-full flex items-center justify-center text-2xl group-hover:shadow-lg group-hover:shadow-primary/20 transition-all duration-300">
                 <span className="animate-pulse">
-                  <img
+                  <Image
                     src="/icons/number-1.png"
                     alt="1"
+                    width={40}
+                    height={40}
                     className="w-10 h-10"
                   />
                 </span>
@@ -233,7 +240,13 @@ export default function HomeClient({ initialProfile }: HomeClientProps) {
             <div className="text-center space-y-4 group hover:scale-105 transition-all duration-300">
               <div className="mx-auto bg-gradient-to-br from-blue-500/10 to-purple-500/10 w-20 h-20 rounded-full flex items-center justify-center text-2xl group-hover:shadow-lg group-hover:shadow-blue-500/20 transition-all duration-300">
                 <span className="animate-pulse">
-                  <img src="/icons/two.png" alt="1" className="w-10 h-10" />
+                  <Image
+                    src="/icons/two.png"
+                    alt="1"
+                    width={40}
+                    height={40}
+                    className="w-10 h-10"
+                  />
                 </span>
               </div>
               <h3 className="text-xl font-bold">Unlock Daily Achievements</h3>
@@ -246,9 +259,11 @@ export default function HomeClient({ initialProfile }: HomeClientProps) {
             <div className="text-center space-y-4 group hover:scale-105 transition-all duration-300">
               <div className="mx-auto bg-gradient-to-br from-purple-500/10 to-amber-500/10 w-20 h-20 rounded-full flex items-center justify-center text-2xl group-hover:shadow-lg group-hover:shadow-purple-500/20 transition-all duration-300">
                 <span className="animate-pulse delay-100">
-                  <img
+                  <Image
                     src="/icons/number-3.png"
                     alt="2"
+                    width={40}
+                    height={40}
                     className="w-10 h-10"
                   />
                 </span>

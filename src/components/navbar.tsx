@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { ChevronDown, LogOut, Medal, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -28,7 +29,13 @@ export function Navbar({ user, onLogout }: NavbarProps) {
               role="img"
               aria-label="trophy"
             >
-              <img src="/icons/trophy.png" alt="trophy" className="w-8 h-8" />
+              <Image
+                src="/icons/trophy.png"
+                alt="trophy"
+                width={32}
+                height={32}
+                className="w-8 h-8"
+              />
             </span>
             <span className="hidden font-bold sm:inline-block relative">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500 text-xl">

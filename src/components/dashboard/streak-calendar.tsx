@@ -45,7 +45,7 @@ export function StreakCalendar({ achievementDates }: StreakCalendarProps) {
   };
 
   const nextMonth = () => {
-    if (currentMonth) {
+    if (isCurrentMonth) {
       return;
     }
 

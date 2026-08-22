@@ -50,20 +50,84 @@ export function LeaderboardTable({
         <CardTitle>Achievement Leaders</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="overflow-hidden rounded-md">
+        {/* Mobile */}
+        <div className="divide-y sm:hidden">
+          {isLoading
+            ? Array(5)
+                .fill(0)
+                .map((_, index) => (
+                  <div
+                    key={`mobile-loading-${index}`}
+                    className="flex items-center gap-3 p-4"
+                  >
+                    <Skeleton className="h-8 w-8" />
+
+                    <Skeleton className="h-10 w-10 rounded-full" />
+
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-3 w-32" />
+                    </div>
+                  </div>
+                ))
+            : users.map((user, index) => (
+                <div
+                  key={user.id}
+                  className="flex items-center gap-3 p-4 even:bg-gray-200/20"
+                >
+                  {/* Rank */}
+                  <div className="flex w-8 shrink-0 justify-center">
+                    {getRankIcon(index + 1)}
+                  </div>
+
+                  {/* User */}
+                  <Avatar className="h-10 w-10 shrink-0">
+                    <AvatarImage src={user.avatar_url || ""} />
+
+                    <AvatarFallback>
+                      {user.username.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium text-gray-700 dark:text-gray-200">
+                      {user.username}
+                    </p>
+
+                    <div className="mt-1 flex items-center gap-4 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Flame className="size-4 text-orange-400" />
+                        <span>{user.currentStreak} streak</span>
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <Trophy className="size-4 text-amber-400" />
+                        <span>{user.achievementCount}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+        </div>
+
+        {/* Tablet / Desktop */}
+        <div className="hidden overflow-hidden rounded-md sm:block">
           <table className="w-full">
             <thead>
-              <tr className="bg-muted border-b">
-                <th className="text-left p-4 font-medium">Rank</th>
-                <th className="text-left p-4 font-medium">User</th>
-                <th className="text-center p-4 font-medium">Streak</th>
-                <th className="text-center p-4 font-medium">Achievements</th>
+              <tr className="border-b bg-muted">
+                <th className="p-4 text-left font-medium">Rank</th>
+
+                <th className="p-4 text-left font-medium">User</th>
+
+                <th className="p-4 text-center font-medium">Streak</th>
+
+                <th className="p-4 text-center font-medium">Achievements</th>
               </tr>
             </thead>
+
             <tbody>
               {isLoading
-                ? // Loading state
-                  Array(5)
+                ? Array(5)
                     .fill(0)
                     .map((_, index) => (
                       <tr
@@ -73,55 +137,58 @@ export function LeaderboardTable({
                         <td className="p-4">
                           <Skeleton className="h-8 w-8" />
                         </td>
+
                         <td className="p-4">
                           <div className="flex items-center gap-3">
                             <Skeleton className="h-8 w-8 rounded-full" />
                             <Skeleton className="h-4 w-24" />
                           </div>
                         </td>
+
                         <td className="p-4 text-center">
-                          <Skeleton className="h-4 w-8 mx-auto" />
+                          <Skeleton className="mx-auto h-4 w-8" />
                         </td>
+
                         <td className="p-4 text-center">
-                          <Skeleton className="h-4 w-8 mx-auto" />
+                          <Skeleton className="mx-auto h-4 w-8" />
                         </td>
                       </tr>
                     ))
-                : // Actual data
-                  users.map((user, index) => (
+                : users.map((user, index) => (
                     <tr
                       key={user.id}
-                      className="border-b last:border-0 hover:bg-muted/50"
+                      className="border-b transition-colors last:border-0 hover:bg-muted/60 even:bg-gray-200/20"
                     >
                       <td className="p-4">{getRankIcon(index + 1)}</td>
+
                       <td className="p-4">
                         <div className="flex items-center gap-3">
                           <Avatar>
                             <AvatarImage src={user.avatar_url || ""} />
+
                             <AvatarFallback>
                               {user.username.substring(0, 2).toUpperCase()}
                             </AvatarFallback>
                           </Avatar>
-                          <div>
-                            <p className="font-medium">{user.username}</p>
-                          </div>
+
+                          <p className="font-medium">{user.username}</p>
                         </div>
                       </td>
+
                       <td className="p-4 text-center">
-                        <div className="flex items-center justify-center gap-1">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <Flame className="size-5 text-orange-400" />
+
                           <span className="text-sm">{user.currentStreak}</span>
-                          <span className="text-xs">
-                            <Flame className="size-6 text-orange-400" />
-                          </span>
                         </div>
                       </td>
+
                       <td className="p-4 text-center">
-                        <div className="flex items-center justify-center gap-1">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <Trophy className="size-5 text-amber-400" />
+
                           <span className="text-sm">
                             {user.achievementCount}
-                          </span>
-                          <span className="text-xs">
-                            <Trophy className="size-6 text-amber-400" />
                           </span>
                         </div>
                       </td>

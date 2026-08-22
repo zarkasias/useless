@@ -2,6 +2,7 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
+import { getUserEntitlements } from "./entitlement-service-server";
 import { getAnonymousUser } from "@/lib/anonymous-user";
 import { Achievement, UserProfile } from "@/lib/supabase";
 
@@ -336,6 +337,12 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Achie
   const user = await getAuthenticatedUser();
 
   if (!user) {
+    return null;
+  }
+
+  const entitlements = await getUserEntitlements(user.id);
+
+  if (!entitlements.canClaimAchievement) {
     return null;
   }
 

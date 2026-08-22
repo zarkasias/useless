@@ -107,8 +107,8 @@ export default function DashboardClient({
 
           {/* Today's Achievement */}
           <section className="overflow-hidden rounded-lg border bg-background shadow-sm">
-            <div className="grid gap-0 lg:grid-cols-[1.5fr_0.85fr]">
-              <div className="flex h-full flex-col">
+            <div className="grid gap-2 lg:grid-cols-[1.5fr_0.85fr]">
+              <div className="flex h-full flex-col border-r">
                 {/* Main content */}
                 <div className="p-4">
                   <div className="mb-3 inline-flex w-fit items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
