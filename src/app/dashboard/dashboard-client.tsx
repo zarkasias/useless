@@ -146,7 +146,7 @@ export default function DashboardClient({
                       <Button
                         onClick={handleDailyAchievement}
                         size="lg"
-                        className="mt-6"
+                        className="mt-6 bg-gray-700"
                       >
                         <span className="mr-2">🎯</span>
                         Claim Today&apos;s Achievement

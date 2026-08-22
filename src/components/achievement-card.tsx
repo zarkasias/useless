@@ -588,9 +588,7 @@ export function AchievementCard({
       <Card ref={cardRef} className={cardClass}>
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-4">
-            <span className={tagClass}>
-              {is_daily ? "Daily" : typeNames[type]}
-            </span>
+            <span className={tagClass}>{typeNames[type]}</span>
 
             <span
               className="text-3xl"

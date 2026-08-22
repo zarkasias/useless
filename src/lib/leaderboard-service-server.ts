@@ -75,18 +75,35 @@ function calculateCurrentStreak(
   achievementDates: string[],
   today: string,
 ): number {
-  const uniqueDates = Array.from(new Set(achievementDates));
+  const uniqueDates = Array.from(new Set(achievementDates)).sort();
+
+  if (uniqueDates.length === 0) {
+    return 0;
+  }
 
   const dateSet = new Set(uniqueDates);
 
-  if (!dateSet.has(today)) {
+  const yesterday = addDays(today, -1);
+
+  let currentDate: string | null = null;
+
+  // User already claimed today.
+  if (dateSet.has(today)) {
+    currentDate = today;
+  }
+  // User has not claimed today yet, but yesterday's
+  // streak is still active.
+  else if (dateSet.has(yesterday)) {
+    currentDate = yesterday;
+  }
+  // User missed at least one full calendar day.
+  else {
     return 0;
   }
 
   let currentStreak = 0;
-  let currentDate = today;
 
-  while (dateSet.has(currentDate)) {
+  while (currentDate && dateSet.has(currentDate)) {
     currentStreak++;
 
     currentDate = addDays(currentDate, -1);

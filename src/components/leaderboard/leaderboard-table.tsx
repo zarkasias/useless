@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Medal, Flame, Trophy } from "lucide-react";
 import type { LeaderboardUser } from "@/lib/leaderboard-service-server";
 import React from "react";
 
@@ -17,11 +18,23 @@ export function LeaderboardTable({
   const getRankIcon = (rank: number): React.ReactNode => {
     switch (rank) {
       case 1:
-        return <div className="text-2xl">🥇</div>;
+        return (
+          <div className="text-2xl">
+            <Medal className="size-6 text-amber-400" />
+          </div>
+        );
       case 2:
-        return <div className="text-2xl">🥈</div>;
+        return (
+          <div className="text-2xl">
+            <Medal className="size-6 text-gray-400" />
+          </div>
+        );
       case 3:
-        return <div className="text-2xl">🥉</div>;
+        return (
+          <div className="text-2xl">
+            <Medal className="size-6 text-amber-700" />
+          </div>
+        );
       default:
         return (
           <div className="w-8 h-8 flex items-center justify-center text-muted-foreground">
@@ -97,7 +110,9 @@ export function LeaderboardTable({
                       <td className="p-4 text-center">
                         <div className="flex items-center justify-center gap-1">
                           <span className="text-sm">{user.currentStreak}</span>
-                          <span className="text-xs">🔥</span>
+                          <span className="text-xs">
+                            <Flame className="size-6 text-orange-400" />
+                          </span>
                         </div>
                       </td>
                       <td className="p-4 text-center">
@@ -105,7 +120,9 @@ export function LeaderboardTable({
                           <span className="text-sm">
                             {user.achievementCount}
                           </span>
-                          <span className="text-xs">🏆</span>
+                          <span className="text-xs">
+                            <Trophy className="size-6 text-amber-400" />
+                          </span>
                         </div>
                       </td>
                     </tr>

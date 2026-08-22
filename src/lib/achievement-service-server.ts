@@ -215,10 +215,28 @@ export async function getAuthenticatedUserStreakData(): Promise<AchievementStrea
   // Current streak
   // ----------------------------------------
 
+  // ----------------------------------------
+  // Current streak
+  // ----------------------------------------
+
   let currentStreak = 0;
 
-  if (claimedToday) {
-    let currentDate = today;
+  const yesterday = addDays(today, -1);
+
+  let streakStartDate: string | null = null;
+
+  // If the user already claimed today, count backward from today.
+  if (dateSet.has(today)) {
+    streakStartDate = today;
+  }
+  // If they have not claimed today yet, yesterday's streak is still active.
+  else if (dateSet.has(yesterday)) {
+    streakStartDate = yesterday;
+  }
+
+  // Only count the streak if it is still active.
+  if (streakStartDate) {
+    let currentDate = streakStartDate;
 
     while (dateSet.has(currentDate)) {
       currentStreak++;
