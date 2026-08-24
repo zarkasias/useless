@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Medal, Flame, Trophy } from "lucide-react";
-import type { LeaderboardUser } from "@/lib/leaderboard-service-server";
+import type { LeaderboardUser } from "@/lib/services/leaderboard-service-server";
 import React from "react";
 
 interface LeaderboardTableProps {

@@ -14,7 +14,7 @@ import {
   claimDailyAchievementAction,
   getStreakDataAction,
 } from "@/app/actions/achievement-actions";
-import type { AchievementStreakData } from "@/lib/achievement-service-server";
+import type { AchievementStreakData } from "@/lib/services/achievement-service-server";
 
 import { toast } from "sonner";
 import { logout } from "@/lib/auth-actions";
@@ -111,8 +111,12 @@ export default function DashboardClient({
               <div className="flex h-full flex-col border-r">
                 {/* Main content */}
                 <div className="p-4">
-                  <div className="mb-3 inline-flex w-fit items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary">
-                    Today
+                  <div className="mb-3 inline-flex w-fit items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                    Today ·{" "}
+                    {new Date().toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                    })}
                   </div>
 
                   {streakData.claimedToday ? (

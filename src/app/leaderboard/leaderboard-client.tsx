@@ -6,7 +6,7 @@ import { Navbar } from "@/components/navbar";
 import { LeaderboardTable } from "@/components/leaderboard/leaderboard-table";
 import { UserProfile } from "@/lib/supabase";
 import { logout } from "@/lib/auth-actions";
-import type { LeaderboardUser } from "@/lib/leaderboard-service-server";
+import type { LeaderboardUser } from "@/lib/services/leaderboard-service-server";
 
 interface LeaderboardClientProps {
   initialProfile: UserProfile | null;

@@ -1,5 +1,5 @@
 import HomeClient from "@/app/home/home-client";
-import { getAuthenticatedUserProfile } from "@/lib/achievement-service-server";
+import { getAuthenticatedUserProfile } from "@/lib/services/achievement-service-server";
 
 export default async function HomePage() {
   const profile = await getAuthenticatedUserProfile();

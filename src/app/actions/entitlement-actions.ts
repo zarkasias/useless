@@ -1,10 +1,10 @@
 "use server";
 
-import { getAuthenticatedUser } from "@/lib/achievement-service-server";
+import { getAuthenticatedUser } from "@/lib/services/achievement-service-server";
 import {
   getUserEntitlements,
   UserEntitlements,
-} from "@/lib/entitlement-service-server";
+} from "@/lib/services/entitlement-service-server";
 
 export async function getCurrentUserEntitlementsAction(): Promise<UserEntitlements | null> {
   const user = await getAuthenticatedUser();

@@ -1,5 +1,5 @@
-import { getAuthenticatedUserProfile } from "@/lib/achievement-service-server";
-import { getLeaderboardUsers } from "@/lib/leaderboard-service-server";
+import { getAuthenticatedUserProfile } from "@/lib/services/achievement-service-server";
+import { getLeaderboardUsers } from "@/lib/services/leaderboard-service-server";
 
 import LeaderboardClient from "./leaderboard-client";
 

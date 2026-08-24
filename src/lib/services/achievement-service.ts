@@ -1,4 +1,4 @@
-import { supabase, Achievement, UserProfile } from "./supabase";
+import { supabase, Achievement, UserProfile } from "../supabase";
 
 /**
  * Get all achievements for a user

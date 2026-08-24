@@ -10,7 +10,7 @@ import {
 
 import { getCurrentUserEntitlementsAction } from "@/app/actions/entitlement-actions";
 
-import type { UserEntitlements } from "@/lib/entitlement-service-server";
+import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
 
 export default function AuthTestPage() {
   const [achievement, setAchievement] = useState<Achievement | null>(null);

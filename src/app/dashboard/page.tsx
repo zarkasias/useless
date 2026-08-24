@@ -4,7 +4,7 @@ import {
   getAuthenticatedUserProfile,
   getAuthenticatedUserAchievements,
   getAuthenticatedUserStreakData,
-} from "@/lib/achievement-service-server";
+} from "@/lib/services/achievement-service-server";
 import DashboardClient from "./dashboard-client";
 
 export default async function DashboardPage() {

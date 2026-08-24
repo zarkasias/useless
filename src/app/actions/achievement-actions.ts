@@ -10,9 +10,9 @@ import {
   claimDailyAchievementForAnonymousUser,
   mergeAnonymousAchievementsIntoCurrentUser,
   getAuthenticatedUserStreakData,
-} from "@/lib/achievement-service-server";
+} from "@/lib/services/achievement-service-server";
 
-import type { AchievementStreakData } from "@/lib/achievement-service-server";
+import type { AchievementStreakData } from "@/lib/services/achievement-service-server";
 
 import { createAnonymousUser } from "@/lib/anonymous-user";
 
