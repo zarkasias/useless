@@ -79,6 +79,7 @@ interface AchievementCardProps {
   unlockedAt?: string;
   ingrid?: boolean;
   showShareButton?: boolean;
+  variant?: "default" | "compact";
 }
 
 export function AchievementCard({
@@ -86,6 +87,7 @@ export function AchievementCard({
   unlockedAt,
   showShareButton = false,
   ingrid = false,
+  variant = "default",
 }: AchievementCardProps) {
   const { title, description, type, emoji } = achievement;
   const cardRef = useRef<HTMLDivElement>(null);
@@ -97,12 +99,14 @@ export function AchievementCard({
   const generationAttemptedRef = useRef(false);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
 
+  const isCompact = variant === "compact";
+
   const cardClass = `
   ${typeColors[type]}
   h-full
   rounded-lg
   border
-  py-4
+  ${isCompact ? "py-2" : "py-4"}
   shadow-sm
   transition-shadow
   hover:shadow-md
@@ -586,12 +590,18 @@ export function AchievementCard({
     <div className="relative w-full">
       {/* Main achievement card */}
       <Card ref={cardRef} className={cardClass}>
-        <CardHeader className="pb-3">
+        <CardHeader className={isCompact ? "px-4 pb-2" : "pb-3"}>
           <div className="flex items-start justify-between gap-4">
-            <span className={tagClass}>{typeNames[type]}</span>
+            <span
+              className={`${tagClass} ${
+                isCompact ? "px-2 py-0.5 text-[10px]" : ""
+              }`}
+            >
+              {typeNames[type]}
+            </span>
 
             <span
-              className="text-3xl"
+              className={isCompact ? "text-2xl" : "text-3xl"}
               role="img"
               aria-label={`${title} achievement`}
             >
@@ -599,12 +609,24 @@ export function AchievementCard({
             </span>
           </div>
 
-          <div className="space-y-2 pt-2">
-            <CardTitle className="text-lg font-semibold tracking-tight text-gray-700 dark:text-gray-200">
+          <div className={isCompact ? "space-y-1 pt-1" : "space-y-2 pt-2"}>
+            <CardTitle
+              className={
+                isCompact
+                  ? "text-base font-semibold tracking-tight text-gray-700 dark:text-gray-200"
+                  : "text-lg font-semibold tracking-tight text-gray-700 dark:text-gray-200"
+              }
+            >
               {title}
             </CardTitle>
 
-            <CardDescription className="line-clamp-3 text-sm leading-6">
+            <CardDescription
+              className={
+                isCompact
+                  ? "line-clamp-2 text-xs leading-5"
+                  : "line-clamp-3 text-sm leading-6"
+              }
+            >
               {description}
             </CardDescription>
           </div>

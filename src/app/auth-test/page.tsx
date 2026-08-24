@@ -26,15 +26,30 @@ export default function AuthTestPage() {
     try {
       const result = await claimDailyAchievementAction();
 
-      if (!result) {
-        setMessage("You have already claimed today's achievement.");
+      if (result.status === "subscription_required") {
+        setMessage("Subscription required. Free achievement limit reached.");
+
         return;
       }
 
-      setAchievement(result);
+      if (result.status === "already_claimed") {
+        setMessage("You have already claimed today's achievement.");
+
+        return;
+      }
+
+      if (result.status === "unavailable") {
+        setMessage("Achievement unavailable.");
+
+        return;
+      }
+
+      setAchievement(result.achievement);
+
       setMessage("Achievement claimed!");
     } catch (error) {
       console.error(error);
+
       setMessage("Error claiming achievement.");
     }
   }

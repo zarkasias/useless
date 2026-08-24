@@ -2,8 +2,6 @@
 
 import { cookies } from "next/headers";
 
-import { Achievement } from "@/lib/supabase";
-
 import {
   getAuthenticatedUser,
   claimDailyAchievementForAuthenticatedUser,
@@ -13,12 +11,13 @@ import {
 } from "@/lib/services/achievement-service-server";
 
 import type { AchievementStreakData } from "@/lib/services/achievement-service-server";
+import type { DailyClaimResult } from "@/lib/services/achievement-service-server";
 
 import { createAnonymousUser } from "@/lib/anonymous-user";
 
 const ANONYMOUS_COOKIE = "anonymous_user_id";
 
-export async function claimDailyAchievementAction(): Promise<Achievement | null> {
+export async function claimDailyAchievementAction(): Promise<DailyClaimResult> {
   const user = await getAuthenticatedUser();
 
   // --------------------------------------------------
@@ -57,7 +56,19 @@ export async function claimDailyAchievementAction(): Promise<Achievement | null>
     });
   }
 
-  return await claimDailyAchievementForAnonymousUser(anonymousId);
+  const achievement = await claimDailyAchievementForAnonymousUser(anonymousId);
+
+  if (!achievement) {
+    return {
+      status: "already_claimed",
+      achievement: null,
+    };
+  }
+
+  return {
+    status: "claimed",
+    achievement,
+  };
 }
 
 // --------------------------------------------------

@@ -12,6 +12,7 @@ import {
   LayoutDashboard,
   Trophy,
   Medal,
+  Sparkles,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -25,9 +26,10 @@ import { UserProfile } from "@/lib/supabase";
 
 interface NavbarProps {
   user: UserProfile | null;
+  isSubscribed?: boolean;
 }
 
-export function Navbar({ user }: NavbarProps) {
+export function Navbar({ user, isSubscribed = false }: NavbarProps) {
   const pathname = usePathname();
 
   const handleLogout = async () => {
@@ -105,6 +107,20 @@ export function Navbar({ user }: NavbarProps) {
                   </Button>
                 </Link>
               </div>
+
+              <Link href="/pro">
+                <Button
+                  className={
+                    isSubscribed
+                      ? "gap-2 border border-primary/20 bg-gradient-to-r from-blue-600 to-violet-600 text-white font-semibold hover:bg-primary/10 flex"
+                      : "gap-2 bg-gradient-to-r from-blue-600 to-violet-600 text-white font-semibold shadow-sm hover:bg-primary/90 flex"
+                  }
+                  variant={isSubscribed ? "outline" : "default"}
+                >
+                  <Sparkles className="size-4 text-pink-100/80" />
+                  Upgrade
+                </Button>
+              </Link>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

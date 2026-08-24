@@ -31,38 +31,33 @@ export default function HomeClient({ initialProfile }: HomeClientProps) {
 
   const handleGetDailyAchievement = async () => {
     try {
-      const achievement = await claimDailyAchievementAction();
+      const result = await claimDailyAchievementAction();
 
-      if (!achievement) {
-        toast.info(
-          user
-            ? "You've already claimed today's achievement."
-            : "No new achievement is available today. If you've used this browser with an account, log in to continue.",
-        );
-
+      if (result.status === "already_claimed") {
+        toast.info("You've already claimed today's achievement.");
         return;
       }
+
+      if (result.status === "subscription_required") {
+        toast.info("You've reached your free achievement limit.");
+        return;
+      }
+
+      if (result.status === "unavailable") {
+        toast.error("Today's achievement is unavailable right now.");
+        return;
+      }
+
+      const achievement = result.achievement;
 
       setUnlockedAchievement(achievement);
       setShowAchievementModal(true);
 
-      if (user) {
-        toast.success("Today's achievement unlocked!");
-      } else {
-        toast.success("Today's achievement unlocked!", {
-          duration: 5000,
-          action: {
-            label: "Sign Up",
-            onClick: () => {
-              window.location.href = "/signup";
-            },
-          },
-        });
-      }
+      toast.success("Today's achievement unlocked!");
     } catch (error) {
       console.error("Error claiming daily achievement:", error);
 
-      toast.error("Something went wrong. Please try again.");
+      toast.error("Something went wrong.");
     }
   };
 

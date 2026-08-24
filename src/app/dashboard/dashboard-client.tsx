@@ -44,12 +44,24 @@ export default function DashboardClient({
     if (!user) return;
 
     try {
-      const achievement = await claimDailyAchievementAction();
+      const result = await claimDailyAchievementAction();
 
-      if (!achievement) {
+      if (result.status === "already_claimed") {
         toast.info("You've already claimed today's achievement.");
         return;
       }
+
+      if (result.status === "subscription_required") {
+        toast.info("You've reached your free achievement limit.");
+        return;
+      }
+
+      if (result.status === "unavailable") {
+        toast.info("Today's achievement is unavailable right now.");
+        return;
+      }
+
+      const achievement = result.achievement;
 
       setUnlockedAchievement(achievement);
       setShowAchievementModal(true);
@@ -224,6 +236,7 @@ export default function DashboardClient({
                     achievement={achievement}
                     ingrid={true}
                     showShareButton={false}
+                    variant="compact"
                   />
                 ))}
               </div>

@@ -26,6 +26,24 @@ export interface AchievementStreakData {
   claimedToday: boolean;
 }
 
+export type DailyClaimResult =
+  | {
+      status: "claimed";
+      achievement: Achievement;
+    }
+  | {
+      status: "already_claimed";
+      achievement: null;
+    }
+  | {
+      status: "subscription_required";
+      achievement: null;
+    }
+  | {
+      status: "unavailable";
+      achievement: null;
+    };
+
 function getToday(): string {
   const formatter = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/New_York",
@@ -333,17 +351,14 @@ async function getRandomAvailableDailyAchievement(
  * - Achievement must be marked is_daily = true.
  * - The same daily achievement will not be given twice.
  */
-export async function claimDailyAchievementForAuthenticatedUser(): Promise<Achievement | null> {
+export async function claimDailyAchievementForAuthenticatedUser(): Promise<DailyClaimResult> {
   const user = await getAuthenticatedUser();
 
   if (!user) {
-    return null;
-  }
-
-  const entitlements = await getUserEntitlements(user.id);
-
-  if (!entitlements.canClaimAchievement) {
-    return null;
+    return {
+      status: "unavailable",
+      achievement: null,
+    };
   }
 
   const today = getToday();
@@ -377,12 +392,31 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Achie
   if (existingClaimError) {
     console.error("Error checking today's achievement:", existingClaimError);
 
-    return null;
+    return {
+      status: "unavailable",
+      achievement: null,
+    };
   }
 
   // User already has today's achievement.
   if (existingClaim) {
-    return null;
+    return {
+      status: "already_claimed",
+      achievement: null,
+    };
+  }
+
+  // --------------------------------------------------
+  // Check whether the user can earn another achievement.
+  // --------------------------------------------------
+
+  const entitlements = await getUserEntitlements(user.id);
+
+  if (!entitlements.canClaimAchievement) {
+    return {
+      status: "subscription_required",
+      achievement: null,
+    };
   }
 
   // --------------------------------------------------
@@ -398,7 +432,10 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Achie
   if (previousClaimsError) {
     console.error("Error fetching previous achievements:", previousClaimsError);
 
-    return null;
+    return {
+      status: "unavailable",
+      achievement: null,
+    };
   }
 
   const previousAchievementIds =
@@ -413,7 +450,10 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Achie
   );
 
   if (!achievement) {
-    return null;
+    return {
+      status: "unavailable",
+      achievement: null,
+    };
   }
 
   // --------------------------------------------------
@@ -436,14 +476,20 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Achie
       claimError,
     );
 
-    return null;
+    return {
+      status: "unavailable",
+      achievement: null,
+    };
   }
 
   return {
-    ...achievement,
-    user_id: user.id,
-    created_at: claim.created_at,
-    is_daily: true,
+    status: "claimed",
+    achievement: {
+      ...achievement,
+      user_id: user.id,
+      created_at: claim.created_at,
+      is_daily: true,
+    },
   };
 }
 
