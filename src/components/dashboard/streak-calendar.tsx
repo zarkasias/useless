@@ -130,7 +130,7 @@ export function StreakCalendar({ achievementDates }: StreakCalendarProps) {
               >
                 <div
                   className={`flex size-6 items-center justify-center rounded-full text-xs font-medium transition-colors
-                        ${claimed ? "bg-green-500 border border-green-500 text-white" : "text-gray-600 dark:text-gray-300"}
+                        ${claimed ? "bg-green-600 border border-green-600 text-white" : "text-gray-600 dark:text-gray-300"}
                         ${todaysDate && !claimed ? "border border-primary text-primary" : ""}`}
                   title={
                     claimed

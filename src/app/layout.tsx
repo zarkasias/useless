@@ -7,6 +7,7 @@ import { Toaster } from "@/components/ui/sonner";
 import Link from "next/link";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import Script from "next/script";
+import { IdleSessionManager } from "@/components/auth/idle-session-manager";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -221,6 +222,7 @@ export default function RootLayout({
         )}
         suppressHydrationWarning
       >
+        <IdleSessionManager />
         <GoogleAnalytics />
         <StructuredData />
         <Script

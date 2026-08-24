@@ -1,7 +1,17 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { ChevronDown, LogOut, Medal, User } from "lucide-react";
+import {
+  ChevronDown,
+  LogOut,
+  User,
+  LayoutDashboard,
+  Trophy,
+  Medal,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -18,6 +28,20 @@ interface NavbarProps {
 }
 
 export function Navbar({ user, onLogout }: NavbarProps) {
+  const pathname = usePathname();
+
+  const getNavButtonClass = (href: string) => {
+    const isActive = pathname === href || pathname.startsWith(`${href}/`);
+
+    return `
+      transition-all duration-200
+      ${
+        isActive
+          ? "bg-primary/10 text-primary font-medium"
+          : "text-gray-600 hover:bg-primary/10 hover:text-primary"
+      }
+    `;
+  };
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-blue-500/5 pointer-events-none"></div>
@@ -49,14 +73,34 @@ export function Navbar({ user, onLogout }: NavbarProps) {
         <nav className="flex items-center gap-4">
           {user ? (
             <>
-              <Link href="/dashboard">
-                <Button
-                  variant="ghost"
-                  className="hover:bg-primary/10 hover:text-primary transition-all duration-300"
-                >
-                  Dashboard
-                </Button>
-              </Link>
+              <div className="hidden items-center gap-1 md:flex">
+                <Link href="/dashboard">
+                  <Button
+                    variant="ghost"
+                    className={getNavButtonClass("/dashboard")}
+                  >
+                    Dashboard
+                  </Button>
+                </Link>
+
+                <Link href="/achievements">
+                  <Button
+                    variant="ghost"
+                    className={getNavButtonClass("/achievements")}
+                  >
+                    Achievements
+                  </Button>
+                </Link>
+
+                <Link href="/leaderboard">
+                  <Button
+                    variant="ghost"
+                    className={getNavButtonClass("/leaderboard")}
+                  >
+                    Leaderboard
+                  </Button>
+                </Link>
+              </div>
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -83,6 +127,29 @@ export function Navbar({ user, onLogout }: NavbarProps) {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
+                  {/* Mobile-only navigation */}
+                  <DropdownMenuItem asChild className="md:hidden">
+                    <Link href="/dashboard">
+                      <LayoutDashboard className="size-4" />
+                      Dashboard
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem asChild className="md:hidden">
+                    <Link href="/achievements">
+                      <Trophy className="size-4" />
+                      Achievements
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem asChild className="md:hidden">
+                    <Link href="/leaderboard">
+                      <Medal className="size-4" />
+                      Leaderboard
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuSeparator className="md:hidden" />
                   <DropdownMenuItem asChild>
                     <Link
                       href="/profile"
@@ -90,16 +157,6 @@ export function Navbar({ user, onLogout }: NavbarProps) {
                     >
                       <User className="size-4" />
                       Profile
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/leaderboard"
-                      className="flex cursor-pointer items-center gap-2"
-                    >
-                      <Medal className="size-4" />
-                      Leaderboard
                     </Link>
                   </DropdownMenuItem>
 

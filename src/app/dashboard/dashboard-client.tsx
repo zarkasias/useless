@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Navbar } from "@/components/navbar";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
-import { AchievementsGrid } from "@/components/dashboard/achievements-grid";
 import { StreakCalendar } from "@/components/dashboard/streak-calendar";
 import { UnlockAchievement } from "@/components/unlock-achievement";
 import { Button } from "@/components/ui/button";
-import { Flame, Trophy } from "lucide-react";
+import { ArrowRight, Flame, Trophy } from "lucide-react";
 import { Achievement, UserProfile } from "@/lib/supabase";
 
 import {
@@ -18,6 +18,7 @@ import type { AchievementStreakData } from "@/lib/services/achievement-service-s
 
 import { toast } from "sonner";
 import { logout } from "@/lib/auth-actions";
+import { AchievementCard } from "@/components/achievement-card";
 
 interface DashboardClientProps {
   initialProfile: UserProfile;
@@ -94,15 +95,6 @@ export default function DashboardClient({
                 accomplishing absolutely nothing useful.
               </p>
             </div>
-
-            {/* <div className="flex items-center gap-2 rounded-full border bg-background px-4 py-2 shadow-sm">
-              <span className="text-lg">🔥</span>
-
-              <span className="text-sm text-gray-700 font-medium">
-                {streakData.currentStreak} day
-                {streakData.currentStreak === 1 ? "" : "s"} streak
-              </span>
-            </div> */}
           </section>
 
           {/* Today's Achievement */}
@@ -208,22 +200,51 @@ export default function DashboardClient({
             <DashboardStats userAchievements={userAchievements} />
           </section>
 
-          {/* Achievement Collection */}
-          <section className="space-y-4">
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-              <div>
-                <h2 className="text-2xl text-gray-700 font-semibold tracking-tight">
-                  Your achievements{" "}
-                  <span className="-mt-[1px] text-[16px] text-muted-foreground">
-                    ({userAchievements.length})
-                  </span>
+          {/* Recent Achievements */}
+          <section className="space-y-4 pt-4">
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <h2 className="sm:text-2xl text-gray-700 font-semibold tracking-tight">
+                  Recent achievements
                 </h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Your latest completely unnecessary accomplishments.
+                </p>
               </div>
+
+              <Link
+                href="/achievements"
+                className="group flex shrink-0 items-center gap-1 text-sm font-medium text-primary"
+              >
+                View all
+                <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+              </Link>
             </div>
 
-            <div className="rounded-l border bg-background p-4 shadow-sm sm:p-6">
-              <AchievementsGrid achievements={userAchievements} />
-            </div>
+            {userAchievements.length > 0 ? (
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 xl:grid-cols-3">
+                {userAchievements.slice(0, 3).map((achievement) => (
+                  <AchievementCard
+                    key={achievement.id}
+                    achievement={achievement}
+                    ingrid={true}
+                    showShareButton={false}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="rounded-lg border bg-background p-8 text-center shadow-sm">
+                <Trophy className="mx-auto size-8 text-muted-foreground" />
+
+                <p className="mt-3 font-medium text-gray-700">
+                  No achievements yet
+                </p>
+
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Claim your first achievement to start your collection.
+                </p>
+              </div>
+            )}
           </section>
         </div>
       </main>
