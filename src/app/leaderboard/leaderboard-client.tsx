@@ -1,11 +1,8 @@
 "use client";
 
-import { useState } from "react";
-
 import { Navbar } from "@/components/navbar";
 import { LeaderboardTable } from "@/components/leaderboard/leaderboard-table";
 import { UserProfile } from "@/lib/supabase";
-import { logout } from "@/lib/auth-actions";
 import type { LeaderboardUser } from "@/lib/services/leaderboard-service-server";
 
 interface LeaderboardClientProps {
@@ -17,16 +14,11 @@ export default function LeaderboardClient({
   initialProfile,
   initialUsers,
 }: LeaderboardClientProps) {
-  const [user, setUser] = useState<UserProfile | null>(initialProfile);
-
-  const handleLogout = async () => {
-    setUser(null);
-    await logout();
-  };
+  const user = initialProfile;
 
   return (
     <div className="min-h-screen bg-muted/20">
-      <Navbar user={user} onLogout={handleLogout} />
+      <Navbar user={user} />
 
       <main className="mx-auto w-full max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8">
         <div className="space-y-6">

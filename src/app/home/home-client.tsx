@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/sheet";
 import { LoginForm } from "@/components/auth/login-form";
 import { toast } from "sonner";
-import { logout } from "@/lib/auth-actions";
 import Link from "next/link";
 
 interface HomeClientProps {
@@ -24,16 +23,11 @@ interface HomeClientProps {
 }
 
 export default function HomeClient({ initialProfile }: HomeClientProps) {
-  const [user, setUser] = useState<UserProfile | null>(initialProfile);
+  const user = initialProfile;
   const [unlockedAchievement, setUnlockedAchievement] =
     useState<Achievement | null>(null);
   const [showAchievementModal, setShowAchievementModal] = useState(false);
   const [isAuthSheetOpen, setIsAuthSheetOpen] = useState(false);
-
-  const handleLogout = async () => {
-    setUser(null);
-    await logout();
-  };
 
   const handleGetDailyAchievement = async () => {
     try {
@@ -74,7 +68,7 @@ export default function HomeClient({ initialProfile }: HomeClientProps) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Navbar user={user} onLogout={handleLogout} />
+      <Navbar user={user} />
 
       <section className="px-4 py-24 md:py-32 bg-gradient-to-b from-background via-primary/5 to-blue-500/10 relative overflow-hidden">
         {/* Animated background elements */}

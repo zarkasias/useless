@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { logout } from "@/lib/auth-actions";
 import Image from "next/image";
 import {
   ChevronDown,
@@ -24,11 +25,14 @@ import { UserProfile } from "@/lib/supabase";
 
 interface NavbarProps {
   user: UserProfile | null;
-  onLogout: () => void;
 }
 
-export function Navbar({ user, onLogout }: NavbarProps) {
+export function Navbar({ user }: NavbarProps) {
   const pathname = usePathname();
+
+  const handleLogout = async () => {
+    await logout();
+  };
 
   const getNavButtonClass = (href: string) => {
     const isActive = pathname === href || pathname.startsWith(`${href}/`);
@@ -163,7 +167,7 @@ export function Navbar({ user, onLogout }: NavbarProps) {
                   <DropdownMenuSeparator />
 
                   <DropdownMenuItem
-                    onClick={onLogout}
+                    onClick={handleLogout}
                     className="cursor-pointer text-destructive focus:text-destructive"
                   >
                     <LogOut className="size-4" />

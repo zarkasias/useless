@@ -17,7 +17,7 @@ export default async function SignupPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Navbar user={null} onLogout={() => {}} />
+      <Navbar user={null} />
 
       <div className="container mx-auto px-4 py-12 flex-1 flex items-center justify-center">
         <Card className="w-full max-w-md mx-auto">

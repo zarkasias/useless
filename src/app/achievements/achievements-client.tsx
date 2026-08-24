@@ -1,14 +1,10 @@
 "use client";
 
-import { useState } from "react";
-
 import { Navbar } from "@/components/navbar";
 
 import { AchievementsGrid } from "@/components/dashboard/achievements-grid";
 
 import { Achievement, UserProfile } from "@/lib/supabase";
-
-import { logout } from "@/lib/auth-actions";
 
 interface AchievementClientProps {
   initialProfile: UserProfile;
@@ -19,15 +15,11 @@ export default function AchievementsClient({
   initialProfile,
   initialAchievements,
 }: AchievementClientProps) {
-  const [user, setUser] = useState<UserProfile | null>(initialProfile);
+  const user = initialProfile;
 
-  const handleLogout = async () => {
-    setUser(null);
-    await logout();
-  };
   return (
     <div className="min-h-screen bg-muted/20">
-      <Navbar user={user} onLogout={handleLogout} />
+      <Navbar user={user} />
 
       <main className="mx-auto w-full mx-w-[1440px] px-4 py-8 sm:px-6 lg:px-8">
         <div className="space-y-6">

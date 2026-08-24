@@ -17,7 +17,6 @@ import {
 import type { AchievementStreakData } from "@/lib/services/achievement-service-server";
 
 import { toast } from "sonner";
-import { logout } from "@/lib/auth-actions";
 import { AchievementCard } from "@/components/achievement-card";
 
 interface DashboardClientProps {
@@ -40,10 +39,6 @@ export default function DashboardClient({
   const [unlockedAchievement, setUnlockedAchievement] =
     useState<Achievement | null>(null);
   const [showAchievementModal, setShowAchievementModal] = useState(false);
-
-  const handleLogout = async () => {
-    await logout();
-  };
 
   const handleDailyAchievement = async () => {
     if (!user) return;
@@ -75,7 +70,7 @@ export default function DashboardClient({
 
   return (
     <div className="min-h-screen bg-muted/20">
-      <Navbar user={user} onLogout={handleLogout} />
+      <Navbar user={user} />
 
       <main className="mx-auto w-full max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8">
         <div className="space-y-3">
