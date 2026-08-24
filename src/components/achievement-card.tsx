@@ -87,7 +87,7 @@ export function AchievementCard({
   showShareButton = false,
   ingrid = false,
 }: AchievementCardProps) {
-  const { title, description, type, emoji, is_daily } = achievement;
+  const { title, description, type, emoji } = achievement;
   const cardRef = useRef<HTMLDivElement>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -234,7 +234,7 @@ export function AchievementCard({
       ctx.stroke();
 
       // Draw tag background
-      const tagText = is_daily ? "Daily" : typeNames[type];
+      const tagText = typeNames[type];
       ctx.font = "500 12px system-ui, -apple-system, sans-serif";
       const tagWidth = ctx.measureText(tagText).width + 20;
 
