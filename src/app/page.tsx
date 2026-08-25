@@ -14,6 +14,7 @@ export default async function HomePage() {
 
   const entitlements = user ? await getUserEntitlements(user.id) : null;
 
+  // return the home client
   return (
     <HomeClient initialProfile={profile} initialEntitlements={entitlements} />
   );
