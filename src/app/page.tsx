@@ -1,8 +1,20 @@
 import HomeClient from "@/app/home/home-client";
-import { getAuthenticatedUserProfile } from "@/lib/services/achievement-service-server";
+
+import {
+  getAuthenticatedUser,
+  getAuthenticatedUserProfile,
+} from "@/lib/services/achievement-service-server";
+
+import { getUserEntitlements } from "@/lib/services/entitlement-service-server";
 
 export default async function HomePage() {
-  const profile = await getAuthenticatedUserProfile();
+  const user = await getAuthenticatedUser();
 
-  return <HomeClient initialProfile={profile} />;
+  const profile = user ? await getAuthenticatedUserProfile() : null;
+
+  const entitlements = user ? await getUserEntitlements(user.id) : null;
+
+  return (
+    <HomeClient initialProfile={profile} initialEntitlements={entitlements} />
+  );
 }

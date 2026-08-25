@@ -6,20 +6,28 @@ import { AchievementsGrid } from "@/components/dashboard/achievements-grid";
 
 import { Achievement, UserProfile } from "@/lib/supabase";
 
+import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
+
 interface AchievementClientProps {
   initialProfile: UserProfile;
   initialAchievements: Achievement[];
+  initialEntitlements: UserEntitlements;
 }
 
 export default function AchievementsClient({
   initialProfile,
   initialAchievements,
+  initialEntitlements,
 }: AchievementClientProps) {
   const user = initialProfile;
 
   return (
     <div className="min-h-screen bg-muted/20">
-      <Navbar user={user} />
+      <Navbar
+        user={user}
+        isSubscribed={initialEntitlements.isSubscribed}
+        subscriptionStatus={initialEntitlements.subscriptionStatus}
+      />
 
       <main className="mx-auto w-full mx-w-[1440px] px-4 py-8 sm:px-6 lg:px-8">
         <div className="space-y-6">

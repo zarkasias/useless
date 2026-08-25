@@ -77,8 +77,11 @@ export async function getUserEntitlements(
 
   const count = achievmentCount ?? 0;
 
+  const ACTIVE_SUBSCRIPTION_STATUSES = ["active", "trialing", "past_due"];
+
   const isSubscribed =
-    subscription?.status === "active" || subscription?.status === "trialing";
+    subscription != null &&
+    ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status);
 
   const hasReachedFreeLimit = count >= FREE_ACHIEVMENT_LIMIT && !isSubscribed;
 

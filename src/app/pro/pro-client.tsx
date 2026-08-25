@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { Check, Sparkles } from "lucide-react";
 
@@ -8,6 +9,11 @@ import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 
 import type { UserProfile } from "@/lib/supabase";
+import {
+  createSubscriptionCheckoutAction,
+  changeSubscriptionPlanAction,
+  createCustomerPortalAction,
+} from "../actions/subscription-actions";
 
 import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
 
@@ -24,18 +30,67 @@ export default function ProClient({
 }: ProClientProps) {
   const [billingInterval, setBillingInterval] =
     useState<BillingInterval>("year");
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const router = useRouter();
 
   const isSubscribed = initialEntitlements?.isSubscribed ?? false;
 
+  const subscriptionStatus = initialEntitlements?.subscriptionStatus ?? null;
+
+  const currentBillingInterval = initialEntitlements?.billingInterval ?? null;
+
+  const isPastDue = subscriptionStatus === "past_due";
+
+  const isCurrentPlan =
+    isSubscribed && currentBillingInterval === billingInterval;
+
+  const handleManageSubscription = async () => {
+    try {
+      setIsCheckingOut(true);
+
+      await createCustomerPortalAction();
+    } catch (error) {
+      console.error("Unable to open subscription management:", error);
+
+      setIsCheckingOut(false);
+    }
+  };
+
+  const handlePlanAction = async () => {
+    try {
+      setIsCheckingOut(true);
+
+      if (isSubscribed) {
+        await changeSubscriptionPlanAction(billingInterval);
+
+        router.refresh();
+
+        return;
+      }
+
+      await createSubscriptionCheckoutAction(billingInterval);
+    } catch (error) {
+      console.error("Unable to update subscription:", error);
+    } finally {
+      if (isSubscribed) {
+        setIsCheckingOut(false);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-muted/20">
-      <Navbar user={initialProfile} isSubscribed={isSubscribed} />
+      <Navbar
+        user={initialProfile}
+        isSubscribed={isSubscribed}
+        subscriptionStatus={initialEntitlements?.subscriptionStatus}
+      />
 
       <main className="mx-auto w-full max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="text-center mx-auto">
           <div className="flex flex-col gap-3 items-center justify-center sm:flex-row">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-              <Sparkles className="size-5 text-purple-500" />
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-gray-200/40">
+              <Sparkles className="size-5 text-purple-700" />
             </div>
 
             <h1 className="text-3xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500 sm:text-4xl">
@@ -48,6 +103,49 @@ export default function ProClient({
             climbing the leaderboard.
           </p>
         </div>
+
+        {isSubscribed && (
+          <div
+            className="mx-auto mt-8 flex max-w-xl items-center justify-between gap-4 rounded-lg border bg-background p-4 shadow-sm 
+  sm:flex-row sm:items-center sm:justify-between"
+          >
+            <div className="text-left">
+              <p className="text-sm font-semibold text-gray-700">
+                Your subscription
+              </p>
+
+              <p className="mt-1 text-sm text-muted-foreground">
+                You&apos;re currently subscribed to the{" "}
+                <span className="font-medium text-gray-700">
+                  {currentBillingInterval === "year" ? "Annual" : "Monthly"}
+                </span>{" "}
+                plan.
+              </p>
+            </div>
+
+            <Button
+              variant="outline"
+              onClick={handleManageSubscription}
+              disabled={isCheckingOut}
+              className="shrink-0"
+            >
+              Manage subscription
+            </Button>
+          </div>
+        )}
+
+        {isPastDue && (
+          <div className="mx-auto mt-8 max-w-xl rounded-lg border border-amber-300 bg-amber-50 p-4 text-center">
+            <p className="text-sm font-semibold text-amber-800">
+              There&apos;s a problem with your payment
+            </p>
+
+            <p className="mt-1 text-sm text-amber-700">
+              Your subscription is still active for now, but your payment method
+              needs attention.
+            </p>
+          </div>
+        )}
 
         {/* Billing toggle */}
         <div className="mx-auto mt-8 grid max-w-sm grid-cols-2 rounded-lg bg-muted p-1">
@@ -136,12 +234,22 @@ export default function ProClient({
               <Feature text="Full achievement collection" />
             </div>
 
-            <Button className="mt-8 w-full" disabled={isSubscribed}>
-              {isSubscribed
-                ? "You're already Pro"
-                : billingInterval === "month"
-                  ? "Upgrade Monthly"
-                  : "Upgrade Annually"}
+            <Button
+              className="mt-8 w-full"
+              disabled={isCurrentPlan || isCheckingOut}
+              onClick={handlePlanAction}
+            >
+              {isCheckingOut
+                ? "Opening checkout..."
+                : isCurrentPlan
+                  ? "Current plan"
+                  : isSubscribed
+                    ? billingInterval === "month"
+                      ? "Switch to Monthly"
+                      : "Switch to Annual"
+                    : billingInterval === "month"
+                      ? "Subscribe Monthly"
+                      : "Subscribe Annually"}
             </Button>
 
             <p className="mt-3 text-center text-xs text-muted-foreground">

@@ -4,21 +4,28 @@ import { Navbar } from "@/components/navbar";
 import { LeaderboardTable } from "@/components/leaderboard/leaderboard-table";
 import { UserProfile } from "@/lib/supabase";
 import type { LeaderboardUser } from "@/lib/services/leaderboard-service-server";
+import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
 
 interface LeaderboardClientProps {
   initialProfile: UserProfile | null;
   initialUsers: LeaderboardUser[];
+  initialEntitlements: UserEntitlements | null;
 }
 
 export default function LeaderboardClient({
   initialProfile,
   initialUsers,
+  initialEntitlements,
 }: LeaderboardClientProps) {
   const user = initialProfile;
 
   return (
     <div className="min-h-screen bg-muted/20">
-      <Navbar user={user} />
+      <Navbar
+        user={user}
+        isSubscribed={initialEntitlements?.isSubscribed ?? false}
+        subscriptionStatus={initialEntitlements?.subscriptionStatus ?? null}
+      />
 
       <main className="mx-auto w-full max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8">
         <div className="space-y-6">

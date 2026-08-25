@@ -17,12 +17,18 @@ import {
 import { LoginForm } from "@/components/auth/login-form";
 import { toast } from "sonner";
 import Link from "next/link";
+import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
 
 interface HomeClientProps {
   initialProfile: UserProfile | null;
+
+  initialEntitlements: UserEntitlements | null;
 }
 
-export default function HomeClient({ initialProfile }: HomeClientProps) {
+export default function HomeClient({
+  initialProfile,
+  initialEntitlements,
+}: HomeClientProps) {
   const user = initialProfile;
   const [unlockedAchievement, setUnlockedAchievement] =
     useState<Achievement | null>(null);
@@ -63,7 +69,11 @@ export default function HomeClient({ initialProfile }: HomeClientProps) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <Navbar user={user} />
+      <Navbar
+        user={user}
+        isSubscribed={initialEntitlements?.isSubscribed ?? false}
+        subscriptionStatus={initialEntitlements?.subscriptionStatus ?? null}
+      />
 
       <section className="px-4 py-24 md:py-32 bg-gradient-to-b from-background via-primary/5 to-blue-500/10 relative overflow-hidden">
         {/* Animated background elements */}
@@ -88,9 +98,6 @@ export default function HomeClient({ initialProfile }: HomeClientProps) {
                 Celebrate the mundane, embrace the absurd! Our achievements
                 validate your everyday digital existence with humor and
                 absolutely zero practical value.
-              </p>
-              <p className="text-xl text-red-500 font-bold">
-                Updated with brand new achievements!
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { StreakCalendar } from "@/components/dashboard/streak-calendar";
@@ -15,6 +16,7 @@ import {
   getStreakDataAction,
 } from "@/app/actions/achievement-actions";
 import type { AchievementStreakData } from "@/lib/services/achievement-service-server";
+import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
 
 import { toast } from "sonner";
 import { AchievementCard } from "@/components/achievement-card";
@@ -23,13 +25,16 @@ interface DashboardClientProps {
   initialProfile: UserProfile;
   initialAchievements: Achievement[];
   initialStreakData: AchievementStreakData;
+  initialEntitlements: UserEntitlements;
 }
 
 export default function DashboardClient({
   initialProfile,
   initialAchievements,
   initialStreakData,
+  initialEntitlements,
 }: DashboardClientProps) {
+  const router = useRouter();
   const [user] = useState<UserProfile | null>(initialProfile);
   const [userAchievements, setUserAchievements] =
     useState<Achievement[]>(initialAchievements);
@@ -52,7 +57,7 @@ export default function DashboardClient({
       }
 
       if (result.status === "subscription_required") {
-        toast.info("You've reached your free achievement limit.");
+        router.push("/pro");
         return;
       }
 
@@ -82,7 +87,11 @@ export default function DashboardClient({
 
   return (
     <div className="min-h-screen bg-muted/20">
-      <Navbar user={user} />
+      <Navbar
+        user={user}
+        isSubscribed={initialEntitlements.isSubscribed}
+        subscriptionStatus={initialEntitlements.subscriptionStatus}
+      />
 
       <main className="mx-auto w-full max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8">
         <div className="space-y-3">

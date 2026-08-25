@@ -27,10 +27,26 @@ import { UserProfile } from "@/lib/supabase";
 interface NavbarProps {
   user: UserProfile | null;
   isSubscribed?: boolean;
+  billingInterval?: string | null;
+  subscriptionStatus?: string | null;
 }
 
-export function Navbar({ user, isSubscribed = false }: NavbarProps) {
+export function Navbar({
+  user,
+  isSubscribed = false,
+  subscriptionStatus = null,
+}: NavbarProps) {
   const pathname = usePathname();
+
+  const hasBillingIssue = subscriptionStatus === "past_due";
+
+  const isProPage = pathname === "/pro" || pathname.startsWith("/pro/");
+
+  const subscriptionLabel = hasBillingIssue
+    ? "Billing issue"
+    : isSubscribed
+      ? "Upgrade"
+      : "Subscribe";
 
   const handleLogout = async () => {
     await logout();
@@ -110,15 +126,26 @@ export function Navbar({ user, isSubscribed = false }: NavbarProps) {
 
               <Link href="/pro">
                 <Button
+                  variant="ghost"
                   className={
-                    isSubscribed
-                      ? "gap-2 border border-primary/20 bg-gradient-to-r from-blue-600 to-violet-600 text-white font-semibold hover:bg-primary/10 flex"
-                      : "gap-2 bg-gradient-to-r from-blue-600 to-violet-600 text-white font-semibold shadow-sm hover:bg-primary/90 flex"
+                    hasBillingIssue
+                      ? "flex gap-2 border border-amber-300 bg-amber-50 font-semibold text-amber-700 hover:bg-amber-100"
+                      : isProPage
+                        ? "flex gap-2 bg-muted text-gray-700 font-medium hover:bg-muted"
+                        : "flex gap-2 bg-gradient-to-r from-blue-600 to-violet-600 font-semibold text-white shadow-sm hover:opacity-90"
                   }
-                  variant={isSubscribed ? "outline" : "default"}
                 >
-                  <Sparkles className="size-4 text-pink-100/80" />
-                  Upgrade
+                  <Sparkles
+                    className={
+                      hasBillingIssue
+                        ? "size-4 text-amber-500"
+                        : isProPage
+                          ? "size-4 text-primary"
+                          : "size-4 text-pink-100/80"
+                    }
+                  />
+
+                  {subscriptionLabel}
                 </Button>
               </Link>
 

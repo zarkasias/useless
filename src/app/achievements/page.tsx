@@ -6,6 +6,8 @@ import {
   getAuthenticatedUserProfile,
 } from "@/lib/services/achievement-service-server";
 
+import { getUserEntitlements } from "@/lib/services/entitlement-service-server";
+
 import AchievementsClient from "./achievements-client";
 
 export default async function AchievementsPage() {
@@ -15,9 +17,10 @@ export default async function AchievementsPage() {
     redirect("/");
   }
 
-  const [profile, achievements] = await Promise.all([
+  const [profile, achievements, entitlements] = await Promise.all([
     getAuthenticatedUserProfile(),
     getAuthenticatedUserAchievements(),
+    getUserEntitlements(user.id),
   ]);
 
   if (!profile) {
@@ -28,6 +31,7 @@ export default async function AchievementsPage() {
     <AchievementsClient
       initialProfile={profile}
       initialAchievements={achievements}
+      initialEntitlements={entitlements}
     />
   );
 }

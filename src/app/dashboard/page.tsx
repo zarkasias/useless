@@ -1,10 +1,14 @@
 import { redirect } from "next/navigation";
+
 import {
   getAuthenticatedUser,
   getAuthenticatedUserProfile,
   getAuthenticatedUserAchievements,
   getAuthenticatedUserStreakData,
 } from "@/lib/services/achievement-service-server";
+
+import { getUserEntitlements } from "@/lib/services/entitlement-service-server";
+
 import DashboardClient from "./dashboard-client";
 
 export default async function DashboardPage() {
@@ -14,20 +18,23 @@ export default async function DashboardPage() {
     redirect("/");
   }
 
-  const profile = await getAuthenticatedUserProfile();
+  const [profile, achievements, streakData, entitlements] = await Promise.all([
+    getAuthenticatedUserProfile(),
+    getAuthenticatedUserAchievements(),
+    getAuthenticatedUserStreakData(),
+    getUserEntitlements(user.id),
+  ]);
 
   if (!profile) {
     redirect("/");
   }
-
-  const achievements = await getAuthenticatedUserAchievements();
-  const streakData = await getAuthenticatedUserStreakData();
 
   return (
     <DashboardClient
       initialProfile={profile}
       initialAchievements={achievements}
       initialStreakData={streakData}
+      initialEntitlements={entitlements}
     />
   );
 }
