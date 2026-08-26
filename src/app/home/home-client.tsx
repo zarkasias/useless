@@ -1,39 +1,61 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import Image from "next/image";
-import { Card, CardContent } from "@/components/ui/card";
+import { CalendarDays, Flame, Medal, Sparkles, Trophy } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/navbar";
 import { UnlockAchievement } from "@/components/unlock-achievement";
+import { AchievementCard } from "@/components/achievement-card-updated";
+
 import { Achievement, UserProfile } from "@/lib/supabase";
 import { claimDailyAchievementAction } from "@/app/actions/achievement-actions";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { LoginForm } from "@/components/auth/login-form";
-import { toast } from "sonner";
-import Link from "next/link";
 import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
+import { toast } from "sonner";
 
 interface HomeClientProps {
   initialProfile: UserProfile | null;
-
   initialEntitlements: UserEntitlements | null;
 }
+
+const previewAchievements: Achievement[] = [
+  {
+    id: "preview-rare",
+    user_id: "preview",
+    title: "Digital Explorer",
+    description:
+      "Found this website when you could be doing literally anything else.",
+    type: "RARE",
+    emoji: "🧠",
+    created_at: "2026-01-01T00:00:00.000Z",
+    is_daily: true,
+  },
+  {
+    id: "preview-legendary",
+    user_id: "preview",
+    title: "Achievement Hoarder",
+    description:
+      "Returned often enough to turn completely useless progress into a lifestyle.",
+    type: "LEGENDARY",
+    emoji: "🏆",
+    created_at: "2026-01-01T00:00:00.000Z",
+    is_daily: true,
+  },
+];
 
 export default function HomeClient({
   initialProfile,
   initialEntitlements,
 }: HomeClientProps) {
+  const router = useRouter();
   const user = initialProfile;
+
   const [unlockedAchievement, setUnlockedAchievement] =
     useState<Achievement | null>(null);
   const [showAchievementModal, setShowAchievementModal] = useState(false);
-  const [isAuthSheetOpen, setIsAuthSheetOpen] = useState(false);
 
   const handleGetDailyAchievement = async () => {
     try {
@@ -45,7 +67,7 @@ export default function HomeClient({
       }
 
       if (result.status === "subscription_required") {
-        toast.info("You've reached your free achievement limit.");
+        router.push("/pro");
         return;
       }
 
@@ -54,253 +76,241 @@ export default function HomeClient({
         return;
       }
 
-      const achievement = result.achievement;
-
-      setUnlockedAchievement(achievement);
+      setUnlockedAchievement(result.achievement);
       setShowAchievementModal(true);
-
       toast.success("Today's achievement unlocked!");
     } catch (error) {
       console.error("Error claiming daily achievement:", error);
-
       toast.error("Something went wrong.");
     }
   };
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-muted/20">
       <Navbar
         user={user}
         isSubscribed={initialEntitlements?.isSubscribed ?? false}
         subscriptionStatus={initialEntitlements?.subscriptionStatus ?? null}
       />
 
-      <section className="px-4 py-24 md:py-32 bg-gradient-to-b from-background via-primary/5 to-blue-500/10 relative overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute top-1/4 right-10 w-32 h-32 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
-          <div className="absolute bottom-1/4 left-10 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-          <div className="absolute top-3/4 right-1/4 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl animate-pulse delay-700"></div>
-          <div className="absolute bottom-0 right-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-500"></div>
+      {/* Hero */}
+      <section className="relative overflow-hidden border-b bg-gradient-to-b from-background via-primary/5 to-blue-500/10 px-4 py-20 md:py-28">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute right-10 top-1/4 size-32 rounded-full bg-primary/15 blur-3xl" />
+          <div className="absolute bottom-1/4 left-10 size-48 rounded-full bg-blue-500/15 blur-3xl" />
+          <div className="absolute bottom-0 right-0 size-64 rounded-full bg-purple-500/10 blur-3xl" />
         </div>
 
-        <div className="container mx-auto max-w-6xl relative z-10">
-          <div className="grid gap-12 md:grid-cols-2 items-center">
-            <div className="space-y-6">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold">
-                Unlock{" "}
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500 animate-pulse">
-                  Useless
-                </span>{" "}
-                Achievements
-              </h1>
-              <p className="text-lg md:text-xl text-muted-foreground">
-                Celebrate the mundane, embrace the absurd! Our achievements
-                validate your everyday digital existence with humor and
-                absolutely zero practical value.
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <Button
-                  size="lg"
-                  onClick={handleGetDailyAchievement}
-                  className="group bg-gradient-to-r from-primary to-blue-500 hover:opacity-90 hover:scale-105 transition-all duration-300 text-white border-0 shadow-md hover:shadow-xl hover:shadow-primary/20"
-                >
-                  <span className="mr-2 text-2xl group-hover:animate-bounce">
-                    <Image
-                      src="/icons/trophy.png"
-                      alt="trophy"
-                      width={32}
-                      height={32}
-                      className="w-8 h-8"
-                    />
-                  </span>
-                  Claim Useless Achievement
-                  <span className="ml-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    →
-                  </span>
-                </Button>
-                {!user && (
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    asChild
-                    className="bg-gradient-to-r from-purple-500 to-blue-500 hover:opacity-90 hover:scale-105 transition-all duration-300 text-white border-0 shadow-md hover:shadow-xl hover:shadow-purple-500/20"
-                  >
-                    <Link href="/signup">Sign Up to Track Progress</Link>
-                  </Button>
-                )}
-              </div>
+        <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-14 lg:grid-cols-[1.05fr_0.95fr]">
+          <div>
+            <div className="mb-5 inline-flex items-center gap-2 rounded-full border bg-background/80 px-3 py-1.5 text-xs font-semibold text-muted-foreground shadow-sm backdrop-blur">
+              <Sparkles className="size-3.5 text-violet-500" />
+              Five achievements free. Unlimited uselessness after that.
             </div>
 
-            <div className="flex justify-center">
-              <div
-                className="relative group cursor-pointer transform-gpu hover:scale-102 transition-all duration-500"
-                onClick={handleGetDailyAchievement}
-              >
-                <Card className="rotate-3 transition-all duration-500 group-hover:rotate-6 group-hover:scale-105 bg-gradient-to-br from-blue-100 to-cyan-200 dark:from-blue-900 dark:to-cyan-800 border-blue-400 border-1 shadow-xl shadow-blue-500/20">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-200 text-blue-800 dark:bg-blue-700 dark:text-blue-200 shadow">
-                        Rare
-                      </span>
-                      <span
-                        className="text-4xl animate-bounce"
-                        role="img"
-                        aria-label="achievement emoji"
-                      >
-                        🧠
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold mb-2 text-blue-800 dark:text-blue-200">
-                      Digital Explorer
-                    </h3>
-                    <p className="text-blue-700 dark:text-blue-300">
-                      Found this website when you could be doing literally
-                      anything else. Click to discover today&apos;s useless
-                      achievement!!
-                    </p>
-                  </CardContent>
-                </Card>
+            <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-gray-800 sm:text-5xl lg:text-6xl">
+              Accomplish absolutely{" "}
+              <span className="bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
+                nothing useful.
+              </span>
+            </h1>
 
-                <Card className="absolute top-5 left-5 -rotate-6 transition-all duration-500 group-hover:-rotate-12 group-hover:scale-95 bg-gradient-to-br from-amber-100 to-orange-300 dark:from-amber-900 dark:to-orange-800 border-amber-400 border-1 shadow-xl shadow-amber-500/20">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-amber-200 text-amber-800 dark:bg-amber-700 dark:text-amber-200 shadow">
-                        Legendary
-                      </span>
-                      <span
-                        className="text-4xl animate-pulse"
-                        role="img"
-                        aria-label="achievement emoji"
-                      >
-                        <Image
-                          src="/icons/trophy.png"
-                          alt="trophy"
-                          width={40}
-                          height={40}
-                          className="w-10 h-10"
-                        />
-                      </span>
-                    </div>
-                    <h3 className="text-xl font-bold mb-2 text-amber-800 dark:text-amber-200">
-                      Achievement Hoarder
-                    </h3>
-                    <p className="text-amber-700 dark:text-amber-300">
-                      Come back each day to discover a new useless achievement.
-                      No account required to get started.
-                    </p>
-                  </CardContent>
-                </Card>
-              </div>
+            <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
+              Claim a new achievement each day, build your streak, grow a
+              collection of ridiculous digital awards, and compete for a spot on
+              the leaderboard.
+            </p>
+
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+              <Button
+                size="lg"
+                onClick={handleGetDailyAchievement}
+                className="group border-0 bg-gradient-to-r from-primary to-blue-500 text-white shadow-md transition-all duration-300 hover:opacity-90"
+              >
+                <Image
+                  src="/icons/trophy.png"
+                  alt=""
+                  width={26}
+                  height={26}
+                  className="mr-2 size-[26px]"
+                />
+                Claim today&apos;s achievement
+              </Button>
+
+              {!user ? (
+                <Button size="lg" variant="outline" asChild>
+                  <Link href="/signup">Create a free account</Link>
+                </Button>
+              ) : (
+                <Button size="lg" variant="outline" asChild>
+                  <Link href="/achievements">View your collection</Link>
+                </Button>
+              )}
+            </div>
+
+            <p className="mt-4 text-xs text-muted-foreground">
+              Start free with 5 achievements. Subscribe whenever you want to
+              keep collecting.
+            </p>
+          </div>
+
+          {/* Live preview using the real AchievementCard component */}
+          <div className="relative mx-auto w-full max-w-md px-4 py-8">
+            <div className="relative z-20 rotate-2 transition-transform duration-300 hover:rotate-0">
+              <AchievementCard
+                achievement={previewAchievements[0]}
+                ingrid
+                variant="default"
+              />
+            </div>
+
+            <div className="relative z-10 -mt-6 ml-8 -rotate-2 opacity-90 transition-transform duration-300 hover:rotate-0 sm:ml-12">
+              <AchievementCard
+                achievement={previewAchievements[1]}
+                ingrid
+                variant="default"
+              />
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-20 px-4 bg-background relative overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-primary/5 to-transparent"></div>
-          <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-blue-500/5 to-transparent"></div>
-        </div>
+      {/* Product value */}
+      <section className="bg-background px-4 py-20">
+        <div className="mx-auto w-full max-w-6xl">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="text-sm font-semibold text-primary">
+              Pointless progress, properly tracked
+            </p>
 
-        <div className="container mx-auto max-w-5xl relative z-10">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">
-            How It Works
+            <h2 className="mt-2 text-3xl font-bold tracking-tight text-gray-800 sm:text-4xl">
+              More than a daily button
+            </h2>
+
+            <p className="mt-3 text-muted-foreground">
+              Your daily claim now feeds a streak, a growing collection, and a
+              leaderboard designed for people who take useless accomplishments
+              far too seriously.
+            </p>
+          </div>
+
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <FeatureCard
+              icon={<CalendarDays className="size-5 text-blue-500" />}
+              title="Claim daily"
+              description="Unlock one new achievement each day and discover what completely unnecessary award you earned."
+            />
+
+            <FeatureCard
+              icon={<Flame className="size-5 text-orange-500" />}
+              title="Build a streak"
+              description="Come back every day, protect your current streak, and keep an eye on your personal best."
+            />
+
+            <FeatureCard
+              icon={<Trophy className="size-5 text-amber-500" />}
+              title="Grow your collection"
+              description="Collect Common, Rare, Epic, and Legendary achievements in one dedicated collection."
+            />
+
+            <FeatureCard
+              icon={<Medal className="size-5 text-violet-500" />}
+              title="Climb the leaderboard"
+              description="Compare your streak and total achievements with other committed collectors of nonsense."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Subscription */}
+      <section className="border-y bg-muted/30 px-4 py-16">
+        <div className="mx-auto flex w-full max-w-5xl flex-col items-center justify-between gap-8 rounded-xl border bg-background p-6 shadow-sm sm:p-8 md:flex-row">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-2">
+              <Sparkles className="size-5 text-violet-500" />
+              <p className="text-sm font-semibold text-primary">
+                Keep the uselessness going
+              </p>
+            </div>
+
+            <h2 className="mt-2 text-2xl font-bold tracking-tight text-gray-800">
+              Your first five achievements are free.
+            </h2>
+
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              Subscribe when you&apos;re ready for unlimited achievements,
+              continued streak progression, and full leaderboard participation.
+              Choose monthly or annual billing and cancel anytime.
+            </p>
+          </div>
+
+          <Button
+            asChild
+            size="lg"
+            className="w-full shrink-0 bg-gradient-to-r from-blue-600 to-violet-600 text-white hover:opacity-90 md:w-auto"
+          >
+            <Link href="/pro">
+              {initialEntitlements?.isSubscribed
+                ? "View subscription"
+                : "View subscription plans"}
+            </Link>
+          </Button>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="bg-background px-4 py-20 text-center">
+        <div className="mx-auto max-w-2xl">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-800">
+            Today&apos;s achievement isn&apos;t going to claim itself.
           </h2>
-          <p className="text-center text-muted-foreground mb-16 max-w-2xl mx-auto">
-            Start claiming achievements right away!! Come back daily to claim a
-            new achievement!
+
+          <p className="mt-3 text-muted-foreground">
+            Well, technically it could. But then what would be the point?
           </p>
 
-          <div className="grid gap-10 md:grid-cols-3">
-            <div className="text-center space-y-4 group hover:scale-105 transition-all duration-300">
-              <div className="mx-auto bg-gradient-to-br from-primary/20 to-blue-500/20 w-20 h-20 rounded-full flex items-center justify-center text-2xl group-hover:shadow-lg group-hover:shadow-primary/20 transition-all duration-300">
-                <span className="animate-pulse">
-                  <Image
-                    src="/icons/number-1.png"
-                    alt="1"
-                    width={40}
-                    height={40}
-                    className="w-10 h-10"
-                  />
-                </span>
-              </div>
-              <h3 className="text-xl font-bold">Sign Up</h3>
-              <p className="text-muted-foreground">
-                Create a free account to start unlocking and tracking your
-                meaningless achievements.
-              </p>
-            </div>
-
-            <div className="text-center space-y-4 group hover:scale-105 transition-all duration-300">
-              <div className="mx-auto bg-gradient-to-br from-blue-500/10 to-purple-500/10 w-20 h-20 rounded-full flex items-center justify-center text-2xl group-hover:shadow-lg group-hover:shadow-blue-500/20 transition-all duration-300">
-                <span className="animate-pulse">
-                  <Image
-                    src="/icons/two.png"
-                    alt="1"
-                    width={40}
-                    height={40}
-                    className="w-10 h-10"
-                  />
-                </span>
-              </div>
-              <h3 className="text-xl font-bold">Unlock Daily Achievements</h3>
-              <p className="text-muted-foreground">
-                Visit daily to unlock new achievements and build up your
-                collection of digital trophies.
-              </p>
-            </div>
-
-            <div className="text-center space-y-4 group hover:scale-105 transition-all duration-300">
-              <div className="mx-auto bg-gradient-to-br from-purple-500/10 to-amber-500/10 w-20 h-20 rounded-full flex items-center justify-center text-2xl group-hover:shadow-lg group-hover:shadow-purple-500/20 transition-all duration-300">
-                <span className="animate-pulse delay-100">
-                  <Image
-                    src="/icons/number-3.png"
-                    alt="2"
-                    width={40}
-                    height={40}
-                    className="w-10 h-10"
-                  />
-                </span>
-              </div>
-              <h3 className="text-xl font-bold">Share & Compare</h3>
-              <p className="text-muted-foreground">
-                Show off your achievements to friends on the social media
-                platform of your choice.
-              </p>
-            </div>
-          </div>
+          <Button
+            size="lg"
+            onClick={handleGetDailyAchievement}
+            className="mt-6 bg-gradient-to-r from-primary to-blue-500 text-white hover:opacity-90"
+          >
+            Claim today&apos;s achievement
+          </Button>
         </div>
       </section>
 
-      {/* Achievement unlock modal */}
       {unlockedAchievement && (
         <UnlockAchievement
           achievement={unlockedAchievement}
           isOpen={showAchievementModal}
-          onClose={() => {
-            setShowAchievementModal(false);
-            // Optional: clear the achievement after closing
-            // setTimeout(() => setUnlockedAchievement(null), 300);
-          }}
+          onClose={() => setShowAchievementModal(false)}
           isLoggedIn={!!user}
         />
       )}
+    </div>
+  );
+}
 
-      {/* Auth sheet */}
-      <Sheet open={isAuthSheetOpen} onOpenChange={setIsAuthSheetOpen}>
-        <SheetContent className="bg-gradient-to-br from-background to-muted border-l-primary/20">
-          <SheetHeader>
-            <SheetTitle className="text-xl bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">
-              Login
-            </SheetTitle>
-          </SheetHeader>
-          <div className="py-4">
-            <LoginForm />
-          </div>
-        </SheetContent>
-      </Sheet>
+function FeatureCard({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <div className="rounded-xl border bg-gray-50/80 p-5 shadow-sm transition-shadow hover:shadow-md">
+      <div className="flex size-10 items-center justify-center rounded-full bg-background shadow-sm">
+        {icon}
+      </div>
+
+      <h3 className="mt-4 font-semibold text-gray-800">{title}</h3>
+
+      <p className="mt-2 text-sm leading-6 text-muted-foreground">
+        {description}
+      </p>
     </div>
   );
 }

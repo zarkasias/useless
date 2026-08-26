@@ -1,8 +1,13 @@
-import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Achievement } from '@/lib/supabase';
-import { AchievementCard } from '@/components/achievement-card';
+import React from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Achievement } from "@/lib/supabase";
+import { AchievementCard } from "@/components/achievement-card-updated";
 // import Link from 'next/link';
 
 interface UnlockAchievementProps {
@@ -12,20 +17,18 @@ interface UnlockAchievementProps {
   isLoggedIn?: boolean;
 }
 
-export function UnlockAchievement({ 
-  achievement, 
-  isOpen, 
-  onClose, 
-  // isLoggedIn = false 
+export function UnlockAchievement({
+  achievement,
+  isOpen,
+  onClose,
+  // isLoggedIn = false
 }: UnlockAchievementProps) {
-
-
   // Early return only if modal shouldn't be shown
   if (!isOpen) return null;
 
   return (
-    <Dialog 
-      open={isOpen} 
+    <Dialog
+      open={isOpen}
       onOpenChange={(open) => {
         if (!open) {
           onClose();
@@ -38,16 +41,18 @@ export function UnlockAchievement({
             Achievement Unlocked!
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="flex flex-col items-center justify-center py-2 relative z-10">
           {achievement ? (
             <div className="mb-6 w-full max-w-sm">
               <p className="text-center text-sm text-muted-foreground mb-4">
-                <span className="font-medium block mb-1">Share your achievement with an image! ✨</span>
+                <span className="font-medium block mb-1">
+                  Share your achievement with an image! ✨
+                </span>
               </p>
-              <AchievementCard 
-                achievement={achievement} 
-                showShareButton={true} 
+              <AchievementCard
+                achievement={achievement}
+                showShareButton={true}
               />
             </div>
           ) : (
@@ -55,7 +60,7 @@ export function UnlockAchievement({
               <p>Achievement data is missing. Please try again.</p>
             </div>
           )}
-          
+
           {/* {!isLoggedIn && achievement && (
             <div className="w-full mb-4 p-4 bg-gradient-to-r from-primary/10 to-blue-500/10 rounded-lg text-center border border-primary/20">
               <p className="mb-2 text-sm font-medium">Create an account to save your achievement and unlock more!</p>
@@ -69,11 +74,11 @@ export function UnlockAchievement({
               </div>
             </div>
           )} */}
-          
-          <Button 
+
+          <Button
             onClick={() => {
               onClose();
-            }} 
+            }}
             className="w-full bg-gradient-to-r from-primary/90 to-blue-500/90 hover:opacity-90 transition-all duration-300 text-white font-medium"
           >
             <span className="mr-2">🎉</span>
@@ -83,4 +88,4 @@ export function UnlockAchievement({
       </DialogContent>
     </Dialog>
   );
-} 
+}

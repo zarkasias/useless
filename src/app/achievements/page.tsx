@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 
 import {
+  getAllAchievements,
   getAuthenticatedUser,
   getAuthenticatedUserAchievements,
   getAuthenticatedUserProfile,
@@ -17,11 +18,13 @@ export default async function AchievementsPage() {
     redirect("/");
   }
 
-  const [profile, achievements, entitlements] = await Promise.all([
-    getAuthenticatedUserProfile(),
-    getAuthenticatedUserAchievements(),
-    getUserEntitlements(user.id),
-  ]);
+  const [profile, allAchievements, collectedAchievements, entitlements] =
+    await Promise.all([
+      getAuthenticatedUserProfile(),
+      getAllAchievements(),
+      getAuthenticatedUserAchievements(),
+      getUserEntitlements(user.id),
+    ]);
 
   if (!profile) {
     redirect("/");
@@ -30,7 +33,8 @@ export default async function AchievementsPage() {
   return (
     <AchievementsClient
       initialProfile={profile}
-      initialAchievements={achievements}
+      allAchievements={allAchievements}
+      collectedAchievements={collectedAchievements}
       initialEntitlements={entitlements}
     />
   );

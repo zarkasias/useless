@@ -37,7 +37,9 @@ export default function ProClient({
 
   const subscriptionStatus = initialEntitlements?.subscriptionStatus ?? null;
 
-  const currentBillingInterval = initialEntitlements?.billingInterval ?? null;
+  const [currentBillingInterval, setCurrentBillingInterval] = useState<
+    string | null
+  >(initialEntitlements?.billingInterval ?? null);
 
   const isPastDue = subscriptionStatus === "past_due";
 
@@ -61,7 +63,11 @@ export default function ProClient({
       setIsCheckingOut(true);
 
       if (isSubscribed) {
-        await changeSubscriptionPlanAction(billingInterval);
+        const result = await changeSubscriptionPlanAction(billingInterval);
+
+        if (result.changed) {
+          setCurrentBillingInterval(result.interval);
+        }
 
         router.refresh();
 

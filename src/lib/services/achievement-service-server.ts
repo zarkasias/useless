@@ -791,3 +791,19 @@ export async function mergeAnonymousAchievementsIntoCurrentUser(
     skipped,
   };
 }
+
+export async function getAllAchievements(): Promise<Achievement[]> {
+  const { data, error } = await supabaseAdmin
+    .from("achievements")
+    .select("*")
+    .order("type")
+    .order("title");
+
+  if (error) {
+    console.error("Error loading achievement catalog:", error);
+
+    throw new Error("Unable to load achievement catalog");
+  }
+
+  return data ?? [];
+}

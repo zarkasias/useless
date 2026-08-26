@@ -45,7 +45,7 @@ export function Navbar({
   const subscriptionLabel = hasBillingIssue
     ? "Billing issue"
     : isSubscribed
-      ? "Upgrade"
+      ? "Subscription"
       : "Subscribe";
 
   const handleLogout = async () => {
@@ -110,7 +110,7 @@ export function Navbar({
                     variant="ghost"
                     className={getNavButtonClass("/achievements")}
                   >
-                    Achievements
+                    Collection
                   </Button>
                 </Link>
 
@@ -185,7 +185,7 @@ export function Navbar({
                   <DropdownMenuItem asChild className="md:hidden">
                     <Link href="/achievements">
                       <Trophy className="size-4" />
-                      Achievements
+                      Collection
                     </Link>
                   </DropdownMenuItem>
 

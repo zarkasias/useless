@@ -19,7 +19,7 @@ import type { AchievementStreakData } from "@/lib/services/achievement-service-s
 import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
 
 import { toast } from "sonner";
-import { AchievementCard } from "@/components/achievement-card";
+import { AchievementCard } from "@/components/achievement-card-updated";
 
 interface DashboardClientProps {
   initialProfile: UserProfile;

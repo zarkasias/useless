@@ -7,7 +7,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Copy, Download, LoaderCircle, RefreshCw } from "lucide-react";
+import {
+  Copy,
+  Download,
+  LoaderCircle,
+  RefreshCw,
+  Sparkles,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Achievement, AchievementType } from "@/lib/supabase";
 import { formatDistanceToNow } from "date-fns";
@@ -15,28 +21,25 @@ import { toast } from "sonner";
 
 // Define achievement type colors with more vibrant gradients
 
-const typeColors: Record<AchievementType, string> = {
-  COMMON:
-    "border-gray-300 bg-gray-100/70 dark:border-gray-700 dark:bg-gray-900/40",
+const typeBorderColors: Record<AchievementType, string> = {
+  COMMON: "from-gray-100 to-gray-300",
 
-  RARE: "border-blue-300 bg-blue-100/60 dark:border-blue-800 dark:bg-blue-950/20",
+  RARE: "from-gray-100 to-blue-500",
 
-  EPIC: "border-purple-300 bg-purple-100/60 dark:border-purple-800 dark:bg-purple-950/20",
+  EPIC: "from-gray-100 to-purple-500",
 
-  LEGENDARY:
-    "border-amber-300 bg-amber-100/60 dark:border-amber-800 dark:bg-amber-950/20",
+  LEGENDARY: "from-gray-100 to-amber-500",
 };
 
 const typeBadgeColors: Record<AchievementType, string> = {
-  COMMON:
-    "border-gray-300 text-gray-600 dark:border-gray-700 dark:text-gray-300",
+  COMMON: "bg-gradient-to-r from-gray-500 via-gray-400 to-gray-400 text-white",
 
-  RARE: "border-blue-300 text-blue-600 dark:border-blue-800 dark:text-blue-400",
+  RARE: "bg-gradient-to-r from-blue-500 via-blue-400 to-blue-400 text-white",
 
-  EPIC: "border-purple-300 text-purple-600 dark:border-purple-800 dark:text-purple-400",
+  EPIC: "bg-gradient-to-r from-purple-500 via-purple-400 to-purple-400 text-white",
 
   LEGENDARY:
-    "border-amber-300 text-amber-600 dark:border-amber-800 dark:text-amber-400",
+    "bg-gradient-to-r from-amber-500 via-amber-400 to-amber-400 text-white",
 };
 
 const typeNames: Record<AchievementType, string> = {
@@ -102,14 +105,25 @@ export function AchievementCard({
   const isCompact = variant === "compact";
 
   const cardClass = `
-  ${typeColors[type]}
+  flex
   h-full
-  rounded-lg
-  border
+  flex-col
+  rounded-[15px]
+  border-0
+  bg-gray-50/80
   ${isCompact ? "py-2" : "py-4"}
   shadow-sm
   transition-shadow
   hover:shadow-md
+`;
+
+  const cardBorderClass = `
+  h-full
+  rounded-2xl
+  bg-gradient-to-br
+  ${typeBorderColors[type]}
+  p-[1px]
+  shadow-sm
 `;
 
   const tagClass = `
@@ -120,6 +134,7 @@ export function AchievementCard({
   px-2.5
   py-1
   text-xs
+  uppercase
   font-medium
   ${typeBadgeColors[type]}
 `;
@@ -189,80 +204,96 @@ export function AchievementCard({
       // Detect dark mode
       const isDarkMode = document.documentElement.classList.contains("dark");
 
-      // Set background and text colors based on achievement type and theme mode
-      const bgColors = {
+      // Match the on-screen card styling: soft interior, gradient border,
+      // and gradient rarity badge.
+      const canvasTheme = {
         COMMON: {
-          light: "#f8f9fa",
-          dark: "#1f2937",
-          border: isDarkMode ? "#4b5563" : "#d1d5db",
-          tag: isDarkMode ? "#4b5563" : "#e5e7eb",
-          tagText: isDarkMode ? "#f3f4f6" : "#111827",
+          light: "#f3f4f6",
+          dark: "#111827",
+          borderStart: "#d1d5db",
+          borderMid: "#9ca3af",
+          borderEnd: "#d1d5db",
+          tagStart: "#6b7280",
+          tagMid: "#9ca3af",
+          tagEnd: "#d1d5db",
         },
         RARE: {
-          light: "#e0f7fa",
-          dark: "#075985",
-          border: isDarkMode ? "#0284c7" : "#7dd3fc",
-          tag: isDarkMode ? "#0369a1" : "#bae6fd",
-          tagText: isDarkMode ? "#f3f4f6" : "#075985",
+          light: "#dbeafe",
+          dark: "#172554",
+          borderStart: "#60a5fa",
+          borderMid: "#818cf8",
+          borderEnd: "#a78bfa",
+          tagStart: "#3b82f6",
+          tagMid: "#60a5fa",
+          tagEnd: "#93c5fd",
         },
         EPIC: {
-          light: "#f3e5f5",
-          dark: "#581c87",
-          border: isDarkMode ? "#7e22ce" : "#d8b4fe",
-          tag: isDarkMode ? "#7e22ce" : "#e9d5ff",
-          tagText: isDarkMode ? "#f3f4f6" : "#6b21a8",
+          light: "#f3e8ff",
+          dark: "#3b0764",
+          borderStart: "#c084fc",
+          borderMid: "#e879f9",
+          borderEnd: "#f472b6",
+          tagStart: "#a855f7",
+          tagMid: "#c084fc",
+          tagEnd: "#d8b4fe",
         },
         LEGENDARY: {
-          light: "#fff8e1",
-          dark: "#78350f",
-          border: isDarkMode ? "#d97706" : "#fcd34d",
-          tag: isDarkMode ? "#d97706" : "#fde68a",
-          tagText: isDarkMode ? "#f3f4f6" : "#92400e",
+          light: "#fef3c7",
+          dark: "#451a03",
+          borderStart: "#fbbf24",
+          borderMid: "#fb923c",
+          borderEnd: "#facc15",
+          tagStart: "#f59e0b",
+          tagMid: "#fbbf24",
+          tagEnd: "#fcd34d",
         },
-      };
+      } as const;
 
-      // Draw background
-      const bgColor = isDarkMode
-        ? bgColors[type]?.dark || "#1f2937"
-        : bgColors[type]?.light || "#f8f9fa";
+      const theme = canvasTheme[type];
 
-      // Draw rounded rectangle for background
-      ctx.fillStyle = bgColor;
-      roundRect(ctx, 0, 0, width, height, 8);
+      // Draw the gradient outer border first.
+      const borderGradient = ctx.createLinearGradient(0, 0, width, height);
+      borderGradient.addColorStop(0, theme.borderStart);
+      borderGradient.addColorStop(0.5, theme.borderMid);
+      borderGradient.addColorStop(1, theme.borderEnd);
+
+      ctx.fillStyle = borderGradient;
+      roundRect(ctx, 0, 0, width, height, 12);
       ctx.fill();
 
-      // Draw border
-      ctx.strokeStyle = bgColors[type]?.border || "#d1d5db";
-      ctx.lineWidth = 2;
-      roundRect(ctx, 1, 1, width - 2, height - 2, 7);
-      ctx.stroke();
-
-      // Draw tag background
-      const tagText = typeNames[type];
-      ctx.font = "500 12px system-ui, -apple-system, sans-serif";
-      const tagWidth = ctx.measureText(tagText).width + 20;
-
-      ctx.fillStyle =
-        bgColors[type]?.tag || (isDarkMode ? "#4b5563" : "#e5e7eb");
-      roundRect(ctx, 20, 20, tagWidth, 24, 12);
+      // Draw the inner card, leaving a thin gradient border visible.
+      ctx.fillStyle = isDarkMode ? theme.dark : theme.light;
+      roundRect(ctx, 2, 2, width - 4, height - 4, 10);
       ctx.fill();
 
-      // Draw tag text
-      ctx.fillStyle =
-        bgColors[type]?.tagText || (isDarkMode ? "#f3f4f6" : "#111827");
-      ctx.fillText(tagText, 30, 36);
+      // Draw the rarity badge using the same gradient family as the UI.
+      const tagText = typeNames[type].toUpperCase();
+      ctx.font = "600 12px system-ui, -apple-system, sans-serif";
+      const tagWidth = ctx.measureText(tagText).width + 24;
+
+      const tagGradient = ctx.createLinearGradient(20, 0, 20 + tagWidth, 0);
+      tagGradient.addColorStop(0, theme.tagStart);
+      tagGradient.addColorStop(0.5, theme.tagMid);
+      tagGradient.addColorStop(1, theme.tagEnd);
+
+      ctx.fillStyle = tagGradient;
+      roundRect(ctx, 20, 18, tagWidth, 26, 13);
+      ctx.fill();
+
+      ctx.fillStyle = "#ffffff";
+      ctx.fillText(tagText, 32, 35);
 
       // Draw emoji
       ctx.font = "32px system-ui, -apple-system, sans-serif";
       ctx.fillText(emoji, width - 50, 40);
 
       // Draw title
-      ctx.fillStyle = isDarkMode ? "#f3f4f6" : "#111827";
+      ctx.fillStyle = isDarkMode ? "#f3f4f6" : "#374151";
       ctx.font = "bold 16px system-ui, -apple-system, sans-serif";
       ctx.fillText(title, 20, 60);
 
       // Draw description (with wrapping)
-      ctx.fillStyle = isDarkMode ? "#d1d5db" : "#4b5563";
+      ctx.fillStyle = isDarkMode ? "#d1d5db" : "#6b7280";
       ctx.font = "12px system-ui, -apple-system, sans-serif";
       wrapText(ctx, description, 20, 90, width - 20, 16);
 
@@ -588,59 +619,82 @@ export function AchievementCard({
 
   return (
     <div className="relative w-full">
-      {/* Main achievement card */}
-      <Card ref={cardRef} className={cardClass}>
-        <CardHeader className={isCompact ? "px-4 pb-2" : "pb-3"}>
-          <div className="flex items-start justify-between gap-4">
-            <span
-              className={`${tagClass} ${
-                isCompact ? "px-2 py-0.5 text-[10px]" : ""
-              }`}
-            >
-              {typeNames[type]}
-            </span>
+      {/* Gradient border wrapper */}
+      <div className={cardBorderClass}>
+        {/* Main achievement card */}
+        <Card ref={cardRef} className={cardClass}>
+          <CardHeader
+            className={isCompact ? "flex-1 px-4 pb-2" : "flex-1 pb-3"}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <span
+                className={`${tagClass} ${
+                  isCompact ? "px-2 py-0.5 text-[10px]" : ""
+                }`}
+              >
+                {typeNames[type]}
+              </span>
 
-            <span
-              className={isCompact ? "text-2xl" : "text-3xl"}
-              role="img"
-              aria-label={`${title} achievement`}
-            >
-              {emoji}
-            </span>
-          </div>
+              <div className="relative mr-2 mt-2">
+                {/* Sparkles */}
+                <Sparkles className="absolute left-1 -top-1 size-4 text-violet-400" />
 
-          <div className={isCompact ? "space-y-1 pt-1" : "space-y-2 pt-2"}>
-            <CardTitle
-              className={
-                isCompact
-                  ? "text-base font-semibold tracking-tight text-gray-700 dark:text-gray-200"
-                  : "text-lg font-semibold tracking-tight text-gray-700 dark:text-gray-200"
-              }
-            >
-              {title}
-            </CardTitle>
+                <Sparkles className="absolute -bottom-1 right-1 size-3 text-purple-300" />
 
-            <CardDescription
-              className={
-                isCompact
-                  ? "line-clamp-2 text-xs leading-5"
-                  : "line-clamp-3 text-sm leading-6"
-              }
-            >
-              {description}
-            </CardDescription>
-          </div>
-        </CardHeader>
+                {/* Emoji circle */}
+                <div
+                  className={`
+      flex size-14 items-center justify-center
+      rounded-full
+    `}
+                >
+                  <div className="flex size-full items-center justify-center rounded-full bg-gradient-to-br from-transparent via-blue-400/30 to-transparent">
+                    <span
+                      className="text-3xl"
+                      role="img"
+                      aria-label={`${title} achievement`}
+                    >
+                      {emoji}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
-        {unlockedAt && (
-          <CardContent className="pt-0">
-            <p className="text-xs text-muted-foreground">Unlocked {timeAgo}</p>
-          </CardContent>
-        )}
-        {showShareButton && (
-          <CardFooter className="flex flex-col pt-0 gap-4">
-            {/* Image Preview (if available) */}
-            {/* {imageUrl && (
+            <div className={isCompact ? "space-y-1 pt-1" : "space-y-2 pt-2"}>
+              <CardTitle
+                className={
+                  isCompact
+                    ? "text-base font-semibold tracking-tight text-gray-700 dark:text-gray-200"
+                    : "text-lg font-semibold tracking-tight text-gray-700 dark:text-gray-200"
+                }
+              >
+                {title}
+              </CardTitle>
+
+              <CardDescription
+                className={
+                  isCompact
+                    ? "min-h-10 line-clamp-2 text-xs leading-5"
+                    : "min-h-[72px] line-clamp-3 text-xs leading-6"
+                }
+              >
+                {description}
+              </CardDescription>
+            </div>
+          </CardHeader>
+
+          {unlockedAt && (
+            <CardContent className="pt-0">
+              <p className="text-xs text-muted-foreground">
+                Unlocked {timeAgo}
+              </p>
+            </CardContent>
+          )}
+          {showShareButton && (
+            <CardFooter className="flex flex-col pt-0 gap-4">
+              {/* Image Preview (if available) */}
+              {/* {imageUrl && (
               <div className="w-full flex justify-center mb-2">
                 <div className="relative w-64 h-38 rounded-md overflow-hidden border border-gray-200 dark:border-gray-800">
                   <img 
@@ -655,46 +709,47 @@ export function AchievementCard({
               </div>
             )} */}
 
-            {/* Download and Copy Buttons */}
-            <div className="grid grid-cols-1 gap-2 w-full">
-              <Button
-                variant="outline"
-                onClick={downloadImage}
-                className="w-full"
-                disabled={
-                  isGeneratingImage || !imageUrl || socialLoading === "Copy"
-                }
-              >
-                <Download className="mr-2 size-4" />
-
-                {isMobileDevice ? "Save & Share" : "Download"}
-              </Button>
-
-              {!isMobileDevice && (
+              {/* Download and Copy Buttons */}
+              <div className="grid grid-cols-1 gap-2 w-full">
                 <Button
                   variant="outline"
-                  onClick={copyImageToClipboard}
+                  onClick={downloadImage}
                   className="w-full"
-                  disabled={isGeneratingImage || !imageUrl || !!socialLoading}
+                  disabled={
+                    isGeneratingImage || !imageUrl || socialLoading === "Copy"
+                  }
                 >
-                  {socialLoading === "Copy" ? (
-                    <LoaderCircle className="mr-2 size-4 animate-spin" />
-                  ) : (
-                    <Copy className="mr-2 size-4" />
-                  )}
-                  Copy to Clipboard
+                  <Download className="mr-2 size-4" />
+
+                  {isMobileDevice ? "Save & Share" : "Download"}
                 </Button>
-              )}
 
-              {isMobileDevice && imageUrl && (
-                <p className="text-xs text-muted-foreground text-center mt-1">
-                  Save the image and share it on your favorite social platforms
-                </p>
-              )}
-            </div>
+                {!isMobileDevice && (
+                  <Button
+                    variant="outline"
+                    onClick={copyImageToClipboard}
+                    className="w-full"
+                    disabled={isGeneratingImage || !imageUrl || !!socialLoading}
+                  >
+                    {socialLoading === "Copy" ? (
+                      <LoaderCircle className="mr-2 size-4 animate-spin" />
+                    ) : (
+                      <Copy className="mr-2 size-4" />
+                    )}
+                    Copy to Clipboard
+                  </Button>
+                )}
 
-            {/* Social Media Buttons */}
-            {/* <div className="grid grid-cols-4 gap-2 w-full">
+                {isMobileDevice && imageUrl && (
+                  <p className="text-xs text-muted-foreground text-center mt-1">
+                    Save the image and share it on your favorite social
+                    platforms
+                  </p>
+                )}
+              </div>
+
+              {/* Social Media Buttons */}
+              {/* <div className="grid grid-cols-4 gap-2 w-full">
               {socialPlatforms.map((platform) => (
                 <Button 
                   key={platform.name}
@@ -722,36 +777,37 @@ export function AchievementCard({
               ))}
             </div> */}
 
-            {/* Regenerate button if image generation failed */}
-            {!imageUrl &&
-              !isGeneratingImage &&
-              generationAttemptedRef.current && (
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    generationAttemptedRef.current = false;
-                    generateImage();
-                  }}
-                  className="mt-2 text-sm"
-                >
-                  <RefreshCw className="mr-2 size-4" />
-                  Try Again
-                </Button>
+              {/* Regenerate button if image generation failed */}
+              {!imageUrl &&
+                !isGeneratingImage &&
+                generationAttemptedRef.current && (
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      generationAttemptedRef.current = false;
+                      generateImage();
+                    }}
+                    className="mt-2 text-sm"
+                  >
+                    <RefreshCw className="mr-2 size-4" />
+                    Try Again
+                  </Button>
+                )}
+
+              {/* Loading indicator when generating image */}
+              {isGeneratingImage && (
+                <div className="mt-2 flex w-full items-center justify-center gap-2">
+                  <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
+
+                  <span className="text-xs text-muted-foreground">
+                    Preparing your achievement...
+                  </span>
+                </div>
               )}
-
-            {/* Loading indicator when generating image */}
-            {isGeneratingImage && (
-              <div className="mt-2 flex w-full items-center justify-center gap-2">
-                <LoaderCircle className="size-4 animate-spin text-muted-foreground" />
-
-                <span className="text-xs text-muted-foreground">
-                  Preparing your achievement...
-                </span>
-              </div>
-            )}
-          </CardFooter>
-        )}
-      </Card>
+            </CardFooter>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }

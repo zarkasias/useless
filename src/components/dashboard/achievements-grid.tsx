@@ -9,7 +9,7 @@ import {
   Trophy,
 } from "lucide-react";
 
-import { AchievementCard } from "@/components/achievement-card";
+import { AchievementCard } from "@/components/achievement-card-updated";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import {
@@ -166,7 +166,7 @@ export function AchievementsGrid({ achievements }: AchievementsGridProps) {
 
       {/* Results */}
       {sortedAchievements.length > 0 ? (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-4">
+        <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
           {sortedAchievements.map((achievement) => (
             <AchievementCard
               key={achievement.id}
