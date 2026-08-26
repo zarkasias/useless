@@ -229,7 +229,7 @@ export default function DashboardClient({
               </div>
 
               <Link
-                href="/achievements"
+                href="/collection"
                 className="group flex shrink-0 items-center gap-1 text-sm font-medium text-primary"
               >
                 View all

@@ -105,10 +105,10 @@ export function Navbar({
                   </Button>
                 </Link>
 
-                <Link href="/achievements">
+                <Link href="/collection">
                   <Button
                     variant="ghost"
-                    className={getNavButtonClass("/achievements")}
+                    className={getNavButtonClass("/collection")}
                   >
                     Collection
                   </Button>
@@ -183,7 +183,7 @@ export function Navbar({
                   </DropdownMenuItem>
 
                   <DropdownMenuItem asChild className="md:hidden">
-                    <Link href="/achievements">
+                    <Link href="/collection">
                       <Trophy className="size-4" />
                       Collection
                     </Link>
