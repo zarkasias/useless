@@ -143,7 +143,7 @@ export default function HomeClient({
                 </Button>
               ) : (
                 <Button size="lg" variant="outline" asChild>
-                  <Link href="/achievements">View your collection</Link>
+                  <Link href="/collection">View your collection</Link>
                 </Button>
               )}
             </div>
