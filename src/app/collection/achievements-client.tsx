@@ -153,7 +153,7 @@ export default function AchievementsClient({
             {/* Filters */}
             <div className="rounded-b-lg bg-gray-100/80 p-4 shadow-sm">
               <div className="flex flex-col gap-4">
-                <div className="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap">
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap">
                   <Button
                     size="sm"
                     variant={filter === "all" ? "default" : "outline"}
@@ -178,7 +178,7 @@ export default function AchievementsClient({
                     size="sm"
                     variant={filter === "uncollected" ? "default" : "outline"}
                     onClick={() => setFilter("uncollected")}
-                    className="w-full sm:w-auto"
+                    className="col-span-2 w-full sm:w-auto"
                   >
                     Uncollected
                     <span className="ml-1.5 opacity-60">
