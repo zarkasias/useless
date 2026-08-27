@@ -18,6 +18,7 @@ export interface Achievement {
   description: string;
   type: AchievementType;
   emoji: string;
+  icon_path?: string | null;
   created_at: string;
   is_daily?: boolean;
 }

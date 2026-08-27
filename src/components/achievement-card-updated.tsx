@@ -17,6 +17,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Achievement, AchievementType } from "@/lib/supabase";
 import { formatDistanceToNow } from "date-fns";
+
+import Image from "next/image";
 import { toast } from "sonner";
 
 // Define achievement type colors with more vibrant gradients
@@ -94,7 +96,7 @@ export function AchievementCard({
   ingrid = false,
   variant = "default",
 }: AchievementCardProps) {
-  const { title, description, type, emoji } = achievement;
+  const { title, description, type, emoji, icon_path } = achievement;
   const cardRef = useRef<HTMLDivElement>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -169,6 +171,17 @@ export function AchievementCard({
     };
     setIsMobileDevice(detectMobile());
   }, []);
+
+  const loadImage = (src: string): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+      const image = new window.Image();
+
+      image.onload = () => resolve(image);
+      image.onerror = reject;
+
+      image.src = src;
+    });
+  };
 
   // Generate image from the achievement card
   const generateImage = async () => {
@@ -309,11 +322,36 @@ export function AchievementCard({
       ctx.fillStyle = theme.sparkleB;
       drawSparkle(ctx, centerX + 18, centerY + 20, 4);
 
-      // Emoji itself.
-      ctx.font = "30px system-ui, -apple-system, sans-serif";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(emoji, centerX, centerY + 1);
+      // Achievement icon or emoji fallback.
+      if (icon_path) {
+        try {
+          const iconImage = await loadImage(icon_path);
+
+          const iconSize = 42;
+
+          ctx.drawImage(
+            iconImage,
+            centerX - iconSize / 2,
+            centerY - iconSize / 2,
+            iconSize,
+            iconSize,
+          );
+        } catch (error) {
+          console.error("Failed to load achievement icon:", error);
+
+          ctx.font = "30px system-ui, -apple-system, sans-serif";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+
+          ctx.fillText(emoji, centerX, centerY + 1);
+        }
+      } else {
+        ctx.font = "30px system-ui, -apple-system, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        ctx.fillText(emoji, centerX, centerY + 1);
+      }
 
       // Reset text alignment for the rest of the card.
       ctx.textAlign = "start";
@@ -700,15 +738,27 @@ export function AchievementCard({
       rounded-full
     `}
                 >
-                  <div className="flex size-full items-center justify-center rounded-full bg-gradient-to-br from-transparent via-blue-400/30 to-transparent">
-                    <span className="bg-white/60 size-10 rounded-full flex items-center justify-center">
-                      <span
-                        className="text-2xl"
-                        role="img"
-                        aria-label={`${title} achievement`}
-                      >
-                        {emoji}
-                      </span>
+                  <div className="flex size-full items-center justify-center rounded-full bg-gradient-to-br from-transparent via-blue-400/20 to-transparent">
+                    <span
+                      className={`${icon_path ? "size-14" : "bg-white/50 size-10"} rounded-full flex items-center justify-center`}
+                    >
+                      {icon_path ? (
+                        <Image
+                          src={icon_path}
+                          alt={`${title} achievement`}
+                          width={52}
+                          height={52}
+                          className="h-12 w-12 object-contain"
+                        />
+                      ) : (
+                        <span
+                          className="text-2xl"
+                          role="img"
+                          aria-label={`${title} achievement`}
+                        >
+                          {emoji}
+                        </span>
+                      )}
                     </span>
                   </div>
                 </div>

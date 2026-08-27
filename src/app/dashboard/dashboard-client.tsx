@@ -8,7 +8,7 @@ import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { StreakCalendar } from "@/components/dashboard/streak-calendar";
 import { UnlockAchievement } from "@/components/unlock-achievement";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Flame, Trophy } from "lucide-react";
+import { ArrowRight, Flame, Trophy, Target, Check } from "lucide-react";
 import { Achievement, UserProfile } from "@/lib/supabase";
 
 import {
@@ -140,7 +140,7 @@ export default function DashboardClient({
                       </p>
 
                       <div className="mt-6 inline-flex w-fit items-center gap-2 rounded-lg bg-muted px-4 py-3 text-sm font-medium">
-                        <span>✓</span>
+                        <Check className="size-5 text-gray-700" />
                         Achievement claimed
                       </div>
                     </>
@@ -160,7 +160,9 @@ export default function DashboardClient({
                         size="lg"
                         className="mt-6 bg-gray-700"
                       >
-                        <span className="mr-2">🎯</span>
+                        <span className="mr-2 rounded-full p-0.5 bg-white">
+                          <Target className="size-5 text-red-500" />
+                        </span>
                         Claim Today&apos;s Achievement
                       </Button>
                     </>

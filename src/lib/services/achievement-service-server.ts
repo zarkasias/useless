@@ -141,6 +141,7 @@ export async function getAuthenticatedUserAchievements(): Promise<
         description,
         type,
         emoji,
+        icon_path,
         created_at,
         is_daily
       )
@@ -173,6 +174,7 @@ export async function getAuthenticatedUserAchievements(): Promise<
         description: achievement.description,
         type: achievement.type,
         emoji: achievement.emoji,
+        icon_path: achievement.icon_path,
         created_at: record.created_at,
         is_daily: achievement.is_daily,
       };

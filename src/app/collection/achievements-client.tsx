@@ -210,7 +210,7 @@ export default function AchievementsClient({
                     </SelectTrigger>
 
                     <SelectContent>
-                      <SelectItem value="all">All rarities</SelectItem>
+                      <SelectItem value="all">All categories</SelectItem>
                       <SelectItem value="COMMON">Common</SelectItem>
                       <SelectItem value="RARE">Rare</SelectItem>
                       <SelectItem value="EPIC">Epic</SelectItem>
@@ -231,30 +231,34 @@ export default function AchievementsClient({
 
           {filteredCollection.length > 0 ? (
             <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {filteredCollection.map(({ achievement, isCollected }) => (
-                <div key={achievement.id} className="relative h-full w-full">
-                  <div
-                    className={
-                      isCollected
-                        ? "h-full"
-                        : "h-full grayscale opacity-55 transition-all hover:grayscale-[70%] hover:opacity-75"
-                    }
-                  >
-                    <AchievementCard
-                      achievement={achievement}
-                      isCollected={isCollected}
-                      ingrid
-                      showShareButton={true}
-                    />
-                  </div>
-
-                  {!isCollected && (
-                    <div className="pointer-events-none absolute right-3 top-3 flex size-10 items-center justify-center rounded-full border bg-gray-300/90 text-muted-foreground shadow-sm backdrop-blur">
-                      <Lock className="size-6 text-gray-700" />
+              {filteredCollection
+                .sort((a, b) =>
+                  a.achievement.title.localeCompare(b.achievement.title),
+                )
+                .map(({ achievement, isCollected }) => (
+                  <div key={achievement.id} className="relative h-full w-full">
+                    <div
+                      className={
+                        isCollected
+                          ? "h-full"
+                          : "h-full grayscale opacity-55 transition-all hover:grayscale-[70%] hover:opacity-75"
+                      }
+                    >
+                      <AchievementCard
+                        achievement={achievement}
+                        isCollected={isCollected}
+                        ingrid
+                        showShareButton={true}
+                      />
                     </div>
-                  )}
-                </div>
-              ))}
+
+                    {!isCollected && (
+                      <div className="pointer-events-none absolute right-3 top-3 flex size-10 items-center justify-center rounded-full border bg-gray-300/90 text-muted-foreground shadow-sm backdrop-blur">
+                        <Lock className="size-6 text-gray-700" />
+                      </div>
+                    )}
+                  </div>
+                ))}
             </div>
           ) : (
             <div className="rounded-lg border bg-background p-10 text-center shadow-sm">
