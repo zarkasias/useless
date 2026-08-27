@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { memo, useRef, useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -88,7 +88,7 @@ interface AchievementCardProps {
   variant?: "default" | "compact";
 }
 
-export function AchievementCard({
+function AchievementCardComponent({
   achievement,
   unlockedAt,
   isCollected = false,
@@ -746,6 +746,8 @@ export function AchievementCard({
                         <Image
                           src={icon_path}
                           alt={`${title} achievement`}
+                          loading="lazy"
+                          decoding="async"
                           width={52}
                           height={52}
                           className="h-12 w-12 object-contain"
@@ -940,3 +942,6 @@ declare global {
     };
   }
 }
+
+export const AchievementCard = memo(AchievementCardComponent);
+AchievementCard.displayName = "AchievementCard";

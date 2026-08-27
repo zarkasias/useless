@@ -5,7 +5,7 @@ import { Navbar } from "@/components/navbar";
 import { Achievement, UserProfile } from "@/lib/supabase";
 
 import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
-import { useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AchievementCard } from "@/components/achievement-card-updated";
 import { Search, Lock } from "lucide-react";
@@ -38,6 +38,7 @@ export default function AchievementsClient({
 }: AchievementClientProps) {
   const [filter, setFilter] = useState<CollectionFilter>("collected");
   const [searchQuery, setSearchQuery] = useState("");
+  const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const [rarityFilter, setRarityFilter] = useState<RarityFilter>("all");
   const user = initialProfile;
@@ -76,7 +77,7 @@ export default function AchievementsClient({
     }
 
     // Step 3: search
-    const normalizedSearch = searchQuery.trim().toLowerCase();
+    const normalizedSearch = deferredSearchQuery.trim().toLowerCase();
 
     if (normalizedSearch) {
       results = results.filter(
@@ -87,7 +88,7 @@ export default function AchievementsClient({
     }
 
     return results;
-  }, [collection, filter, rarityFilter, searchQuery]);
+  }, [collection, filter, rarityFilter, deferredSearchQuery]);
 
   const collectedCount = collectedAchievements.length;
 
@@ -236,7 +237,10 @@ export default function AchievementsClient({
                   a.achievement.title.localeCompare(b.achievement.title),
                 )
                 .map(({ achievement, isCollected }) => (
-                  <div key={achievement.id} className="relative h-full w-full">
+                  <div
+                    key={achievement.id}
+                    className="relative h-full w-full [content-visibility:auto] [contain-intrinsic-size:220px]"
+                  >
                     <div
                       className={
                         isCollected
