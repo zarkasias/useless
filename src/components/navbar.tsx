@@ -162,7 +162,7 @@ export function Navbar({
                       />
 
                       <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
-                        {user.username.substring(0, 2).toUpperCase()}
+                        {user.username.slice(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
 
