@@ -12,7 +12,6 @@ import type { UserProfile } from "@/lib/supabase";
 import {
   createSubscriptionCheckoutAction,
   changeSubscriptionPlanAction,
-  createCustomerPortalAction,
 } from "../actions/subscription-actions";
 
 import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
@@ -28,8 +27,9 @@ export default function ProClient({
   initialProfile,
   initialEntitlements,
 }: ProClientProps) {
-  const [billingInterval, setBillingInterval] =
-    useState<BillingInterval>("year");
+  const [billingInterval, setBillingInterval] = useState<BillingInterval>(
+    initialEntitlements?.billingInterval === "month" ? "month" : "year",
+  );
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const router = useRouter();
 
@@ -37,26 +37,18 @@ export default function ProClient({
 
   const subscriptionStatus = initialEntitlements?.subscriptionStatus ?? null;
 
-  const [currentBillingInterval, setCurrentBillingInterval] = useState<
-    string | null
-  >(initialEntitlements?.billingInterval ?? null);
+  const [currentBillingInterval, setCurrentBillingInterval] =
+    useState<BillingInterval | null>(
+      initialEntitlements?.billingInterval === "month" ||
+        initialEntitlements?.billingInterval === "year"
+        ? initialEntitlements.billingInterval
+        : null,
+    );
 
   const isPastDue = subscriptionStatus === "past_due";
 
   const isCurrentPlan =
     isSubscribed && currentBillingInterval === billingInterval;
-
-  const handleManageSubscription = async () => {
-    try {
-      setIsCheckingOut(true);
-
-      await createCustomerPortalAction();
-    } catch (error) {
-      console.error("Unable to open subscription management:", error);
-
-      setIsCheckingOut(false);
-    }
-  };
 
   const handlePlanAction = async () => {
     try {
@@ -109,36 +101,6 @@ export default function ProClient({
             climbing the leaderboard.
           </p>
         </div>
-
-        {isSubscribed && (
-          <div
-            className="mx-auto mt-8 flex max-w-xl items-center justify-between gap-4 rounded-lg border bg-background p-4 shadow-sm 
-  sm:flex-row sm:items-center sm:justify-between"
-          >
-            <div className="text-left">
-              <p className="text-sm font-semibold text-gray-700">
-                Your subscription
-              </p>
-
-              <p className="mt-1 text-sm text-muted-foreground">
-                You&apos;re currently subscribed to the{" "}
-                <span className="font-medium text-gray-700">
-                  {currentBillingInterval === "year" ? "Annual" : "Monthly"}
-                </span>{" "}
-                plan.
-              </p>
-            </div>
-
-            <Button
-              variant="outline"
-              onClick={handleManageSubscription}
-              disabled={isCheckingOut}
-              className="shrink-0"
-            >
-              Manage subscription
-            </Button>
-          </div>
-        )}
 
         {isPastDue && (
           <div className="mx-auto mt-8 max-w-xl rounded-lg border border-amber-300 bg-amber-50 p-4 text-center">

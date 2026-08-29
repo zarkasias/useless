@@ -1,3 +1,7 @@
+"use client";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
 import {
   Card,
   CardContent,
@@ -7,6 +11,7 @@ import {
 } from "@/components/ui/card";
 
 import { Button } from "@/components/ui/button";
+import { createCustomerPortalAction } from "@/app/actions/subscription-actions";
 
 import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
 
@@ -17,8 +22,28 @@ interface SubscriptionProps {
 export default function Subscription({
   initialEntitlements,
 }: SubscriptionProps) {
+  const router = useRouter();
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSubscriptionAction = async () => {
+    if (!initialEntitlements.isSubscribed) {
+      router.push("/pro");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      await createCustomerPortalAction("/profile");
+    } catch (error) {
+      console.error("Unable to open subscription management:", error);
+      setIsLoading(false);
+    }
+  };
+
   return (
-    <Card>
+    <Card className="bg-gray-200/80 border border-gray-300/80">
       <CardHeader>
         <CardTitle>Subscription</CardTitle>
         <CardDescription>Manage your current plan and billing.</CardDescription>
@@ -40,7 +65,11 @@ export default function Subscription({
             </p>
           </div>
 
-          <Button variant="outline">
+          <Button
+            variant="outline"
+            onClick={handleSubscriptionAction}
+            disabled={isLoading}
+          >
             {initialEntitlements.subscriptionStatus === "past_due"
               ? "Manage billing"
               : initialEntitlements.isSubscribed

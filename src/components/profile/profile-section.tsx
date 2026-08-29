@@ -1,10 +1,19 @@
+import { useState } from "react";
 import type { UserProfile } from "@/lib/supabase";
+import { toast } from "sonner";
 import Image from "next/image";
+
+import {
+  updateUsernameAction,
+  updateAvatarAction,
+} from "@/app/actions/profile-actions";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import { LoaderCircle, Plus } from "lucide-react";
+
+import { createClient } from "@/lib/supabase/client";
 
 import {
   Card,
@@ -16,31 +25,106 @@ import {
 
 interface ProfileProps {
   profile: UserProfile;
-  isUploadingAvatar: boolean;
-  username: string;
-  isEditing: boolean;
-  isSaving: boolean;
   email: string;
-  setUsername: (value: string) => void;
-  setIsEditing: (value: boolean) => void;
-  handleAvatarUpload: (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => Promise<void>;
-  handleSaveUsername: () => Promise<void>;
+  onProfileUpdated: (profile: UserProfile) => void;
 }
 
 export default function Profile({
   profile,
-  username,
-  isEditing,
-  isSaving,
   email,
-  isUploadingAvatar,
-  setUsername,
-  setIsEditing,
-  handleAvatarUpload,
-  handleSaveUsername,
+  onProfileUpdated,
 }: ProfileProps) {
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [username, setUsername] = useState(profile.username ?? "");
+  const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleAvatarUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const file = event.target.files?.[0];
+
+    if (!file) return;
+
+    try {
+      setIsUploadingAvatar(true);
+
+      const supabase = createClient();
+
+      const fileExtension = file.name.split(".").pop();
+      const fileName = `${profile.id}-${Date.now()}.${fileExtension}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("avatars")
+        .upload(fileName, file, {
+          upsert: false,
+        });
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(fileName);
+
+      const result = await updateAvatarAction(publicUrl);
+
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      const updatedProfile = {
+        ...profile,
+        avatar_url: result.avatarUrl,
+      };
+
+      onProfileUpdated(updatedProfile);
+
+      toast.success("Avatar updated");
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      toast.error("Unable to update avatar.");
+    } finally {
+      setIsUploadingAvatar(false);
+
+      event.target.value = "";
+    }
+  };
+
+  const handleSaveUsername = async () => {
+    try {
+      setIsSaving(true);
+
+      const result = await updateUsernameAction(username);
+
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      const updatedUsername = result.username;
+
+      const updatedProfile = {
+        ...profile,
+        username: result.username,
+      };
+
+      onProfileUpdated(updatedProfile);
+
+      setUsername(updatedUsername);
+      setIsEditing(false);
+
+      toast.success("Profile Updated");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Something went wrong updating profile.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -122,7 +206,11 @@ export default function Profile({
           <div className="flex gap-2">
             <Button
               onClick={handleSaveUsername}
-              disabled={isSaving || username.trim() === profile.username}
+              disabled={
+                isSaving ||
+                username.trim().length < 3 ||
+                username.trim() === profile.username
+              }
             >
               {isSaving ? "Saving..." : "Save"}
             </Button>

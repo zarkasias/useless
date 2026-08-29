@@ -66,7 +66,17 @@ export function SignupForm() {
       });
 
       if (error) {
-        setError(error.message);
+        if (
+          error.code === "over_email_send_rate_limit" ||
+          error.status === 429
+        ) {
+          setError(
+            "Too many confirmation emails have been sent. Please wait a little while and try again.",
+          );
+        } else {
+          setError(error.message);
+        }
+
         return;
       }
 
@@ -89,6 +99,7 @@ export function SignupForm() {
         return;
       }
 
+      form.reset();
       setMessage(
         "Account created! Please check your email to confirm your account.",
       );
@@ -98,6 +109,36 @@ export function SignupForm() {
     } finally {
       setIsLoading(false);
     }
+  }
+
+  if (message) {
+    return (
+      <div className="space-y-6 text-center">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold">Check your email</h1>
+
+          <p className="text-muted-foreground">
+            We sent a confirmation link to{" "}
+            <span className="font-medium text-foreground">
+              {form.getValues("email")}
+            </span>
+            .
+          </p>
+
+          <p className="text-sm text-muted-foreground">
+            Confirm your email address to finish creating your account.
+          </p>
+        </div>
+
+        <Button
+          variant="outline"
+          className="w-full"
+          onClick={() => router.push("/login")}
+        >
+          Back to login
+        </Button>
+      </div>
+    );
   }
 
   return (

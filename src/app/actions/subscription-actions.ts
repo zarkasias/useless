@@ -28,7 +28,7 @@ function getPriceId(interval: BillingInterval) {
   return process.env.STRIPE_PRICE_YEARLY;
 }
 
-export async function createCustomerPortalAction() {
+export async function createCustomerPortalAction(returnPath = "/pro") {
   const user = await getAuthenticatedUser();
 
   if (!user) {
@@ -53,7 +53,7 @@ export async function createCustomerPortalAction() {
   const portalSession = await stripe.billingPortal.sessions.create({
     customer: subscription.provider_customer_id,
 
-    return_url: `${process.env.NEXT_PUBLIC_SITE_URL}/pro`,
+    return_url: `${process.env.NEXT_PUBLIC_SITE_URL}${returnPath}`,
   });
 
   redirect(portalSession.url);
