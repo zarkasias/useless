@@ -309,6 +309,7 @@ async function getRandomAvailableDailyAchievement(
       description,
       type,
       emoji,
+      icon_path,
       created_at,
       is_daily
       `,
@@ -382,6 +383,7 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Daily
           description,
           type,
           emoji,
+          icon_path,
           created_at,
           is_daily
         )

@@ -4,10 +4,12 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { LoaderCircle, Sparkles } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+
 import { migrateAnonymousAchievementsAction } from "@/app/actions/achievement-actions";
 
 import {
@@ -27,12 +29,17 @@ const formSchema = z.object({
   password: z.string().min(6),
 });
 
+type LoginStage = "idle" | "authenticating" | "finishing";
+
 export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+
+  const [loginStage, setLoginStage] = useState<LoginStage>("idle");
 
   const supabase = createClient();
   const router = useRouter();
+
+  const isLoading = loginStage !== "idle";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -44,7 +51,7 @@ export function LoginForm() {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setError(null);
-    setIsLoading(true);
+    setLoginStage("authenticating");
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -54,13 +61,19 @@ export function LoginForm() {
 
       if (error) {
         setError(error.message);
+        setLoginStage("idle");
         return;
       }
 
       if (!data.user) {
         setError("Unable to log in");
+        setLoginStage("idle");
         return;
       }
+
+      // Authentication succeeded.
+      // From this point forward, show the finishing state.
+      setLoginStage("finishing");
 
       try {
         await migrateAnonymousAchievementsAction();
@@ -72,22 +85,39 @@ export function LoginForm() {
       router.refresh();
     } catch (err) {
       console.error("Login error:", err);
+
       setError("An unexpected error occurred");
-    } finally {
-      setIsLoading(false);
+      setLoginStage("idle");
     }
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold">Welcome back!</h1>
+  if (loginStage === "finishing") {
+    return (
+      <div className="flex min-h-[300px] flex-col items-center justify-center text-center">
+        <div className="relative flex size-16 items-center justify-center rounded-2xl bg-violet-100">
+          <Sparkles className="size-7 text-violet-600" />
 
-        <p className="text-gray-500 dark:text-gray-400">
-          Enter your credentials to access your pointless achievements
+          <LoaderCircle className="absolute size-20 animate-spin text-violet-300" />
+        </div>
+
+        <h2 className="mt-6 text-xl font-bold text-gray-800">
+          You&apos;re in!
+        </h2>
+
+        <p className="mt-2 max-w-xs text-sm leading-6 text-muted-foreground">
+          Gathering your completely unnecessary achievements...
         </p>
-      </div>
 
+        <div className="mt-5 flex items-center gap-2 text-xs font-medium text-violet-600">
+          <LoaderCircle className="size-4 animate-spin" />
+          Preparing your dashboard
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4">
       {error && (
         <Alert variant="destructive">
           <AlertDescription>{error}</AlertDescription>
@@ -104,7 +134,11 @@ export function LoginForm() {
                 <FormLabel>Email</FormLabel>
 
                 <FormControl>
-                  <Input placeholder="you@example.com" {...field} />
+                  <Input
+                    placeholder="you@example.com"
+                    disabled={isLoading}
+                    {...field}
+                  />
                 </FormControl>
 
                 <FormMessage />
@@ -120,7 +154,12 @@ export function LoginForm() {
                 <FormLabel>Password</FormLabel>
 
                 <FormControl>
-                  <Input type="password" placeholder="••••••" {...field} />
+                  <Input
+                    type="password"
+                    placeholder="••••••"
+                    disabled={isLoading}
+                    {...field}
+                  />
                 </FormControl>
 
                 <FormMessage />
@@ -129,7 +168,14 @@ export function LoginForm() {
           />
 
           <Button type="submit" className="w-full" disabled={isLoading}>
-            {isLoading ? "Logging in..." : "Login"}
+            {loginStage === "authenticating" ? (
+              <>
+                <LoaderCircle className="mr-2 size-4 animate-spin" />
+                Logging in...
+              </>
+            ) : (
+              "Login"
+            )}
           </Button>
         </form>
       </Form>
