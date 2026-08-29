@@ -217,7 +217,7 @@ export default function RootLayout({
       </head>
       <body
         className={cn(
-          "min-h-screen bg-background font-sans antialiased flex flex-col",
+          "min-h-screen bg-gradient-to-b from-violet-50 via-blue-50 to-background font-sans antialiased flex flex-col",
           fontSans.variable,
         )}
         suppressHydrationWarning

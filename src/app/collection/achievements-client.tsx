@@ -100,7 +100,7 @@ export default function AchievementsClient({
     totalCount > 0 ? Math.round((collectedCount / totalCount) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-muted/20">
+    <div className="min-h-screen">
       <Navbar
         user={user}
         isSubscribed={initialEntitlements.isSubscribed}

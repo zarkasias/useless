@@ -86,7 +86,7 @@ export default function DashboardClient({
   };
 
   return (
-    <div className="min-h-screen bg-muted/20">
+    <div className="min-h-screen bg-transparent">
       <Navbar
         user={user}
         isSubscribed={initialEntitlements.isSubscribed}
