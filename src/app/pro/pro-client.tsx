@@ -84,7 +84,7 @@ export default function ProClient({
   };
 
   return (
-    <div className="min-h-screen bg-muted/20">
+    <div className="min-h-screen">
       <Navbar
         user={initialProfile}
         isSubscribed={isSubscribed}
@@ -93,7 +93,7 @@ export default function ProClient({
 
       <main className="relative">
         {/* Hero background */}
-        <section className="relative bg-gradient-to-b from-violet-50 via-blue-50 to-background px-4 pb-10 pt-10">
+        <section className="relative bg-gradient-to-b from-violet-50 to-blue-50 px-4 pb-10 pt-10">
           {/* Decorative shapes */}
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
             <div className="absolute left-[8%] top-20 size-3 rotate-12 rounded-sm bg-yellow-300 sm:size-4" />
