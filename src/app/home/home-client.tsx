@@ -9,7 +9,6 @@ import { CalendarDays, Flame, Medal, Sparkles, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/navbar";
 import { UnlockAchievement } from "@/components/unlock-achievement";
-import { AchievementCard } from "@/components/achievement-card-updated";
 
 import { Achievement, UserProfile } from "@/lib/supabase";
 import { claimDailyAchievementAction } from "@/app/actions/achievement-actions";
@@ -20,33 +19,6 @@ interface HomeClientProps {
   initialProfile: UserProfile | null;
   initialEntitlements: UserEntitlements | null;
 }
-
-const previewAchievements: Achievement[] = [
-  {
-    id: "preview-rare",
-    user_id: "preview",
-    title: "Digital Explorer",
-    description:
-      "Found this website when you could be doing literally anything else.",
-    type: "RARE",
-    emoji: "🧠",
-    icon_path: "/achievement_icons/webp/404-explorer.webp",
-    created_at: "2026-01-01T00:00:00.000Z",
-    is_daily: true,
-  },
-  {
-    id: "preview-legendary",
-    user_id: "preview",
-    title: "Achievement Hoarder",
-    description:
-      "Returned often enough to turn completely useless progress into a lifestyle.",
-    type: "LEGENDARY",
-    emoji: "🏆",
-    icon_path: "/achievement_icons/webp/achievement_hoarder.webp",
-    created_at: "2026-01-01T00:00:00.000Z",
-    is_daily: true,
-  },
-];
 
 export default function HomeClient({
   initialProfile,
@@ -96,84 +68,86 @@ export default function HomeClient({
       />
 
       {/* Hero */}
-      <section className="relative overflow-hidden border-b bg-gradient-to-b from-background via-primary/5 to-blue-500/10 px-4 py-20 md:py-28">
+      <section className="relative bg-gradient-to-b from-violet-50 via-blue-50 to-background px-4 pt-12 sm:pt-16 lg:pt-16">
+        {/* Decorative shapes */}
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute right-10 top-1/4 size-32 rounded-full bg-primary/15 blur-3xl" />
-          <div className="absolute bottom-1/4 left-10 size-48 rounded-full bg-blue-500/15 blur-3xl" />
-          <div className="absolute bottom-0 right-0 size-64 rounded-full bg-purple-500/10 blur-3xl" />
+          <div className="absolute left-[6%] top-24 size-3 rotate-12 rounded-sm bg-yellow-300 sm:size-4" />
+          <div className="absolute right-[8%] top-32 size-4 rotate-45 rounded-sm bg-violet-300 sm:size-5" />
+          <div className="absolute left-[15%] top-[52%] size-2.5 rounded-full bg-blue-300 sm:size-3" />
+          <div className="absolute right-[16%] top-[58%] size-2.5 rounded-full bg-pink-300 sm:size-3" />
+
+          <div className="absolute left-1/2 top-10 size-64 -translate-x-1/2 rounded-full bg-violet-400/10 blur-3xl sm:size-96" />
+          <div className="absolute bottom-10 left-[10%] size-44 rounded-full bg-blue-400/10 blur-3xl sm:size-72" />
+          <div className="absolute bottom-0 right-[8%] size-44 rounded-full bg-pink-400/10 blur-3xl sm:size-72" />
         </div>
 
-        <div className="relative z-10 mx-auto grid w-full max-w-6xl items-center gap-14 lg:grid-cols-[1.05fr_0.95fr]">
-          <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border bg-background/80 px-3 py-1.5 text-xs font-semibold text-muted-foreground shadow-sm backdrop-blur">
-              <Sparkles className="size-3.5 text-violet-500" />
-              Five achievements free. Unlimited uselessness after that.
-            </div>
+        <div className="relative z-10 mx-auto max-w-5xl text-center">
+          <div className="mx-auto inline-flex -rotate-1 items-center gap-2 rounded-full border-2 border-violet-200 bg-white/90 px-3 py-1.5 text-xs font-bold text-violet-700 shadow-sm backdrop-blur sm:px-4 sm:py-2 sm:text-sm">
+            <Sparkles className="size-3.5 sm:size-4" />
+            Five useless achievements are on us
+          </div>
 
-            <h1 className="max-w-3xl text-4xl font-bold tracking-tight text-gray-800 sm:text-5xl lg:text-6xl">
-              Accomplish absolutely{" "}
-              <span className="bg-gradient-to-r from-primary to-blue-500 bg-clip-text text-transparent">
-                nothing useful.
-              </span>
-            </h1>
+          <h1 className="mx-auto mt-5 max-w-4xl text-4xl font-black leading-[0.95] tracking-tight text-gray-800 sm:mt-6 sm:text-5xl md:text-6xl lg:text-7xl">
+            Accomplish absolutely{" "}
+            <span className="inline-block -rotate-2 bg-gradient-to-r from-violet-600 via-blue-500 to-cyan-400 bg-clip-text text-transparent pb-2">
+              nothing useful.
+            </span>
+          </h1>
 
-            <p className="mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg">
-              Claim a new achievement each day, build your streak, grow a
-              collection of ridiculous digital awards, and compete for a spot on
-              the leaderboard.
-            </p>
+          <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:mt-6 sm:text-lg sm:leading-8">
+            Earn ridiculous digital awards, build a completely unnecessary
+            streak, and prove once and for all that pointless progress is still
+            progress.
+          </p>
 
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+          <div className="mt-7 flex flex-col items-stretch justify-center gap-3 sm:mt-8 sm:flex-row sm:items-center">
+            <Button
+              size="lg"
+              onClick={handleGetDailyAchievement}
+              className="h-12 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-6 text-base font-bold text-white shadow-lg shadow-violet-500/20 transition-transform hover:scale-105 sm:px-7"
+            >
+              <Trophy className="mr-2 size-5" />
+              Claim my useless achievement
+            </Button>
+
+            {!user ? (
               <Button
                 size="lg"
-                onClick={handleGetDailyAchievement}
-                className="group border-0 bg-gradient-to-r from-primary to-blue-500 text-white shadow-md transition-all duration-300 hover:opacity-90"
+                variant="outline"
+                asChild
+                className="h-12 rounded-full bg-white/90 px-6 font-semibold backdrop-blur sm:px-7"
               >
-                <Image
-                  src="/icons/trophy.png"
-                  alt=""
-                  width={26}
-                  height={26}
-                  className="mr-2 size-[26px]"
-                />
-                Claim today&apos;s achievement
+                <Link href="/signup">Join the nonsense</Link>
               </Button>
-
-              {!user ? (
-                <Button size="lg" variant="outline" asChild>
-                  <Link href="/signup">Create a free account</Link>
-                </Button>
-              ) : (
-                <Button size="lg" variant="outline" asChild>
-                  <Link href="/collection">View your collection</Link>
-                </Button>
-              )}
-            </div>
-
-            <p className="mt-4 text-xs text-muted-foreground">
-              Start free with 5 achievements. Subscribe whenever you want to
-              keep collecting.
-            </p>
+            ) : (
+              <Button
+                size="lg"
+                variant="outline"
+                asChild
+                className="h-12 rounded-full bg-white/90 px-6 font-semibold backdrop-blur sm:px-7"
+              >
+                <Link href="/collection">See my ridiculous collection</Link>
+              </Button>
+            )}
           </div>
 
-          {/* Live preview using the real AchievementCard component */}
-          <div className="relative mx-auto w-full max-w-md px-4 py-8">
-            <div className="relative z-20 rotate-2 transition-transform duration-300 hover:rotate-0">
-              <AchievementCard
-                achievement={previewAchievements[0]}
-                ingrid
-                variant="default"
-              />
-            </div>
+          <p className="mt-4 text-xs text-muted-foreground">
+            Start free with 5 achievements. Subscribe if the nonsense gets
+            serious.
+          </p>
+        </div>
 
-            <div className="relative z-10 -mt-6 ml-8 -rotate-2 opacity-90 transition-transform duration-300 hover:rotate-0 sm:ml-12">
-              <AchievementCard
-                achievement={previewAchievements[1]}
-                ingrid
-                variant="default"
-              />
-            </div>
-          </div>
+        {/* Main hero artwork */}
+        <div className="relative z-10 mx-auto -mb-6 mt-2 w-full max-w-5xl sm:-mb-10 sm:mt-0 lg:-mb-14">
+          <Image
+            src="/achievement_burst.webp"
+            alt="A burst of colorful useless achievement awards"
+            width={1600}
+            height={1200}
+            priority
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 95vw, 1000px"
+            className="h-auto w-full object-contain"
+          />
         </div>
       </section>
 

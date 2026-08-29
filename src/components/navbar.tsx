@@ -65,22 +65,22 @@ export function Navbar({
     `;
   };
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-40 w-full border-b bg-background/05 backdrop-blur supports-[backdrop-filter]:bg-background/05">
       <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-blue-500/5 pointer-events-none"></div>
       <div className="mx-auto flex h-16 w-full max-w-[1600px] items-center justify-between px-4 sm:px-6 lg:px-8 relative">
         <div className="flex items-center gap-2">
-          <Link href="/" className="flex items-center gap-2 group">
+          <Link href="/" className="flex items-center gap-1 group">
             <span
-              className="text-3xl transition-transform duration-500 ease-in-out group-hover:rotate-12 group-hover:scale-110"
+              className="text-3xl transition-transform duration-500 ease-in-out group-hover:rotate-16 group-hover:scale-110"
               role="img"
               aria-label="trophy"
             >
               <Image
-                src="/icons/trophy.png"
+                src="/icons/golden_trophy.webp"
                 alt="trophy"
-                width={32}
-                height={32}
-                className="w-8 h-8"
+                width={40}
+                height={40}
+                className="w-12 h-12"
               />
             </span>
             <span className="hidden font-bold sm:inline-block relative">
