@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Sparkles, Trophy } from "lucide-react";
 
@@ -29,10 +29,10 @@ export default function ProClient({
   const router = useRouter();
 
   const isLoggedIn = !!initialProfile;
-
   const isSubscribed = initialEntitlements?.isSubscribed ?? false;
-
   const subscriptionStatus = initialEntitlements?.subscriptionStatus ?? null;
+
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
 
   const [billingInterval, setBillingInterval] = useState<BillingInterval>(
     initialEntitlements?.billingInterval === "month" ? "month" : "year",
@@ -46,22 +46,64 @@ export default function ProClient({
         : null,
     );
 
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
-
   const isPastDue = subscriptionStatus === "past_due";
 
   const isCurrentPlan =
     isSubscribed && currentBillingInterval === billingInterval;
 
+  useEffect(() => {
+    if (!isLoggedIn || isSubscribed) {
+      return;
+    }
+
+    const params = new URLSearchParams(window.location.search);
+
+    const plan = params.get("plan");
+    const shouldCheckout = params.get("checkout") === "1";
+
+    if (!shouldCheckout || (plan !== "month" && plan !== "year")) {
+      return;
+    }
+
+    setBillingInterval(plan);
+    setIsCheckingOut(true);
+
+    // Remove checkout=1 immediately so refresh/back does not
+    // automatically start another checkout.
+    window.history.replaceState({}, "", `/pro?plan=${plan}`);
+
+    const startCheckout = async () => {
+      try {
+        await createSubscriptionCheckoutAction(plan);
+      } catch (error) {
+        console.error("Unable to continue subscription checkout:", error);
+
+        setIsCheckingOut(false);
+      }
+    };
+
+    startCheckout();
+  }, [isLoggedIn, isSubscribed]);
+
   const handlePlanAction = async () => {
+    /*
+     * Logged-out visitor explicitly clicked the Pro plan.
+     * Preserve their selected plan through signup.
+     */
     if (!isLoggedIn) {
-      router.push("/signup");
+      router.push(`/signup?next=/pro&plan=${billingInterval}`);
       return;
     }
 
     try {
       setIsCheckingOut(true);
 
+      /*
+       * Existing subscriber:
+       * changing the toggle does nothing by itself.
+       *
+       * Only this explicit button click changes their plan.
+       */
       if (isSubscribed) {
         const result = await changeSubscriptionPlanAction(billingInterval);
 
@@ -73,9 +115,14 @@ export default function ProClient({
         return;
       }
 
+      /*
+       * Logged-in free user explicitly clicked Subscribe.
+       * This is the only path that opens Stripe checkout.
+       */
       await createSubscriptionCheckoutAction(billingInterval);
     } catch (error) {
       console.error("Unable to update subscription:", error);
+      setIsCheckingOut(false);
     } finally {
       if (isSubscribed) {
         setIsCheckingOut(false);
@@ -98,8 +145,8 @@ export default function ProClient({
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
             <div className="absolute left-[8%] top-20 size-3 rotate-12 rounded-sm bg-yellow-300 sm:size-4" />
             <div className="absolute right-[10%] top-28 size-4 rotate-45 rounded-sm bg-violet-300 sm:size-5" />
-            <div className="absolute left-[18%] bottom-20 size-3 rounded-full bg-blue-300" />
-            <div className="absolute right-[16%] bottom-16 size-3 rounded-full bg-pink-300" />
+            <div className="absolute bottom-20 left-[18%] size-3 rounded-full bg-blue-300" />
+            <div className="absolute bottom-16 right-[16%] size-3 rounded-full bg-pink-300" />
 
             <div className="absolute left-1/2 top-8 size-72 -translate-x-1/2 rounded-full bg-violet-400/10 blur-3xl sm:size-96" />
           </div>
@@ -263,7 +310,9 @@ export default function ProClient({
                   onClick={handlePlanAction}
                 >
                   {isCheckingOut
-                    ? "Opening checkout..."
+                    ? isSubscribed
+                      ? "Updating plan..."
+                      : "Opening checkout..."
                     : !isLoggedIn
                       ? "Create account to subscribe"
                       : isCurrentPlan
@@ -282,7 +331,7 @@ export default function ProClient({
                     Already collecting nonsense?{" "}
                     <button
                       type="button"
-                      onClick={() => router.push("/login")}
+                      onClick={() => router.push("/login?next=/pro")}
                       className="font-semibold text-violet-600 underline underline-offset-4"
                     >
                       Log in

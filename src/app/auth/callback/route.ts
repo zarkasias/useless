@@ -10,6 +10,8 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
 
   const code = searchParams.get("code");
+  const next = searchParams.get("next");
+  const plan = searchParams.get("plan");
 
   if (code) {
     const supabase = await createClient();
@@ -37,6 +39,22 @@ export async function GET(request: Request) {
         }
       }
 
+      /*
+       * User came from the Pro page.
+       * Preserve the selected plan and send them back there.
+       */
+
+      if (next === "/pro" && (plan === "month" || plan === "year")) {
+        const redirectUrl = new URL("/pro", origin);
+        redirectUrl.searchParams.set("plan", plan);
+        redirectUrl.searchParams.set("checkout", "1");
+
+        return NextResponse.redirect(redirectUrl);
+      }
+
+      /*
+       * Normal signup/login confirmation flow.
+       */
       return NextResponse.redirect(`${origin}/dashboard`);
     }
   }

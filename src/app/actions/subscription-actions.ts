@@ -176,7 +176,7 @@ export async function createSubscriptionCheckoutAction(
       },
     },
 
-    success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/pro?checkout=success`,
+    success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/subscriptions/success`,
     cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/pro?checkout=cancelled`,
   });
 

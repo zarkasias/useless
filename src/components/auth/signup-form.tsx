@@ -65,6 +65,18 @@ export function SignupForm() {
     setError(null);
     setSignupStage("creating");
 
+    const params = new URLSearchParams(window.location.search);
+    const next = params.get("next") ?? "/dashboard";
+    const plan = params.get("plan");
+
+    const callbackUrl = new URL("/auth/callback", window.location.origin);
+
+    callbackUrl.searchParams.set("next", next);
+
+    if (plan === "month" || plan === "year") {
+      callbackUrl.searchParams.set("plan", plan);
+    }
+
     try {
       const { data, error } = await supabase.auth.signUp({
         email: values.email,
@@ -73,7 +85,7 @@ export function SignupForm() {
           data: {
             username: values.username,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: callbackUrl.toString(),
         },
       });
 
@@ -115,7 +127,11 @@ export function SignupForm() {
           );
         }
 
-        router.push("/dashboard");
+        if (next === "/pro" && (plan === "month" || plan === "year")) {
+          router.push(`/pro?plan=${plan}&checkout=1`);
+        } else {
+          router.push("/dashboard");
+        }
         router.refresh();
         return;
       }
@@ -153,7 +169,7 @@ export function SignupForm() {
 
         <div className="mt-5 flex items-center gap-2 text-xs font-medium text-violet-600">
           <LoaderCircle className="size-4 animate-spin" />
-          Preparing your dashboard
+          Finished your account setup...
         </div>
       </div>
     );
