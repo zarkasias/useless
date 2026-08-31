@@ -310,11 +310,6 @@ function AchievementCardComponent({
       medallionGradient.addColorStop(0.55, theme.medallionMid);
       medallionGradient.addColorStop(1, "rgba(255, 255, 255, 0)");
 
-      ctx.fillStyle = medallionGradient;
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      ctx.fill();
-
       // Small sparkle marks around the emoji.
       ctx.fillStyle = theme.sparkleA;
       drawSparkle(ctx, centerX - 23, centerY - 21, 5);
@@ -346,6 +341,10 @@ function AchievementCardComponent({
           ctx.fillText(emoji, centerX, centerY + 1);
         }
       } else {
+        ctx.fillStyle = medallionGradient;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.fill();
         ctx.font = "30px system-ui, -apple-system, sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
@@ -738,9 +737,11 @@ function AchievementCardComponent({
       rounded-full
     `}
                 >
-                  <div className="flex size-full items-center justify-center rounded-full bg-gradient-to-br from-transparent via-blue-400/20 to-transparent">
+                  <div
+                    className={`flex size-full items-center justify-center ${icon_path ? "" : "rounded-full bg-gradient-to-br from-transparent via-blue-400/20 to-transparent"}`}
+                  >
                     <span
-                      className={`${icon_path ? "size-14" : "bg-white/50 size-10"} rounded-full flex items-center justify-center`}
+                      className={`${icon_path ? "size-18" : "bg-white/50 size-10"} rounded-full flex items-center justify-center`}
                     >
                       {icon_path ? (
                         <Image
@@ -748,9 +749,9 @@ function AchievementCardComponent({
                           alt={`${title} achievement`}
                           loading="lazy"
                           decoding="async"
-                          width={52}
-                          height={52}
-                          className="h-12 w-12 object-contain"
+                          width={60}
+                          height={60}
+                          className="h-16 w-16 object-contain"
                         />
                       ) : (
                         <span
