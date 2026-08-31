@@ -33,7 +33,9 @@ export default function HomeClient({
 
   const handleGetDailyAchievement = async () => {
     try {
-      const result = await claimDailyAchievementAction();
+      const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+      const result = await claimDailyAchievementAction(timezone);
 
       if (result.status === "already_claimed") {
         toast.info("You've already claimed today's achievement.");

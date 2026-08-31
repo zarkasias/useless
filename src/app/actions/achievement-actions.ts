@@ -13,11 +13,32 @@ import {
 import type { AchievementStreakData } from "@/lib/services/achievement-service-server";
 import type { DailyClaimResult } from "@/lib/services/achievement-service-server";
 
-import { createAnonymousUser } from "@/lib/anonymous-user";
+import {
+  createAnonymousUser,
+  updateAnonymousUserTimezone,
+} from "@/lib/anonymous-user";
 
 const ANONYMOUS_COOKIE = "anonymous_user_id";
 
-export async function claimDailyAchievementAction(): Promise<DailyClaimResult> {
+function isValidTimeZone(timezone?: string): timezone is string {
+  if (!timezone) {
+    return false;
+  }
+
+  try {
+    new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone,
+    });
+
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function claimDailyAchievementAction(
+  timezone?: string,
+): Promise<DailyClaimResult> {
   const user = await getAuthenticatedUser();
 
   // --------------------------------------------------
@@ -54,6 +75,10 @@ export async function claimDailyAchievementAction(): Promise<DailyClaimResult> {
       path: "/",
       maxAge: 60 * 60 * 24 * 365,
     });
+  }
+
+  if (isValidTimeZone(timezone)) {
+    await updateAnonymousUserTimezone(anonymousId, timezone);
   }
 
   const achievement = await claimDailyAchievementForAnonymousUser(anonymousId);

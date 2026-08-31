@@ -30,4 +30,5 @@ export interface UserProfile {
   created_at: string;
   streak_count: number;
   last_daily_achievement?: string;
+  timezone?: string | null;
 }

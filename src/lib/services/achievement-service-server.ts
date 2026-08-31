@@ -44,9 +44,9 @@ export type DailyClaimResult =
       achievement: null;
     };
 
-function getToday(): string {
+function getToday(timeZone: string): string {
   const formatter = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/New_York",
+    timeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
@@ -229,12 +229,16 @@ export async function getAuthenticatedUserStreakData(): Promise<AchievementStrea
 
   const dateSet = new Set(achievementDates);
 
-  const today = getToday();
-  const claimedToday = dateSet.has(today);
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("timezone")
+    .eq("id", user.id)
+    .single();
 
-  // ----------------------------------------
-  // Current streak
-  // ----------------------------------------
+  const timezone = profile?.timezone ?? "UTC";
+
+  const today = getToday(timezone);
+  const claimedToday = dateSet.has(today);
 
   // ----------------------------------------
   // Current streak
@@ -364,7 +368,15 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Daily
     };
   }
 
-  const today = getToday();
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("timezone")
+    .eq("id", user.id)
+    .single();
+
+  const timezone = profile?.timezone ?? "UTC";
+
+  const today = getToday(timezone);
 
   // --------------------------------------------------
   // Check whether the user already claimed today.
@@ -521,7 +533,9 @@ export async function claimDailyAchievementForAnonymousUser(
     return null;
   }
 
-  const today = getToday();
+  const timezone = anonymousUser.timezone ?? "UTC";
+
+  const today = getToday(timezone);
 
   // --------------------------------------------------
   // Check whether anonymous user already claimed today.
@@ -624,13 +638,21 @@ export async function unlockAchievementForCurrentUser(
     return null;
   }
 
+  const { data: profile } = await supabaseAdmin
+    .from("profiles")
+    .select("timezone")
+    .eq("id", user.id)
+    .single();
+
+  const timezone = profile?.timezone ?? "UTC";
+
   const { data, error } = await supabaseAdmin
     .from("user_achievements")
     .insert({
       user_id: user.id,
       achievement_id: achievement.id,
       created_at: new Date().toISOString(),
-      achievement_date: getToday(),
+      achievement_date: getToday(timezone),
     })
     .select()
     .single();

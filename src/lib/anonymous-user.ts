@@ -54,3 +54,24 @@ export async function createAnonymousUser() {
 
   return data;
 }
+
+export async function updateAnonymousUserTimezone(
+  anonymousId: string,
+  timezone: string,
+) {
+  const { error } = await supabaseAdmin
+    .from("anonymous_users")
+    .update({
+      timezone,
+      last_seen_at: new Date().toISOString(),
+    })
+    .eq("anonymous_id", anonymousId);
+
+  if (error) {
+    console.error("Error updating anonymous user timezone:", error);
+
+    return false;
+  }
+
+  return true;
+}

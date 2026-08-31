@@ -149,7 +149,7 @@ export function StreakCalendar({ achievementDates }: StreakCalendarProps) {
 
         <div className="flex items-center justify-center gap-4 border-t pt-2 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
-            <span className="size-2.5 rounded-full bg-primary" />
+            <span className="size-2.5 rounded-full bg-green-500 border border-green-600" />
             Claimed
           </div>
 

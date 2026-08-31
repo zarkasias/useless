@@ -7,6 +7,7 @@ import { Navbar } from "@/components/navbar";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { StreakCalendar } from "@/components/dashboard/streak-calendar";
 import { UnlockAchievement } from "@/components/unlock-achievement";
+import { Timezonesync } from "@/components/timezone-sync";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Flame, Trophy, Target, Check } from "lucide-react";
 import { Achievement, UserProfile } from "@/lib/supabase";
@@ -87,6 +88,7 @@ export default function DashboardClient({
 
   return (
     <div className="min-h-screen bg-transparent">
+      <Timezonesync currentTimezone={initialProfile.timezone} />
       <Navbar
         user={user}
         isSubscribed={initialEntitlements.isSubscribed}
