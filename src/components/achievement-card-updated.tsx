@@ -374,11 +374,32 @@ function AchievementCardComponent({
       }
 
       // Draw site URL
+      const shareText = getShareText();
+
+      const shareX = 20;
+      const shareWidth = width - 40;
+      const shareHeight = 42;
+      const shareY = height - shareHeight - 20;
+
       ctx.fillStyle = isDarkMode
-        ? "rgba(156, 163, 175, 0.9)"
-        : "rgba(107, 114, 128, 0.9)";
-      ctx.font = "9px system-ui, -apple-system, sans-serif";
-      wrapText(ctx, getShareText(), 20, height - 40, width - 20, 16);
+        ? "rgba(31, 41, 55, 0.92)"
+        : "rgba(255, 255, 255, 0.96)";
+
+      ctx.strokeStyle = isDarkMode
+        ? "rgba(75, 85, 99, 0.8)"
+        : "rgba(209, 213, 219, 0.9)";
+
+      ctx.lineWidth = 1;
+
+      ctx.beginPath();
+      ctx.roundRect(shareX, shareY, shareWidth, shareHeight, 12);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.fillStyle = isDarkMode ? "#f3f4f6" : "#374151";
+      ctx.font = "600 11px system-ui, -apple-system, sans-serif";
+
+      wrapText(ctx, shareText, shareX + 12, shareY + 16, shareWidth - 24, 14);
 
       // Convert to data URL and set
       const dataUrl = canvas.toDataURL("image/png", 1.0);
@@ -493,7 +514,7 @@ function AchievementCardComponent({
 
   // Share text and basic information for social media
   const getShareText = () =>
-    `I just unlocked "${title}" on Useless Achievements!\nCheck it out: ${window.location.origin}`;
+    `I just unlocked "${title}" on Useless Achievements!\n${window.location.origin}`;
   // const getShareUrl = () => window.location.origin;
 
   // Function to download the generated image
@@ -716,13 +737,24 @@ function AchievementCardComponent({
             className={isCompact ? "flex-1 px-4 pb-2" : "flex-1 pb-3"}
           >
             <div className="flex items-start justify-between gap-4">
-              <span
-                className={`${tagClass} ${
-                  isCompact ? "px-2 py-0.5 text-[10px]" : ""
-                }`}
-              >
-                {typeNames[type]}
-              </span>
+              <div className="space-y-2">
+                <span
+                  className={`${tagClass} ${
+                    isCompact ? "px-2 py-0.5 text-[10px]" : ""
+                  }`}
+                >
+                  {typeNames[type]}
+                </span>
+                <CardTitle
+                  className={
+                    isCompact
+                      ? "text-base font-semibold tracking-tight text-gray-700 dark:text-gray-200"
+                      : "text-lg font-semibold tracking-tight text-gray-700 dark:text-gray-200"
+                  }
+                >
+                  {title}
+                </CardTitle>
+              </div>
 
               <div className="relative mr-2 mt-2">
                 {/* Sparkles */}
@@ -768,17 +800,7 @@ function AchievementCardComponent({
               </div>
             </div>
 
-            <div className={isCompact ? "space-y-1 pt-1" : "space-y-2 pt-2"}>
-              <CardTitle
-                className={
-                  isCompact
-                    ? "text-base font-semibold tracking-tight text-gray-700 dark:text-gray-200"
-                    : "text-lg font-semibold tracking-tight text-gray-700 dark:text-gray-200"
-                }
-              >
-                {title}
-              </CardTitle>
-
+            <div className="space-y-1">
               <CardDescription
                 className={
                   isCompact
