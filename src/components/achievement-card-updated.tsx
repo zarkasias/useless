@@ -734,9 +734,9 @@ function AchievementCardComponent({
         {/* Main achievement card */}
         <Card ref={cardRef} className={cardClass}>
           <CardHeader
-            className={isCompact ? "flex-1 px-4 pb-2" : "flex-1 pb-3"}
+            className={isCompact ? "flex-1 px-3 pb-2" : "flex-1 pb-3 px-3"}
           >
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex items-start justify-between gap-1">
               <div className="space-y-2">
                 <span
                   className={`${tagClass} ${
@@ -748,8 +748,8 @@ function AchievementCardComponent({
                 <CardTitle
                   className={
                     isCompact
-                      ? "text-base font-semibold tracking-tight text-gray-700 dark:text-gray-200"
-                      : "text-lg font-semibold tracking-tight text-gray-700 dark:text-gray-200"
+                      ? "text-base font-semibold tracking-tight text-gray-700 dark:text-gray-200 whitespace-nowrap"
+                      : "text-md font-semibold tracking-tight text-gray-700 dark:text-gray-200 whitespace-nowrap"
                   }
                 >
                   {title}
