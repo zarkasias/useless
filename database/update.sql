@@ -1,25 +1,25 @@
 update achievements
-set icon_path = '/achievement_icons/webp/history-hopper.webp'
+set icon_path = '/achievement_icons/webp/translate-trickster.webp'
 where title in (
-    'History Hopper'
+    'Translate Trickster'
 );
 
 update achievements
-set icon_path = '/achievement_icons/webp/holiday-observer.webp'
+set icon_path = '/achievement_icons/webp/url-copier.webp'
 where title in (
-    'Holiday Observer'
+    'URL Copier'
 );
 
 update achievements
-set icon_path = '/achievement_icons/webp/keyboard-warrior.webp'
+set icon_path = '/achievement_icons/webp/valentine-visitor.webp'
 where title in (
-    'Keyboard Warrior'
+  'Valentine''s Visitor'
 );
 
 update achievements
-set icon_path = '/achievement_icons/webp/link-collector.webp'
+set icon_path = '/achievement_icons/webp/weekend-warrior.webp'
 where title in (
-    'Link Collector'
+    'Weekend Warrior'
 );
 
 

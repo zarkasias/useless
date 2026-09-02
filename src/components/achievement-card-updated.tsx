@@ -805,7 +805,7 @@ function AchievementCardComponent({
                 className={
                   isCompact
                     ? "min-h-10 line-clamp-2 text-xs leading-5"
-                    : "min-h-[52px] line-clamp-3 text-xs leading-6"
+                    : "min-h-[52px] line-clamp-3 text-xs leading-5"
                 }
               >
                 {description}
