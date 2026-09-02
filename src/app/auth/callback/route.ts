@@ -19,11 +19,19 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // The user is authenticated at this point.
-      // If this browser has anonymous achievement history,
-      // merge it into the newly authenticated account.
-      const cookieStore = await cookies();
+      /**
+       * Password recovery flow.
+       * Handle this before anonymous migration.
+       */
+      if (next === "/reset-password") {
+        return NextResponse.redirect(`${origin}/reset-password`);
+      }
 
+      /**
+       * Normal authentication flow can migrate anonymous achievements.
+       */
+
+      const cookieStore = await cookies();
       const anonymousId = cookieStore.get(ANONYMOUS_COOKIE)?.value;
 
       if (anonymousId) {
@@ -50,6 +58,13 @@ export async function GET(request: Request) {
         redirectUrl.searchParams.set("checkout", "1");
 
         return NextResponse.redirect(redirectUrl);
+      }
+
+      /**
+       * Password recovery flow.
+       */
+      if (next === "/reset-password") {
+        return NextResponse.redirect(`${origin}/reset-password`);
       }
 
       /*

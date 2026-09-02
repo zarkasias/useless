@@ -19,6 +19,9 @@ if (!serviceRoleKey) {
 
 const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
 
+const DAILY_CLAIM_HOURS = 20;
+const DAILY_CLAIM_COOLDOWN_MS = DAILY_CLAIM_HOURS * 60 * 60 * 1000;
+
 export interface AchievementStreakData {
   currentStreak: number;
   longestStreak: number;
@@ -423,6 +426,52 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Daily
   }
 
   // --------------------------------------------------
+  // Prevent timezone hopping.
+  //
+  // Even if changing timezone produces a different
+  // calendar date, require a reasonable amount of
+  // real elapsed time since the previous daily claim.
+  // --------------------------------------------------
+
+  const { data: lastDailyClaim, error: lastDailyClaimError } =
+    await supabaseAdmin
+      .from("user_achievements")
+      .select(
+        `
+  created_at,
+  achievements!inner (
+  is_daily
+  )
+  `,
+      )
+      .eq("user_id", user.id)
+      .eq("achievements.is_daily", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+  if (lastDailyClaimError) {
+    console.error("Error checking previous daily claim:", lastDailyClaimError);
+
+    return {
+      status: "unavailable",
+      achievement: null,
+    };
+  }
+
+  if (lastDailyClaim?.created_at) {
+    const lastClaimTime = new Date(lastDailyClaim.created_at).getTime();
+    const elapsed = Date.now() - lastClaimTime;
+
+    if (elapsed < DAILY_CLAIM_COOLDOWN_MS) {
+      return {
+        status: "already_claimed",
+        achievement: null,
+      };
+    }
+  }
+
+  // --------------------------------------------------
   // Check whether the user can earn another achievement.
   // --------------------------------------------------
 
@@ -561,6 +610,41 @@ export async function claimDailyAchievementForAnonymousUser(
     return null;
   }
 
+  const { data: lastDailyClaim, error: lastDailyClaimError } =
+    await supabaseAdmin
+      .from("anonymous_achievements")
+      .select(
+        `
+    created_at,
+    achievements!inner (
+    is_daily
+    )
+    `,
+      )
+      .eq("anonymous_user_id", anonymousUser.id)
+      .eq("achievements.is_daily", true)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+  if (lastDailyClaimError) {
+    console.error(
+      "Error checking previous anonymous daily claim:",
+      lastDailyClaimError,
+    );
+
+    return null;
+  }
+
+  if (lastDailyClaim?.created_at) {
+    const lastClaimTime = new Date(lastDailyClaim.created_at).getTime();
+    const elapsed = Date.now() - lastClaimTime;
+
+    if (elapsed < DAILY_CLAIM_COOLDOWN_MS) {
+      return null;
+    }
+  }
+
   // --------------------------------------------------
   // Get previous anonymous achievements.
   // --------------------------------------------------
@@ -619,54 +703,6 @@ export async function claimDailyAchievementForAnonymousUser(
     ...achievement,
     created_at: claim.created_at,
     is_daily: true,
-  };
-}
-
-/**
- * Legacy achievement unlock.
- *
- * Keep this temporarily because other existing UI/code may
- * still call it. The new dashboard should use
- * claimDailyAchievementAction() instead.
- */
-export async function unlockAchievementForCurrentUser(
-  achievement: Achievement,
-): Promise<Achievement | null> {
-  const user = await getAuthenticatedUser();
-
-  if (!user) {
-    return null;
-  }
-
-  const { data: profile } = await supabaseAdmin
-    .from("profiles")
-    .select("timezone")
-    .eq("id", user.id)
-    .single();
-
-  const timezone = profile?.timezone ?? "UTC";
-
-  const { data, error } = await supabaseAdmin
-    .from("user_achievements")
-    .insert({
-      user_id: user.id,
-      achievement_id: achievement.id,
-      created_at: new Date().toISOString(),
-      achievement_date: getToday(timezone),
-    })
-    .select()
-    .single();
-
-  if (error) {
-    console.error("Error unlocking achievement:", error);
-
-    return null;
-  }
-
-  return {
-    ...achievement,
-    user_id: user.id,
-    created_at: data.created_at,
   };
 }
 

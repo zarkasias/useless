@@ -125,7 +125,7 @@ export function LoginForm() {
       )}
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
           <FormField
             control={form.control}
             name="email"
@@ -166,6 +166,16 @@ export function LoginForm() {
               </FormItem>
             )}
           />
+
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => router.push("/forgot-password")}
+              className="text-xs font-medium text-muted-foreground underline-offset-4 hover:underline"
+            >
+              Forgot password?
+            </button>
+          </div>
 
           <Button type="submit" className="w-full" disabled={isLoading}>
             {loginStage === "authenticating" ? (
