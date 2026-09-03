@@ -194,6 +194,7 @@ function ProductHuntBadge() {
           src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=943979&theme=neutral&t=1742414567377"
           alt="Useless&#0032;Achievements - Unlock&#0032;hilariously&#0032;useless&#0032;digital&#0032;awards | Product Hunt"
           style={{ width: "250px", height: "54px" }}
+          priority
           width="250"
           height="54"
         />

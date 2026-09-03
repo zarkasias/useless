@@ -26,6 +26,7 @@ export interface Achievement {
 export interface UserProfile {
   id: string;
   username: string;
+  role: "user" | "admin";
   avatar_url?: string;
   created_at: string;
   streak_count: number;
