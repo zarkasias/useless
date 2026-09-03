@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createClient as createAdminClient } from "@supabase/supabase-js";
+import { requireAdmin } from "@/lib/auth/require-admin";
 import { AchievementPack } from "@/lib/types/achievement-pack";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -45,4 +46,22 @@ export async function getAchievementPackById(
   }
 
   return data as AchievementPack | null;
+}
+
+export async function getAchievementPackCount(): Promise<number> {
+  await requireAdmin();
+
+  const { count, error } = await supabaseAdmin
+    .from("achievement_packs")
+    .select("*", {
+      count: "exact",
+      head: true,
+    });
+
+  if (error) {
+    console.error("Error loading achievement pack count:", error);
+    throw new Error("Unable to load achievement pack count.");
+  }
+
+  return count ?? 0;
 }

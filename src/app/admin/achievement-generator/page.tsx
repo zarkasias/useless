@@ -1,22 +1,21 @@
-import { testGenerateAchievements } from "./actions";
+import { AchievementGeneratorForm } from "@/components/admin/achievement-generator-form";
+import { getAchievementPacks } from "@/lib/services/achievement-pack-service-server";
 
-export default function AchievementGeneratorPage() {
+export default async function AchievementGeneratorPage() {
+  const packs = await getAchievementPacks();
   return (
-    <main className="mx-auto max-w-4xl px-4 py-10">
-      <h1 className="text-3xl font-black">Achievement Generator</h1>
+    <main className="mx-auto max-w-6xl px-4 py-6">
+      <div className="mb-8">
+        <h1 className="text-3xl font-extrabold text-gray-700">
+          Achievement Generator
+        </h1>
 
-      <p className="mt-2 text-muted-foreground">
-        Temporary AI generation test.
-      </p>
+        <p className="mt-2 text-muted-foreground">
+          Generate achievement drafts for a selected pack.
+        </p>
+      </div>
 
-      <form action={testGenerateAchievements} className="mt-8">
-        <button
-          type="submit"
-          className="rounded-lg bg-violet-600 px-4 py-2 font-semibold text-white"
-        >
-          Generate Test Achievements
-        </button>
-      </form>
+      <AchievementGeneratorForm packs={packs} />
     </main>
   );
 }

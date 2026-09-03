@@ -6,9 +6,11 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function NewAchievementPackPage() {
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
+    <main className="mx-auto max-w-2xl px-4 py-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-black">Create Achievement Pack</h1>
+        <h1 className="text-3xl font-extrabold text-gray-700">
+          Create Achievement Pack
+        </h1>
 
         <p className="mt-2 text-muted-foreground">
           Create a container for core, seasonal, or special achievements.

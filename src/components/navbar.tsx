@@ -42,6 +42,8 @@ export function Navbar({
 
   const isProPage = pathname === "/pro" || pathname.startsWith("/pro/");
 
+  const role = user?.role || "user";
+
   const subscriptionLabel = hasBillingIssue
     ? "Billing issue"
     : isSubscribed
@@ -122,6 +124,17 @@ export function Navbar({
                     Leaderboard
                   </Button>
                 </Link>
+
+                {role === "admin" && (
+                  <Link href="/admin">
+                    <Button
+                      variant="ghost"
+                      className={getNavButtonClass("/admin")}
+                    >
+                      Admin
+                    </Button>
+                  </Link>
+                )}
               </div>
 
               <Link href="/pro">

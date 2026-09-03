@@ -6,10 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export default async function AchievementPacksPage() {
   const packs = await getAchievementPacks();
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10">
+    <main className="mx-auto max-w-6xl px-4 py-6">
       <div className="mb-8 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-gray-700">Achievement Packs</h1>
+          <h1 className="text-3xl font-extrabold text-gray-700">
+            Achievement Packs
+          </h1>
 
           <p className="mt-2 text-muted-foreground">
             Manage core, seasonal, and special achievement packs.

@@ -321,7 +321,8 @@ async function getRandomAvailableDailyAchievement(
       is_daily
       `,
     )
-    .eq("is_daily", true);
+    .eq("is_daily", true)
+    .eq("status", "published");
 
   if (error) {
     console.error("Error fetching daily achievements:", error);

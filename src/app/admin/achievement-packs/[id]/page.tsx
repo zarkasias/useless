@@ -6,6 +6,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+
 export default async function EditAchievementPackPage({
   params,
 }: {
@@ -20,9 +23,18 @@ export default async function EditAchievementPackPage({
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-10">
+    <main className="mx-auto max-w-2xl px-4 py-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-black">Edit Achievement Pack</h1>
+        <Link
+          href="/admin/achievement-packs"
+          className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="size-4" />
+          Back to achievement packs
+        </Link>
+        <h1 className="text-3xl font-extrabold text-gray-700">
+          Edit Achievement Pack
+        </h1>
 
         <p className="mt-2 text-muted-foreground">
           Update this pack&apos;s settings and availability.
