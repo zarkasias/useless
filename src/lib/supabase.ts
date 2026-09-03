@@ -11,6 +11,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export type AchievementType = "COMMON" | "RARE" | "EPIC" | "LEGENDARY";
 
+export type AchievementStatus = "draft" | "review" | "published" | "archived";
+
 export interface Achievement {
   id: string;
   user_id?: string;
@@ -21,6 +23,7 @@ export interface Achievement {
   icon_path?: string | null;
   created_at: string;
   is_daily?: boolean;
+  status: AchievementStatus;
 }
 
 export interface UserProfile {

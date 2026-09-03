@@ -43,18 +43,46 @@ export default function AchievementsClient({
   const [rarityFilter, setRarityFilter] = useState<RarityFilter>("all");
   const user = initialProfile;
 
+  // Only published achievements should appear in the collection.
+  const publishedAchievements = useMemo(
+    () =>
+      allAchievements.filter(
+        (achievement) => achievement.status === "published",
+      ),
+    [allAchievements],
+  );
+
+  // Create a set of published achievement IDs so that previously
+  // collected achievements that are now draft/archived don't affect counts.
+  const publishedAchievementIds = useMemo(
+    () => new Set(publishedAchievements.map((achievement) => achievement.id)),
+    [publishedAchievements],
+  );
+
+  // Only count collected achievements that are still published.
+  const publishedCollectedAchievements = useMemo(
+    () =>
+      collectedAchievements.filter((achievement) =>
+        publishedAchievementIds.has(achievement.id),
+      ),
+    [collectedAchievements, publishedAchievementIds],
+  );
+
   const collectedIds = useMemo(
-    () => new Set(collectedAchievements.map((achievement) => achievement.id)),
-    [collectedAchievements],
+    () =>
+      new Set(
+        publishedCollectedAchievements.map((achievement) => achievement.id),
+      ),
+    [publishedCollectedAchievements],
   );
 
   const collection = useMemo(
     () =>
-      allAchievements.map((achievement) => ({
+      publishedAchievements.map((achievement) => ({
         achievement,
         isCollected: collectedIds.has(achievement.id),
       })),
-    [allAchievements, collectedIds],
+    [publishedAchievements, collectedIds],
   );
 
   const filteredCollection = useMemo(() => {
@@ -90,9 +118,9 @@ export default function AchievementsClient({
     return results;
   }, [collection, filter, rarityFilter, deferredSearchQuery]);
 
-  const collectedCount = collectedAchievements.length;
+  const collectedCount = publishedCollectedAchievements.length;
 
-  const totalCount = allAchievements.length;
+  const totalCount = publishedAchievements.length;
 
   const uncollectedCount = Math.max(totalCount - collectedCount, 0);
 
