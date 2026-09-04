@@ -31,7 +31,11 @@ const formSchema = z.object({
 
 type LoginStage = "idle" | "authenticating" | "finishing";
 
-export function LoginForm() {
+interface LoginFormProps {
+  redirectTo?: string;
+}
+
+export function LoginForm({ redirectTo = "/dashboard" }: LoginFormProps) {
   const [error, setError] = useState<string | null>(null);
 
   const [loginStage, setLoginStage] = useState<LoginStage>("idle");
@@ -81,7 +85,7 @@ export function LoginForm() {
         console.error("Anonymous achievement migration error:", migrationError);
       }
 
-      router.push("/dashboard");
+      router.push(redirectTo);
       router.refresh();
     } catch (err) {
       console.error("Login error:", err);

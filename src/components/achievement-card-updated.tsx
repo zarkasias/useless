@@ -879,8 +879,7 @@ function AchievementCardComponent({
 
                 {isMobileDevice && imageUrl && (
                   <p className="text-xs text-muted-foreground text-center mt-1">
-                    Save the image and share it on your favorite social
-                    platforms
+                    Save the image and share it.
                   </p>
                 )}
               </div>

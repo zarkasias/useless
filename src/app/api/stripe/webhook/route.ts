@@ -8,6 +8,8 @@ import {
   markStripeSubscriptionCanceled,
 } from "@/lib/services/subscription-service-server";
 
+import { grantAchievementPackToUser } from "@/lib/services/user-achievement-pack-service-server";
+
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 export async function POST(request: Request) {
@@ -72,6 +74,56 @@ export async function POST(request: Request) {
       const subscription = event.data.object as Stripe.Subscription;
 
       await markStripeSubscriptionCanceled(subscription);
+
+      break;
+    }
+
+    case "checkout.session.completed": {
+      const session = event.data.object as Stripe.Checkout.Session;
+
+      // We only want one-time pack purchases here.
+      // Subscription checkout continues to be handled
+      // by the subscription events above.
+      if (session.mode !== "payment") {
+        break;
+      }
+
+      // Only grant the pack if Stripe says it was paid.
+      if (session.payment_status !== "paid") {
+        break;
+      }
+
+      const userId = session.metadata?.userId;
+      const packId = session.metadata?.packId;
+
+      if (!userId || !packId) {
+        console.error(
+          "Pack checkout session missing required metadata:",
+          session.id,
+        );
+
+        break;
+      }
+
+      const paymentIntentId =
+        typeof session.payment_intent === "string"
+          ? session.payment_intent
+          : (session.payment_intent?.id ?? null);
+
+      const customerId =
+        typeof session.customer === "string"
+          ? session.customer
+          : (session.customer?.id ?? null);
+
+      await grantAchievementPackToUser({
+        userId,
+        packId,
+        stripeCheckoutSessionId: session.id,
+        stripePaymentIntentId: paymentIntentId,
+        stripeCustomerId: customerId,
+      });
+
+      console.log(`Achievement pack ${packId} granted to user ${userId}`);
 
       break;
     }

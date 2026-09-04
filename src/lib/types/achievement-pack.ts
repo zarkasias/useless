@@ -17,4 +17,8 @@ export interface AchievementPack {
   status: AchievementPackStatus;
   created_at: string;
   updated_at: string;
+  stripe_product_id: string | null;
+  stripe_price_id: string | null;
+  price_cents: number | null;
+  currency: string | null;
 }

@@ -6,16 +6,25 @@ import {
 } from "@/lib/services/achievement-service-server";
 
 import { getUserEntitlements } from "@/lib/services/entitlement-service-server";
+import { getStoreAchievementPacks } from "@/lib/services/pack-store-service-server";
 
 export default async function HomePage() {
   const user = await getAuthenticatedUser();
 
-  const profile = user ? await getAuthenticatedUserProfile() : null;
+  const [profile, entitlements, packs] = await Promise.all([
+    user ? getAuthenticatedUserProfile() : Promise.resolve(null),
+    user ? getUserEntitlements(user.id) : Promise.resolve(null),
 
-  const entitlements = user ? await getUserEntitlements(user.id) : null;
+    // Always load packs, logged in or not
+    getStoreAchievementPacks(),
+  ]);
 
   // return the home client
   return (
-    <HomeClient initialProfile={profile} initialEntitlements={entitlements} />
+    <HomeClient
+      initialProfile={profile}
+      initialEntitlements={entitlements}
+      initialPacks={packs}
+    />
   );
 }

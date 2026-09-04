@@ -7,7 +7,14 @@ import { redirect } from "next/navigation";
 import Image from "next/image";
 import { Sparkles } from "lucide-react";
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { next } = await searchParams;
+
+  const redirectTo = next && next.startsWith("/") ? next : "/dashboard";
   const supabase = await createClient();
 
   const {
@@ -15,7 +22,7 @@ export default async function LoginPage() {
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect("/dashboard");
+    redirect(redirectTo);
   }
 
   return (
@@ -60,7 +67,7 @@ export default async function LoginPage() {
 
           <Card className="rounded-3xl border-2 border-white/80 bg-white/40 shadow-xl shadow-violet-500/10 backdrop-blur">
             <CardContent className="p-6 sm:p-8">
-              <LoginForm />
+              <LoginForm redirectTo={redirectTo} />
             </CardContent>
           </Card>
 

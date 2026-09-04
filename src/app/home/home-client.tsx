@@ -9,20 +9,24 @@ import { CalendarDays, Flame, Medal, Sparkles, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/navbar";
 import { UnlockAchievement } from "@/components/unlock-achievement";
+import { FeaturedPackPromo } from "@/components/packs/featured-pack-promo";
 
 import { Achievement, UserProfile } from "@/lib/supabase";
 import { claimDailyAchievementAction } from "@/app/actions/achievement-actions";
 import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
+import type { StoreAchievementPack } from "@/lib/services/pack-store-service-server";
 import { toast } from "sonner";
 
 interface HomeClientProps {
   initialProfile: UserProfile | null;
   initialEntitlements: UserEntitlements | null;
+  initialPacks: StoreAchievementPack[];
 }
 
 export default function HomeClient({
   initialProfile,
   initialEntitlements,
+  initialPacks,
 }: HomeClientProps) {
   const router = useRouter();
   const user = initialProfile;
@@ -60,6 +64,8 @@ export default function HomeClient({
       toast.error("Something went wrong.");
     }
   };
+
+  const featuredPack = initialPacks?.[0] ?? null;
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/20">
@@ -154,7 +160,7 @@ export default function HomeClient({
       </section>
 
       {/* Product value */}
-      <section className="bg-background px-4 py-20">
+      <section className="bg-background px-4 py-12">
         <div className="mx-auto w-full max-w-6xl">
           <div className="mx-auto max-w-2xl text-center">
             <p className="text-sm font-semibold text-primary">
@@ -199,6 +205,33 @@ export default function HomeClient({
           </div>
         </div>
       </section>
+
+      {featuredPack && (
+        <section className="bg-background px-4 py-4">
+          <div className="mx-auto w-full max-w-6xl">
+            <div className="mb-4 text-center">
+              <p className="text-sm font-semibold text-violet-600 -rotate-2">
+                Something extra pointless
+              </p>
+
+              <h2 className="mt-2 text-3xl font-bold tracking-tight text-gray-800">
+                Limited achievement packs have arrived.
+              </h2>
+
+              <p className="mx-auto mt-1 max-w-2xl text-muted-foreground">
+                Add themed collections to your daily rotation and collect even
+                more things with absolutely no practical value.
+              </p>
+            </div>
+
+            <FeaturedPackPromo
+              pack={featuredPack}
+              variant="homepage"
+              isLoggedIn={!!user}
+            />
+          </div>
+        </section>
+      )}
 
       {/* Subscription */}
       <section className="border-y bg-muted/30 px-4 py-16">

@@ -77,77 +77,79 @@ export default async function AdminAchievementsPage({
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {achievements.map((achievement) => {
-            const pack = Array.isArray(achievement.achievement_packs)
-              ? achievement.achievement_packs[0]
-              : achievement.achievement_packs;
+          {achievements
+            .sort((a, b) => a.title.localeCompare(b.title))
+            .map((achievement) => {
+              const pack = Array.isArray(achievement.achievement_packs)
+                ? achievement.achievement_packs[0]
+                : achievement.achievement_packs;
 
-            return (
-              <Card key={achievement.id}>
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <div className="text-3xl">
-                        {achievement.emoji ?? "🏆"}
+              return (
+                <Card key={achievement.id}>
+                  <CardHeader>
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <div className="text-3xl">
+                          {achievement.emoji ?? "🏆"}
+                        </div>
+
+                        <CardTitle className="mt-2 text-gray-700">
+                          {achievement.title}
+                        </CardTitle>
                       </div>
 
-                      <CardTitle className="mt-2 text-gray-700">
-                        {achievement.title}
-                      </CardTitle>
+                      <span className="rounded-full border px-3 py-1 text-xs font-bold">
+                        {achievement.type}
+                      </span>
+                    </div>
+                  </CardHeader>
+
+                  <CardContent className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      {achievement.description}
+                    </p>
+
+                    <div className="flex gap-4 text-xs justify-between">
+                      <p>
+                        <span className="font-semibold">Status:</span>{" "}
+                        {achievement.status}
+                      </p>
+
+                      <p>
+                        <span className="font-semibold">Pack:</span>{" "}
+                        {pack?.name ?? "Unassigned"}
+                      </p>
+
+                      <p>
+                        <span className="font-semibold">Generated:</span>{" "}
+                        {achievement.generated_by}
+                      </p>
+
+                      <p>
+                        <span className="font-semibold">Trigger:</span>{" "}
+                        {achievement.trigger_type ?? "Legacy"}
+                      </p>
                     </div>
 
-                    <span className="rounded-full border px-3 py-1 text-xs font-bold">
-                      {achievement.type}
-                    </span>
-                  </div>
-                </CardHeader>
+                    {achievement.icon_path ? (
+                      <p className="text-xs uppercase font-medium text-green-600">
+                        Icon assigned
+                      </p>
+                    ) : (
+                      <p className="text-xs uppercase font-medium text-red-500">
+                        Icon needed
+                      </p>
+                    )}
 
-                <CardContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    {achievement.description}
-                  </p>
-
-                  <div className="flex gap-4 text-xs justify-between">
-                    <p>
-                      <span className="font-semibold">Status:</span>{" "}
-                      {achievement.status}
-                    </p>
-
-                    <p>
-                      <span className="font-semibold">Pack:</span>{" "}
-                      {pack?.name ?? "Unassigned"}
-                    </p>
-
-                    <p>
-                      <span className="font-semibold">Generated:</span>{" "}
-                      {achievement.generated_by}
-                    </p>
-
-                    <p>
-                      <span className="font-semibold">Trigger:</span>{" "}
-                      {achievement.trigger_type ?? "Legacy"}
-                    </p>
-                  </div>
-
-                  {achievement.icon_path ? (
-                    <p className="text-xs uppercase font-medium text-green-600">
-                      Icon assigned
-                    </p>
-                  ) : (
-                    <p className="text-xs uppercase font-medium text-red-500">
-                      Icon needed
-                    </p>
-                  )}
-
-                  <Button asChild variant="outline" className="w-full">
-                    <Link href={`/admin/achievements/${achievement.id}`}>
-                      Edit Achievement
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            );
-          })}
+                    <Button asChild variant="outline" className="w-full">
+                      <Link href={`/admin/achievements/${achievement.id}`}>
+                        Edit Achievement
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
         </div>
       )}
     </div>

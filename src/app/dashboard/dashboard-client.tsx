@@ -18,15 +18,18 @@ import {
 } from "@/app/actions/achievement-actions";
 import type { AchievementStreakData } from "@/lib/services/achievement-service-server";
 import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
+import type { StoreAchievementPack } from "@/lib/services/pack-store-service-server";
 
 import { toast } from "sonner";
 import { AchievementCard } from "@/components/achievement-card-updated";
+import { FeaturedPackPromo } from "@/components/packs/featured-pack-promo";
 
 interface DashboardClientProps {
   initialProfile: UserProfile;
   initialAchievements: Achievement[];
   initialStreakData: AchievementStreakData;
   initialEntitlements: UserEntitlements;
+  initialPacks: StoreAchievementPack[];
 }
 
 export default function DashboardClient({
@@ -34,6 +37,7 @@ export default function DashboardClient({
   initialAchievements,
   initialStreakData,
   initialEntitlements,
+  initialPacks,
 }: DashboardClientProps) {
   const router = useRouter();
   const [user] = useState<UserProfile | null>(initialProfile);
@@ -45,6 +49,8 @@ export default function DashboardClient({
   const [unlockedAchievement, setUnlockedAchievement] =
     useState<Achievement | null>(null);
   const [showAchievementModal, setShowAchievementModal] = useState(false);
+
+  const featuredPack = initialPacks[0];
 
   const handleDailyAchievement = async () => {
     if (!user) return;
@@ -214,6 +220,12 @@ export default function DashboardClient({
               </div>
             </div>
           </section>
+
+          {featuredPack && (
+            <section className="pt-2">
+              <FeaturedPackPromo pack={featuredPack} variant="dashboard" />
+            </section>
+          )}
 
           {/* Stats */}
           <section>

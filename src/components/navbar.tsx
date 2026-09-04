@@ -13,6 +13,7 @@ import {
   Trophy,
   Medal,
   Sparkles,
+  Package,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -94,7 +95,7 @@ export function Navbar({
           </Link>
         </div>
 
-        <nav className="flex items-center gap-4">
+        <nav className="flex items-center gap-2">
           {user ? (
             <>
               <div className="hidden items-center gap-1 md:flex">
@@ -122,6 +123,15 @@ export function Navbar({
                     className={getNavButtonClass("/leaderboard")}
                   >
                     Leaderboard
+                  </Button>
+                </Link>
+
+                <Link href="/packs">
+                  <Button
+                    variant="ghost"
+                    className={getNavButtonClass("/packs")}
+                  >
+                    Packs
                   </Button>
                 </Link>
 
@@ -206,6 +216,13 @@ export function Navbar({
                     <Link href="/leaderboard">
                       <Medal className="size-4" />
                       Leaderboard
+                    </Link>
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem asChild className="md:hidden">
+                    <Link href="/packs">
+                      <Package className="size-4" />
+                      Packs
                     </Link>
                   </DropdownMenuItem>
 
