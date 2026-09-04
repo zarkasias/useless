@@ -146,7 +146,8 @@ export async function getAuthenticatedUserAchievements(): Promise<
         emoji,
         icon_path,
         created_at,
-        is_daily
+        is_daily,
+        status
       )
     `,
     )
@@ -180,6 +181,7 @@ export async function getAuthenticatedUserAchievements(): Promise<
         icon_path: achievement.icon_path,
         created_at: record.created_at,
         is_daily: achievement.is_daily,
+        status: achievement.status,
       };
     });
 }
@@ -859,6 +861,7 @@ export async function getAllAchievements(): Promise<Achievement[]> {
   const { data, error } = await supabaseAdmin
     .from("achievements")
     .select("*")
+    .eq("status", "published")
     .order("type")
     .order("title");
 

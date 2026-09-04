@@ -21,7 +21,8 @@ export async function getUserAchievements(
         type,
         emoji,
         created_at,
-        is_daily
+        is_daily,
+        status
       )
     `,
     )
@@ -51,6 +52,7 @@ export async function getUserAchievements(
         emoji: achievement.emoji,
         created_at: record.created_at,
         is_daily: achievement.is_daily,
+        status: achievement.status,
       };
     });
 }
