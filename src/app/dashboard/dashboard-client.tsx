@@ -166,7 +166,7 @@ export default function DashboardClient({
                       <Button
                         onClick={handleDailyAchievement}
                         size="lg"
-                        className="mt-6 bg-gray-700"
+                        className="mt-6 font-black bg-gradient-to-br from-violet-600 via-indigo-900 to-blue-600"
                       >
                         <span className="mr-2 rounded-full p-0.5 bg-white">
                           <Target className="size-5 text-red-500" />

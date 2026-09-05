@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getAdminAchievementById } from "@/lib/services/admin-achievement-service-server";
+import { getAchievementPacks } from "@/lib/services/achievement-pack-service-server";
 
 import {
   updateAdminAchievement,
@@ -10,6 +11,8 @@ import {
   archiveAdminAchievement,
   returnAchievementToDraft,
 } from "../actions";
+
+import { ACHIEVEMENT_CATEGORY_OPTIONS } from "@/lib/achievements/category-options";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +29,10 @@ export default async function AdminAchievementPage({
 }) {
   const { id } = await params;
 
-  const achievement = await getAdminAchievementById(id);
+  const [achievement, packs] = await Promise.all([
+    getAdminAchievementById(id),
+    getAchievementPacks(),
+  ]);
 
   if (!achievement) {
     notFound();
@@ -35,6 +41,12 @@ export default async function AdminAchievementPage({
   const pack = Array.isArray(achievement.achievement_packs)
     ? achievement.achievement_packs[0]
     : achievement.achievement_packs;
+
+  const statusOptions = [
+    { value: "draft", label: "Draft" },
+    { value: "published", label: "Published" },
+    { value: "archived", label: "Archived" },
+  ];
 
   return (
     <main className="mx-auto max-w-4xl px-4 py-6">
@@ -117,6 +129,63 @@ export default async function AdminAchievementPage({
               </div>
 
               <div className="space-y-2">
+                <Label htmlFor="category">Category</Label>
+
+                <select
+                  id="category"
+                  name="category"
+                  defaultValue={achievement.category ?? ""}
+                  className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                >
+                  <option value="">Uncategorized</option>
+                  {ACHIEVEMENT_CATEGORY_OPTIONS.map((option) => (
+                    <option
+                      key={option.value || "uncategorized"}
+                      value={option.value}
+                    >
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="pack_id">Achievement Pack</Label>
+
+                <select
+                  id="pack_id"
+                  name="pack_id"
+                  defaultValue={achievement.pack_id ?? ""}
+                  className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                >
+                  <option value="">No pack</option>
+
+                  {packs.map((pack) => (
+                    <option key={pack.id} value={pack.id}>
+                      {pack.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="status">Status</Label>
+
+                <select
+                  id="status"
+                  name="status"
+                  defaultValue={achievement.status}
+                  className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                >
+                  {statusOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="space-y-2">
                 <Label htmlFor="icon_path">Icon path</Label>
 
                 <Input
@@ -187,6 +256,11 @@ export default async function AdminAchievementPage({
               <p>
                 <span className="font-semibold">Status:</span>{" "}
                 {achievement.status}
+              </p>
+
+              <p>
+                <span className="font-semibold">Category:</span>{" "}
+                {achievement.category ?? "Uncategorized"}
               </p>
 
               <p>

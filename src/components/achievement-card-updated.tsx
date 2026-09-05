@@ -106,6 +106,8 @@ function AchievementCardComponent({
   const generationAttemptedRef = useRef(false);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
 
+  const generateImageRef = useRef<() => Promise<void>>(async () => {});
+
   const isCompact = variant === "compact";
 
   const cardClass = `
@@ -147,20 +149,6 @@ function AchievementCardComponent({
   const timeAgo = unlockedAt
     ? formatDistanceToNow(new Date(unlockedAt), { addSuffix: true })
     : "";
-
-  // Automatically generate image when component mounts
-  useEffect(() => {
-    // Only generate once and only if sharing is enabled
-    if (
-      showShareButton &&
-      !imageUrl &&
-      !isGeneratingImage &&
-      !generationAttemptedRef.current
-    ) {
-      generationAttemptedRef.current = true;
-      generateImage();
-    }
-  }, [showShareButton, imageUrl, isGeneratingImage]);
 
   // Detect mobile devices on component mount
   useEffect(() => {
@@ -438,6 +426,22 @@ function AchievementCardComponent({
       setIsGeneratingImage(false);
     }
   };
+
+  generateImageRef.current = generateImage;
+
+  // Automatically generate image when component mounts
+  useEffect(() => {
+    // Only generate once and only if sharing is enabled
+    if (
+      showShareButton &&
+      !imageUrl &&
+      !isGeneratingImage &&
+      !generationAttemptedRef.current
+    ) {
+      generationAttemptedRef.current = true;
+      void generateImageRef.current();
+    }
+  }, [showShareButton, imageUrl, isGeneratingImage]);
 
   // Helper function to draw rounded rectangles on canvas
   const roundRect = (

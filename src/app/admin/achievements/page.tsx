@@ -22,7 +22,11 @@ const statuses: {
 export default async function AdminAchievementsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; missingIcon?: string }>;
+  searchParams: Promise<{
+    status?: string;
+    missingIcon?: string;
+    category?: string;
+  }>;
 }) {
   const params = await searchParams;
 
@@ -109,10 +113,15 @@ export default async function AdminAchievementsPage({
                       {achievement.description}
                     </p>
 
-                    <div className="flex gap-4 text-xs justify-between">
+                    <div className="flex flex-wrap gap-3 text-xs justify-start">
                       <p>
                         <span className="font-semibold">Status:</span>{" "}
                         {achievement.status}
+                      </p>
+
+                      <p>
+                        <span className="font-semibold">Category:</span>{" "}
+                        {achievement.category ?? "Uncategorized"}
                       </p>
 
                       <p>

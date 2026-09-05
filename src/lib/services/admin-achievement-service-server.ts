@@ -33,6 +33,8 @@ export interface AdminAchievement {
   status: AdminAchievementStatus;
   generated_by: "manual" | "ai";
 
+  category: string | null;
+
   trigger_type: string | null;
   trigger_config: Record<string, unknown> | null;
 
@@ -84,6 +86,7 @@ export async function getAdminAchievements(
       icon_path,
       status,
       generated_by,
+      category,
       trigger_type,
       trigger_config,
       icon_concept,
@@ -135,6 +138,7 @@ export async function getAdminAchievementById(
       icon_path,
       status,
       generated_by,
+      category,
       trigger_type,
       trigger_config,
       icon_concept,

@@ -33,6 +33,12 @@ export async function updateAdminAchievement(formData: FormData) {
 
   const imagePrompt = String(formData.get("image_prompt") ?? "").trim() || null;
 
+  const category = String(formData.get("category") ?? "").trim() || null;
+
+  const packId = String(formData.get("pack_id") ?? "").trim() || null;
+
+  const status = String(formData.get("status") ?? "").trim();
+
   if (!id || !title || !description) {
     throw new Error("Achievement id, title, and description are required.");
   }
@@ -41,6 +47,45 @@ export async function updateAdminAchievement(formData: FormData) {
 
   if (!validTypes.includes(type)) {
     throw new Error("Invalid achievement rarity.");
+  }
+
+  const validCategories = [
+    "everyday",
+    "time_routine",
+    "developer",
+    "digital_life",
+    "milestone",
+    "calendar",
+    "seasonal",
+    "review",
+  ];
+
+  if (category && !validCategories.includes(category)) {
+    throw new Error("Invalid achievement category.");
+  }
+
+  const validStatuses = ["draft", "published", "archived"];
+
+  if (!validStatuses.includes(status)) {
+    throw new Error("Invalid achievement status.");
+  }
+
+  if (packId) {
+    const { data: pack, error: packError } = await supabaseAdmin
+      .from("achievement_packs")
+      .select("id")
+      .eq("id", packId)
+      .maybeSingle();
+
+    if (packError || !pack) {
+      throw new Error("Selected achievement pack does not exist.");
+    }
+  }
+
+  if (status === "published" && !iconPath) {
+    throw new Error(
+      "An achievement must have an icon before it can be published.",
+    );
   }
 
   const { error } = await supabaseAdmin
@@ -53,6 +98,9 @@ export async function updateAdminAchievement(formData: FormData) {
       icon_path: iconPath,
       icon_concept: iconConcept,
       image_prompt: imagePrompt,
+      category,
+      pack_id: packId,
+      status,
     })
     .eq("id", id);
 
