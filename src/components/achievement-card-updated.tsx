@@ -117,7 +117,7 @@ function AchievementCardComponent({
   rounded-[15px]
   border-0
   bg-gray-50/80
-  ${isCompact ? "py-2" : "py-4"}
+  py-0
   shadow-sm
   transition-shadow
   hover:shadow-md
@@ -194,7 +194,7 @@ function AchievementCardComponent({
       // Create a simple canvas directly
       const canvas = document.createElement("canvas");
       const width = 350;
-      const height = 200;
+      const height = 230;
       canvas.width = width * scale;
       canvas.height = height * scale;
 
@@ -281,36 +281,48 @@ function AchievementCardComponent({
       ctx.fillStyle = "#ffffff";
       ctx.fillText(tagText, 31, 34);
 
-      // Decorated emoji medallion in the top-right, matching the UI.
-      const centerX = width - 48;
-      const centerY = 36;
-      const radius = 28;
+      // Achievement icon / emoji, matching the updated card UI.
+      const centerX = width - 58;
+      const centerY = 58;
 
-      const medallionGradient = ctx.createRadialGradient(
-        centerX,
-        centerY,
-        2,
-        centerX,
-        centerY,
-        radius,
-      );
-      medallionGradient.addColorStop(0, theme.medallionMid);
-      medallionGradient.addColorStop(0.55, theme.medallionMid);
-      medallionGradient.addColorStop(1, "rgba(255, 255, 255, 0)");
+      const drawEmojiFallback = () => {
+        const radius = 28;
 
-      // Small sparkle marks around the emoji.
-      ctx.fillStyle = theme.sparkleA;
-      drawSparkle(ctx, centerX - 23, centerY - 21, 5);
+        const medallionGradient = ctx.createRadialGradient(
+          centerX,
+          centerY,
+          2,
+          centerX,
+          centerY,
+          radius,
+        );
 
-      ctx.fillStyle = theme.sparkleB;
-      drawSparkle(ctx, centerX + 18, centerY + 20, 4);
+        medallionGradient.addColorStop(0, theme.medallionMid);
+        medallionGradient.addColorStop(0.55, theme.medallionMid);
+        medallionGradient.addColorStop(1, "rgba(255, 255, 255, 0)");
 
-      // Achievement icon or emoji fallback.
+        ctx.fillStyle = medallionGradient;
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Sparkles only appear for emoji fallback, not real image icons.
+        ctx.fillStyle = theme.sparkleA;
+        drawSparkle(ctx, centerX - 23, centerY - 21, 5);
+
+        ctx.fillStyle = theme.sparkleB;
+        drawSparkle(ctx, centerX + 18, centerY + 20, 4);
+
+        ctx.font = "30px system-ui, -apple-system, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(emoji, centerX, centerY + 1);
+      };
+
       if (icon_path) {
         try {
           const iconImage = await loadImage(icon_path);
-
-          const iconSize = 42;
+          const iconSize = 88;
 
           ctx.drawImage(
             iconImage,
@@ -321,45 +333,28 @@ function AchievementCardComponent({
           );
         } catch (error) {
           console.error("Failed to load achievement icon:", error);
-
-          ctx.font = "30px system-ui, -apple-system, sans-serif";
-          ctx.textAlign = "center";
-          ctx.textBaseline = "middle";
-
-          ctx.fillText(emoji, centerX, centerY + 1);
+          drawEmojiFallback();
         }
       } else {
-        ctx.fillStyle = medallionGradient;
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.font = "30px system-ui, -apple-system, sans-serif";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-
-        ctx.fillText(emoji, centerX, centerY + 1);
+        drawEmojiFallback();
       }
 
       // Reset text alignment for the rest of the card.
       ctx.textAlign = "start";
       ctx.textBaseline = "alphabetic";
 
+      // Leave room on the right for the larger achievement icon.
+      const textMaxWidth = icon_path ? width - 130 : width - 95;
+
       // Draw title
       ctx.fillStyle = isDarkMode ? "#f3f4f6" : "#374151";
       ctx.font = "bold 16px system-ui, -apple-system, sans-serif";
-      ctx.fillText(title, 20, 60);
+      wrapText(ctx, title, 20, 67, textMaxWidth, 19, 2);
 
-      // Draw description (with wrapping)
+      // Draw description directly below the title, matching CardHeader.
       ctx.fillStyle = isDarkMode ? "#d1d5db" : "#6b7280";
       ctx.font = "12px system-ui, -apple-system, sans-serif";
-      wrapText(ctx, description, 20, 90, width - 20, 16);
-
-      // Draw unlocked time if available
-      if (unlockedAt) {
-        ctx.fillStyle = isDarkMode ? "#9ca3af" : "#6b7280";
-        ctx.font = "12px system-ui, -apple-system, sans-serif";
-        ctx.fillText(`Unlocked ${timeAgo}`, 10, height - 30);
-      }
+      wrapText(ctx, description, 20, 94, textMaxWidth, 16, 3);
 
       // Draw site URL
       const shareText = getShareText();
@@ -368,6 +363,12 @@ function AchievementCardComponent({
       const shareWidth = width - 40;
       const shareHeight = 42;
       const shareY = height - shareHeight - 20;
+
+      if (unlockedAt) {
+        ctx.fillStyle = isDarkMode ? "#9ca3af" : "#6b7280";
+        ctx.font = "11px system-ui, -apple-system, sans-serif";
+        ctx.fillText(`Unlocked ${timeAgo}`, 20, shareY - 10);
+      }
 
       ctx.fillStyle = isDarkMode
         ? "rgba(31, 41, 55, 0.92)"
@@ -493,27 +494,42 @@ function AchievementCardComponent({
     y: number,
     maxWidth: number,
     lineHeight: number,
+    maxLines = Infinity,
   ) => {
     const words = text.split(" ");
     let line = "";
-    let testLine = "";
     let lineCount = 0;
 
     for (let n = 0; n < words.length; n++) {
-      testLine = line + words[n] + " ";
-      const metrics = ctx.measureText(testLine);
-      const testWidth = metrics.width;
+      const testLine = `${line}${words[n]} `;
+      const testWidth = ctx.measureText(testLine).width;
 
-      if (testWidth > maxWidth && n > 0) {
-        ctx.fillText(line, x, y + lineCount * lineHeight);
-        line = words[n] + " ";
+      if (testWidth > maxWidth && line) {
+        if (lineCount >= maxLines - 1) {
+          let finalLine = line.trim();
+
+          while (
+            ctx.measureText(`${finalLine}...`).width > maxWidth &&
+            finalLine.length > 0
+          ) {
+            finalLine = finalLine.slice(0, -1);
+          }
+
+          ctx.fillText(`${finalLine.trim()}...`, x, y + lineCount * lineHeight);
+          return;
+        }
+
+        ctx.fillText(line.trim(), x, y + lineCount * lineHeight);
+        line = `${words[n]} `;
         lineCount++;
       } else {
         line = testLine;
       }
     }
 
-    ctx.fillText(line, x, y + lineCount * lineHeight);
+    if (line && lineCount < maxLines) {
+      ctx.fillText(line.trim(), x, y + lineCount * lineHeight);
+    }
   };
 
   // Share text and basic information for social media
@@ -738,7 +754,9 @@ function AchievementCardComponent({
         {/* Main achievement card */}
         <Card ref={cardRef} className={cardClass}>
           <CardHeader
-            className={isCompact ? "flex-1 px-3 pb-2" : "flex-1 pb-3 px-3"}
+            className={
+              isCompact ? "flex-1 px-3 pb-2 pt-3" : "flex-1 pb-3 px-3 pt-3"
+            }
           >
             <div className="flex items-start justify-between gap-1">
               <div className="space-y-2">
@@ -758,26 +776,38 @@ function AchievementCardComponent({
                 >
                   {title}
                 </CardTitle>
+                <CardDescription
+                  className={
+                    isCompact
+                      ? "min-h-10 line-clamp-2 text-xs leading-5"
+                      : "min-h-[68px] line-clamp-3 text-xs leading-5"
+                  }
+                >
+                  {description}
+                </CardDescription>
               </div>
 
-              <div className="relative mr-2 mt-2">
+              <div className="relative -mr-2 -mt-2">
                 {/* Sparkles */}
-                <Sparkles className="absolute left-1 -top-1 size-4 text-violet-400" />
+                {!icon_path && (
+                  <>
+                    <Sparkles className="absolute left-1 -top-1 size-4 text-violet-400" />
 
-                <Sparkles className="absolute -bottom-1 right-1 size-3 text-purple-300" />
+                    <Sparkles className="absolute -bottom-1 right-1 size-3 text-purple-300" />
+                  </>
+                )}
 
                 {/* Emoji circle */}
                 <div
-                  className={`
-      flex size-14 items-center justify-center
-      rounded-full
-    `}
+                  className={`flex items-center justify-center ${
+                    icon_path ? "size-26" : "size-14"
+                  }`}
                 >
                   <div
                     className={`flex size-full items-center justify-center ${icon_path ? "" : "rounded-full bg-gradient-to-br from-transparent via-blue-400/20 to-transparent"}`}
                   >
                     <span
-                      className={`${icon_path ? "size-18" : "bg-white/50 size-10"} rounded-full flex items-center justify-center`}
+                      className={`${icon_path ? "size-24" : "bg-white/50 size-10 rounded-full"} flex items-center justify-center`}
                     >
                       {icon_path ? (
                         <Image
@@ -785,9 +815,9 @@ function AchievementCardComponent({
                           alt={`${title} achievement`}
                           loading="lazy"
                           decoding="async"
-                          width={60}
-                          height={60}
-                          className="h-16 w-16 object-contain"
+                          width={80}
+                          height={80}
+                          className="h-24 w-24 object-contain"
                         />
                       ) : (
                         <span
@@ -804,17 +834,7 @@ function AchievementCardComponent({
               </div>
             </div>
 
-            <div className="space-y-1">
-              <CardDescription
-                className={
-                  isCompact
-                    ? "min-h-10 line-clamp-2 text-xs leading-5"
-                    : "min-h-[52px] line-clamp-3 text-xs leading-5"
-                }
-              >
-                {description}
-              </CardDescription>
-            </div>
+            <div className="space-y-1"></div>
           </CardHeader>
 
           {unlockedAt && (
@@ -843,7 +863,7 @@ function AchievementCardComponent({
             )} */}
 
               {/* Download and Copy Buttons */}
-              <div className="grid grid-cols-1 gap-2 w-full">
+              <div className="grid grid-cols-1 gap-1 w-full pb-2">
                 <Button
                   variant="outline"
                   onClick={downloadImage}
