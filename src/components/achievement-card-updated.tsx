@@ -19,12 +19,13 @@ import { Achievement, AchievementType } from "@/lib/supabase";
 import { formatDistanceToNow } from "date-fns";
 
 import Image from "next/image";
+import { fredoka, nunito } from "./utils/title-fonts";
 import { toast } from "sonner";
 
 // Define achievement type colors with more vibrant gradients
 
 const typeBorderColors: Record<AchievementType, string> = {
-  COMMON: "from-gray-100 to-gray-300",
+  COMMON: "from-gray-100 to-gray-500",
 
   RARE: "from-gray-100 to-blue-500",
 
@@ -348,12 +349,12 @@ function AchievementCardComponent({
 
       // Draw title
       ctx.fillStyle = isDarkMode ? "#f3f4f6" : "#374151";
-      ctx.font = "bold 16px system-ui, -apple-system, sans-serif";
+      ctx.font = `bold 16px ${fredoka.style.fontFamily}`;
       wrapText(ctx, title, 20, 67, textMaxWidth, 19, 2);
 
       // Draw description directly below the title, matching CardHeader.
       ctx.fillStyle = isDarkMode ? "#d1d5db" : "#6b7280";
-      ctx.font = "12px system-ui, -apple-system, sans-serif";
+      ctx.font = `400 12px ${nunito.style.fontFamily}`;
       wrapText(ctx, description, 20, 94, textMaxWidth, 16, 3);
 
       // Draw site URL
@@ -366,7 +367,7 @@ function AchievementCardComponent({
 
       if (unlockedAt) {
         ctx.fillStyle = isDarkMode ? "#9ca3af" : "#6b7280";
-        ctx.font = "11px system-ui, -apple-system, sans-serif";
+        ctx.font = `400 11px ${nunito.style.fontFamily}`;
         ctx.fillText(`Unlocked ${timeAgo}`, 20, shareY - 10);
       }
 
@@ -759,7 +760,7 @@ function AchievementCardComponent({
             }
           >
             <div className="flex items-start justify-between gap-1">
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <span
                   className={`${tagClass} ${
                     isCompact ? "px-2 py-0.5 text-[10px]" : ""
@@ -768,20 +769,22 @@ function AchievementCardComponent({
                   {typeNames[type]}
                 </span>
                 <CardTitle
-                  className={
-                    isCompact
-                      ? "text-base font-semibold tracking-tight text-gray-700 dark:text-gray-200 whitespace-nowrap"
-                      : "text-md font-semibold tracking-tight text-gray-700 dark:text-gray-200 whitespace-nowrap"
-                  }
+                  className={`${fredoka.className}
+                    ${
+                      isCompact
+                        ? `text-base font-semibold tracking-tight text-gray-700 dark:text-gray-200 whitespace-nowrap`
+                        : `text-md font-semibold tracking-normal text-gray-700 dark:text-gray-200 whitespace-nowrap`
+                    }`}
                 >
                   {title}
                 </CardTitle>
                 <CardDescription
-                  className={
-                    isCompact
-                      ? "min-h-10 line-clamp-2 text-xs leading-5"
-                      : "min-h-[68px] line-clamp-3 text-xs leading-5"
-                  }
+                  className={`${nunito.className}
+                    ${
+                      isCompact
+                        ? `min-h-10 line-clamp-2 text-xs leading-4`
+                        : `min-h-[68px] line-clamp-3 text-xs leading-4`
+                    }`}
                 >
                   {description}
                 </CardDescription>

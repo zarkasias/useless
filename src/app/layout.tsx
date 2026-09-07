@@ -132,6 +132,9 @@ function Footer() {
           reserved.
         </p>
         <nav className="flex items-center space-x-4 text-sm">
+          <Link href="/faq" className="text-muted-foreground hover:underline">
+            FAQ
+          </Link>
           <Link
             href="/privacy-policy"
             className="text-muted-foreground hover:underline"
