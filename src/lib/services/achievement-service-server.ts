@@ -606,13 +606,14 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Daily
     };
   }
 
-  // --------------------------------------------------
   // Prevent timezone hopping.
   //
-  // Even if changing timezone produces a different
-  // calendar date, require a reasonable amount of
-  // real elapsed time since the previous daily claim.
-  // --------------------------------------------------
+  // A normal rollover into a new calendar day in the
+  // same timezone is allowed immediately after midnight.
+  //
+  // If the user's timezone changed since their previous
+  // daily claim, require a reasonable amount of real
+  // elapsed time before allowing another claim.
 
   const { data: lastDailyClaim, error: lastDailyClaimError } =
     await supabaseAdmin
@@ -620,6 +621,7 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Daily
       .select(
         `
   created_at,
+  claim_timezone,
   achievements!inner (
   is_daily
   )
@@ -640,7 +642,11 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Daily
     };
   }
 
-  if (lastDailyClaim?.created_at) {
+  if (
+    lastDailyClaim?.created_at &&
+    lastDailyClaim.claim_timezone &&
+    lastDailyClaim.claim_timezone !== timezone
+  ) {
     const lastClaimTime = new Date(lastDailyClaim.created_at).getTime();
     const elapsed = Date.now() - lastClaimTime;
 
@@ -712,6 +718,7 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Daily
       user_id: user.id,
       achievement_id: achievement.id,
       achievement_date: today,
+      claim_timezone: timezone,
     })
     .select("created_at, achievement_date")
     .single();
@@ -797,6 +804,7 @@ export async function claimDailyAchievementForAnonymousUser(
       .select(
         `
     created_at,
+    claim_timezone,
     achievements!inner (
     is_daily
     )
@@ -817,7 +825,11 @@ export async function claimDailyAchievementForAnonymousUser(
     return null;
   }
 
-  if (lastDailyClaim?.created_at) {
+  if (
+    lastDailyClaim?.created_at &&
+    lastDailyClaim.claim_timezone &&
+    lastDailyClaim.claim_timezone !== timezone
+  ) {
     const lastClaimTime = new Date(lastDailyClaim.created_at).getTime();
     const elapsed = Date.now() - lastClaimTime;
 
@@ -870,6 +882,7 @@ export async function claimDailyAchievementForAnonymousUser(
       anonymous_user_id: anonymousUser.id,
       achievement_id: achievement.id,
       achievement_date: today,
+      claim_timezone: timezone,
     })
     .select("created_at, achievement_date")
     .single();
@@ -923,6 +936,7 @@ export async function mergeAnonymousAchievementsIntoCurrentUser(
         id,
         achievement_id,
         achievement_date,
+        claim_timezone,
         created_at
         `,
       )
@@ -975,6 +989,7 @@ export async function mergeAnonymousAchievementsIntoCurrentUser(
         user_id: user.id,
         achievement_id: claim.achievement_id,
         achievement_date: claim.achievement_date,
+        claim_timezone: claim.claim_timezone,
 
         // Preserve when the anonymous achievement was originally earned.
         created_at: claim.created_at,
