@@ -18,6 +18,8 @@ if (!serviceRoleKey) {
 const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
 
 export async function getAchievementPacks(): Promise<AchievementPack[]> {
+  await requireAdmin();
+
   const { data, error } = await supabaseAdmin
     .from("achievement_packs")
     .select("*")
@@ -64,4 +66,35 @@ export async function getAchievementPackCount(): Promise<number> {
   }
 
   return count ?? 0;
+}
+
+export async function getAchievementsForPack(packId: string) {
+  await requireAdmin();
+
+  const { data, error } = await supabaseAdmin
+    .from("achievements")
+    .select(
+      `
+      id,
+      title,
+      description,
+      type,
+      status,
+      category,
+      icon_path,
+      generated_by,
+      trigger_type,
+      pack_id
+    `,
+    )
+    .eq("pack_id", packId)
+    .order("type")
+    .order("title");
+
+  if (error) {
+    console.error("Error fetching achievements for pack:", error);
+    throw new Error("Unable to load achievements for pack.");
+  }
+
+  return data ?? [];
 }
