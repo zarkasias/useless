@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 
 import {
-  getAllAchievements,
+  getCollectionAchievements,
   getAuthenticatedUser,
   getAuthenticatedUserAchievements,
   getAuthenticatedUserProfile,
@@ -21,7 +21,7 @@ export default async function AchievementsPage() {
   const [profile, allAchievements, collectedAchievements, entitlements] =
     await Promise.all([
       getAuthenticatedUserProfile(),
-      getAllAchievements(),
+      getCollectionAchievements(user.id),
       getAuthenticatedUserAchievements(),
       getUserEntitlements(user.id),
     ]);

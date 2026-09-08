@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { getUserEntitlements } from "./entitlement-service-server";
 import { getAnonymousUser } from "@/lib/anonymous-user";
+import { getAchievementPackFilter } from "./achievement-access-service-server";
 import { Achievement, UserProfile } from "@/lib/supabase";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -156,6 +157,8 @@ export async function evaluateAccountAgeAchievementsForAuthenticatedUser(): Prom
 
   const accountAgeDays = Math.floor(accountAgeMs / (1000 * 60 * 60 * 24));
 
+  const packFilter = await getAchievementPackFilter(user.id);
+
   // ----------------------------------------
   // Get published account_age achievements.
   // ----------------------------------------
@@ -179,6 +182,7 @@ export async function evaluateAccountAgeAchievementsForAuthenticatedUser(): Prom
       `,
       )
       .eq("status", "published")
+      .or(packFilter)
       .eq("trigger_type", "account_age")
       .eq("is_daily", false);
 
@@ -307,6 +311,8 @@ export async function getAuthenticatedUserAchievements(): Promise<
     return [];
   }
 
+  const packFilter = await getAchievementPackFilter(user.id);
+
   const { data, error } = await supabaseAdmin
     .from("user_achievements")
     .select(
@@ -316,7 +322,7 @@ export async function getAuthenticatedUserAchievements(): Promise<
       achievement_id,
       created_at,
       achievement_date,
-      achievements (
+      achievements!inner (
         id,
         title,
         description,
@@ -330,6 +336,7 @@ export async function getAuthenticatedUserAchievements(): Promise<
     `,
     )
     .eq("user_id", user.id)
+    .or(packFilter, { referencedTable: "achievements" })
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -486,7 +493,10 @@ export async function getAuthenticatedUserStreakData(): Promise<AchievementStrea
  */
 async function getRandomAvailableDailyAchievement(
   previousAchievementIds: string[],
+  userId?: string,
 ): Promise<Achievement | null> {
+  const packFilter = await getAchievementPackFilter(userId);
+
   const { data: achievements, error } = await supabaseAdmin
     .from("achievements")
     .select(
@@ -502,6 +512,7 @@ async function getRandomAvailableDailyAchievement(
       `,
     )
     .eq("is_daily", true)
+    .or(packFilter)
     .eq("status", "published");
 
   if (error) {
@@ -699,6 +710,7 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Daily
 
   const achievement = await getRandomAvailableDailyAchievement(
     previousAchievementIds,
+    user.id,
   );
 
   if (!achievement) {
@@ -1050,10 +1062,13 @@ export async function mergeAnonymousAchievementsIntoCurrentUser(
   };
 }
 
-export async function getAllAchievements(): Promise<Achievement[]> {
+export async function getCollectionAchievements(userId: string): Promise<Achievement[]> {
+  const packFilter = await getAchievementPackFilter(userId);
+
   const { data, error } = await supabaseAdmin
     .from("achievements")
     .select("*")
+    .or(packFilter)
     .eq("status", "published")
     .order("type")
     .order("title");
