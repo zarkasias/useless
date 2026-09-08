@@ -4,6 +4,8 @@ import { createClient as createAdminClient } from "@supabase/supabase-js";
 
 import { getAuthenticatedUser } from "@/lib/services/achievement-service-server";
 
+import type { Achievement } from "@/lib/supabase";
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -172,4 +174,36 @@ export async function getStoreAchievementPacks(): Promise<
         collectedCount === packAchievements.length,
     };
   });
+}
+
+export async function getPublishedAchievementsForPack(
+  packId: string,
+): Promise<Achievement[]> {
+  const { data, error } = await supabaseAdmin
+    .from("achievements")
+    .select(
+      `
+      id,
+      title,
+      description,
+      type,
+      emoji,
+      icon_path,
+      created_at,
+      is_daily,
+      pack_id,
+      status
+    `,
+    )
+    .eq("pack_id", packId)
+    .eq("status", "published")
+    .order("type")
+    .order("title");
+
+  if (error) {
+    console.error("Error loading pack achievements:", error);
+    throw new Error("Unable to load pack achievements.");
+  }
+
+  return (data ?? []) as Achievement[];
 }

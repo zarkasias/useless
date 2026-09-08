@@ -1,3 +1,5 @@
+"use client";
+
 import React, { memo, useRef, useState, useEffect } from "react";
 import {
   Card,

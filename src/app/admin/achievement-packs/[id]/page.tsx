@@ -44,6 +44,15 @@ export default async function EditAchievementPackPage({
     },
   );
 
+  function toDateTimeLocalValue(dateString: string) {
+    const date = new Date(dateString);
+
+    const offset = date.getTimezoneOffset();
+    const localDate = new Date(date.getTime() - offset * 60 * 1000);
+
+    return localDate.toISOString().slice(0, 16);
+  }
+
   return (
     <main className="mx-auto max-w-4xl px-4 py-6">
       <div className="mb-8">
@@ -129,9 +138,7 @@ export default async function EditAchievementPackPage({
                 name="starts_at"
                 type="datetime-local"
                 defaultValue={
-                  pack.starts_at
-                    ? new Date(pack.starts_at).toISOString().slice(0, 16)
-                    : ""
+                  pack.starts_at ? toDateTimeLocalValue(pack.starts_at) : ""
                 }
               />
             </div>
@@ -144,9 +151,7 @@ export default async function EditAchievementPackPage({
                 name="ends_at"
                 type="datetime-local"
                 defaultValue={
-                  pack.ends_at
-                    ? new Date(pack.ends_at).toISOString().slice(0, 16)
-                    : ""
+                  pack.ends_at ? toDateTimeLocalValue(pack.ends_at) : ""
                 }
               />
             </div>
