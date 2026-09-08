@@ -36,6 +36,7 @@ export interface StoreAchievementPack {
 
   owned: boolean;
   availableForPurchase: boolean;
+  hasEnded: boolean;
 
   totalAchievements: number;
   collectedAchievements: number;
@@ -60,10 +61,10 @@ export async function getStoreAchievementPacks(): Promise<
       price_cents,
       currency,
       starts_at,
-      ends_at
+      ends_at,
+      status
     `,
     )
-    .eq("status", "active")
     .neq("pack_type", "core");
 
   if (packsError) {
@@ -126,54 +127,66 @@ export async function getStoreAchievementPacks(): Promise<
     }
   }
 
-  return packs.map((pack) => {
-    const packAchievements =
-      achievements?.filter((achievement) => achievement.pack_id === pack.id) ??
-      [];
+  const now = Date.now();
 
-    const collectedCount = packAchievements.filter((achievement) =>
-      collectedAchievementIds.has(achievement.id),
-    ).length;
+  return packs
+    .map((pack) => {
+      const packAchievements =
+        achievements?.filter(
+          (achievement) => achievement.pack_id === pack.id,
+        ) ?? [];
 
-    const owned = ownedPackIds.has(pack.id);
+      const collectedCount = packAchievements.filter((achievement) =>
+        collectedAchievementIds.has(achievement.id),
+      ).length;
 
-    const now = Date.now();
+      const owned = ownedPackIds.has(pack.id);
 
-    const startsAt = pack.starts_at ? new Date(pack.starts_at).getTime() : null;
+      const startsAt = pack.starts_at
+        ? new Date(pack.starts_at).getTime()
+        : null;
 
-    const endsAt = pack.ends_at ? new Date(pack.ends_at).getTime() : null;
+      const endsAt = pack.ends_at ? new Date(pack.ends_at).getTime() : null;
 
-    const hasStarted = startsAt === null || now >= startsAt;
+      const hasStarted = startsAt === null || now >= startsAt;
 
-    const hasEnded = endsAt !== null && now > endsAt;
+      const hasEnded = endsAt !== null && now > endsAt;
 
-    const availableForPurchase =
-      !owned && hasStarted && !hasEnded && Boolean(pack.price_cents);
+      const isActive = pack.status === "active";
 
-    return {
-      id: pack.id,
-      name: pack.name,
-      slug: pack.slug,
-      description: pack.description,
-      cover_image_path: pack.cover_image_path,
-      theme_key: pack.theme_key,
-      price_cents: pack.price_cents,
-      currency: pack.currency,
-      starts_at: pack.starts_at,
-      ends_at: pack.ends_at,
+      const availableForPurchase =
+        !owned &&
+        isActive &&
+        hasStarted &&
+        !hasEnded &&
+        Boolean(pack.price_cents);
 
-      owned,
-      availableForPurchase,
+      return {
+        id: pack.id,
+        name: pack.name,
+        slug: pack.slug,
+        description: pack.description,
+        cover_image_path: pack.cover_image_path,
+        theme_key: pack.theme_key,
+        price_cents: pack.price_cents,
+        currency: pack.currency,
+        starts_at: pack.starts_at,
+        ends_at: pack.ends_at,
 
-      totalAchievements: packAchievements.length,
-      collectedAchievements: collectedCount,
+        owned,
+        availableForPurchase,
+        hasEnded,
 
-      completed:
-        owned &&
-        packAchievements.length > 0 &&
-        collectedCount === packAchievements.length,
-    };
-  });
+        totalAchievements: packAchievements.length,
+        collectedAchievements: collectedCount,
+
+        completed:
+          owned &&
+          packAchievements.length > 0 &&
+          collectedCount === packAchievements.length,
+      };
+    })
+    .filter((pack) => pack.availableForPurchase || pack.owned);
 }
 
 export async function getPublishedAchievementsForPack(

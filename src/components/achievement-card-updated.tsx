@@ -784,7 +784,7 @@ function AchievementCardComponent({
                   className={`${nunito.className}
                     ${
                       isCompact
-                        ? `min-h-10 line-clamp-2 text-xs leading-4`
+                        ? `min-h-10 line-clamp-2 text-xs leading-[0.875rem]`
                         : `min-h-[68px] line-clamp-3 text-xs leading-4`
                     }`}
                 >

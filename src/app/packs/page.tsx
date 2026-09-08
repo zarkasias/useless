@@ -41,8 +41,8 @@ export default async function PacksPage() {
           </h1>
 
           <p className="mt-4 max-w-2xl text-muted-foreground">
-            Unlock themed achievement packs and add completely unnecessary new
-            possibilities to your daily collection.
+            Unlock themed achievement packs and keep track of the completely
+            unnecessary collections you already own.
           </p>
         </header>
 
@@ -54,10 +54,10 @@ export default async function PacksPage() {
           </div>
         ) : (
           <div className="rounded-2xl border border-dashed p-12 text-center">
-            <p className="font-bold">No packs available right now.</p>
+            <p className="font-bold">No achievement packs yet.</p>
 
             <p className="mt-2 text-sm text-muted-foreground">
-              The achievement factory is presumably doing something important.
+              New packs will appear here when they become available.
             </p>
           </div>
         )}

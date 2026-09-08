@@ -69,10 +69,18 @@ export function AchievementPackCard({ pack }: AchievementPackCardProps) {
               </span>
 
               {pack.owned && (
-                <span className="w-[80%] inline-flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-5 py-1 text-xs font-bold text-emerald-200">
-                  <Check className="size-3.5" />
-                  Owned
-                </span>
+                <>
+                  <span className="w-[80%] inline-flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-5 py-1 text-xs font-bold text-emerald-200">
+                    <Check className="size-3.5" />
+                    Owned
+                  </span>
+
+                  {pack.owned && pack.hasEnded && (
+                    <span className="rounded-full border border-white/15 bg-black/15 px-3 py-1 text-xs font-semibold text-white/70">
+                      No longer available
+                    </span>
+                  )}
+                </>
               )}
 
               {!pack.owned && price && (
