@@ -1,4 +1,4 @@
-# Pointless Achievements
+# Useless Achievements
 
 A fun, quirky web application for unlocking and sharing hilariously pointless achievements that celebrate the mundane moments of your digital life.
 
@@ -8,7 +8,7 @@ A fun, quirky web application for unlocking and sharing hilariously pointless ac
 - **Achievement System**: Randomly generates humorous and absurd achievements with varying rarity levels
 - **User Accounts**: Supabase authentication for user registration and login to track achievements
 - **Daily Achievements**: Return daily to unlock new achievements and build your streak
-- **Dashboard**: Filter, sort, and view your growing collection of pointless achievements  
+- **Dashboard**: Filter, sort, and view your growing collection of pointless achievements
 - **Social Sharing**: Share your achievements on social media platforms
 - **Leaderboard**: Compete with others to see who has the most achievements
 
@@ -32,12 +32,14 @@ A fun, quirky web application for unlocking and sharing hilariously pointless ac
 ### Setup
 
 1. Clone the repository:
+
    ```bash
    git clone <repository-url>
    cd achievements
    ```
 
 2. Install dependencies:
+
    ```bash
    npm install
    # or
@@ -62,6 +64,7 @@ A fun, quirky web application for unlocking and sharing hilariously pointless ac
      ```
 
 5. Run the development server:
+
    ```bash
    npm run dev
    # or
@@ -75,6 +78,7 @@ A fun, quirky web application for unlocking and sharing hilariously pointless ac
 Create the following tables in your Supabase project:
 
 ### profiles
+
 ```sql
 create table public.profiles (
   id uuid references auth.users not null primary key,
@@ -100,6 +104,7 @@ create policy "Users can update their own profile." on public.profiles
 ```
 
 ### achievements
+
 ```sql
 create type achievement_type as enum ('COMMON', 'RARE', 'EPIC', 'LEGENDARY');
 
@@ -125,6 +130,7 @@ create policy "Authenticated users can insert achievements." on public.achieveme
 ```
 
 ### user_achievements
+
 ```sql
 create table public.user_achievements (
   id uuid default gen_random_uuid() primary key,
@@ -186,3 +192,20 @@ Contributions are welcome! Feel free to submit a pull request or open an issue i
 ## License
 
 This project is licensed under the MIT License.
+
+## Automated tests
+
+Run `npm test` for a single run, or `npm run test:watch` while developing.
+Run one file with `npm test -- tests/pack-access.test.ts`.
+
+The Vitest suite covers pack eligibility, collection rendering and counts,
+subscription limits, daily claims (including duplicate prevention and timezone
+cooldowns), and Stripe webhook validation and routing. It uses dummy environment
+values and mocked authentication, database, and Stripe boundaries; no credentials,
+running app, or network access are needed.
+
+Database tests check query filters and writes, including the user/pack upsert
+conflict key. They do not verify live Postgres constraints, RLS policies, concurrent
+claims, or Stripe delivery behavior. Collection rendering tests cover the initial
+view; browser interactions and the complete checkout flow still need end-to-end
+coverage.
