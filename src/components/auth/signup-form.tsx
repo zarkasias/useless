@@ -77,6 +77,10 @@ export function SignupForm() {
       callbackUrl.searchParams.set("plan", plan);
     }
 
+    if (next === "/pro") {
+      callbackUrl.searchParams.set("checkout", "1");
+    }
+
     try {
       const { data, error } = await supabase.auth.signUp({
         email: values.email,

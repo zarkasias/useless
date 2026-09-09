@@ -60,13 +60,6 @@ export async function GET(request: Request) {
         return NextResponse.redirect(redirectUrl);
       }
 
-      /**
-       * Password recovery flow.
-       */
-      if (next === "/reset-password") {
-        return NextResponse.redirect(`${origin}/reset-password`);
-      }
-
       /*
        * Normal signup/login confirmation flow.
        */
