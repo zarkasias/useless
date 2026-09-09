@@ -15,9 +15,14 @@ const fontSans = FontSans({
 });
 
 export const metadata: Metadata = {
-  title: "Useless Achievements - Unlock Hilariously Useless Digital Awards",
-  description: "Unlock and share hilariously useless achievements!",
-  metadataBase: new URL("https://uselessachievements.com"),
+  title: {
+    default:
+      "Useless Achievements - Collect Ridiculously Pointless Achievements",
+    template: "%s | Useless Achievements",
+  },
+  description:
+    "Collect hilariously useless achievements, build your collection, keep a daily streak, climb the leaderboard, and unlock themed achievement packs.",
+  metadataBase: new URL("https://www.uselessachievements.com"),
   manifest: "/manifest.json",
   keywords: [
     "useless achievements",
@@ -33,7 +38,7 @@ export const metadata: Metadata = {
   authors: [
     {
       name: "Useless Achievements Team",
-      url: "https://uselessachievements.com",
+      url: "https://www.uselessachievements.com",
     },
   ],
   creator: "Useless Achievements",
@@ -41,10 +46,11 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://uselessachievements.com",
-    title: "Useless Achievements - Unlock Hilariously Useless Digital Awards",
+    url: "https://www.uselessachievements.com",
+
+    title: "Useless Achievements - Collect Ridiculously Pointless Achievements",
     description:
-      "Collect and share fun, absurd achievements that celebrate life's mundane moments. Unlock your first achievement today!",
+      "Collect absurd daily achievements, build your collection, maintain your streak, climb the leaderboard, and unlock themed packs.",
     siteName: "Useless Achievements",
     images: [
       {
@@ -58,9 +64,9 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     site: "@zarkasias",
-    title: "Useless Achievements - Celebrate Life's Funniest Moments!",
+    title: "Useless Achievements - Celebrate Absoluteley Nothing",
     description:
-      "Unlock and share hilariously pointless milestones. Track your absurd achievements now!",
+      "Collect absurd daily achievements, build your collection, maintain your streak, climb the leaderboard, and unlock themed packs.",
     images: [
       {
         url: "/og-image.png",
@@ -80,9 +86,9 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: "https://uselessachievements.com",
+    canonical: "https://www.uselessachievements.com",
     languages: {
-      "en-US": "https://uselessachievements.com",
+      "en-US": "https://www.uselessachievements.com",
     },
   },
   other: {
