@@ -2,110 +2,244 @@ import Link from "next/link";
 
 export default function PrivacyPolicy() {
   return (
-    <div className="container mx-auto py-12 px-4 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-6">Privacy Policy</h1>
-      
-      <div className="space-y-6">
+    <div className="container mx-auto max-w-4xl px-4 py-12">
+      <h1 className="mb-2 text-3xl font-bold">Privacy Policy</h1>
+
+      <p className="mb-8 text-sm text-muted-foreground">
+        Effective September 7, 2026
+      </p>
+
+      <div className="space-y-8">
         <section>
-          <h2 className="text-2xl font-semibold mb-3">1. Introduction</h2>
-          <p className="mb-2">
-            Welcome to Useless Achievements. We respect your privacy and are committed to protecting your personal data.
-            This privacy policy explains how we collect, use, and share information about you when you use our website and services.
-          </p>
+          <h2 className="mb-3 text-2xl font-semibold">1. Introduction</h2>
+
           <p>
-            Please read this privacy policy carefully. If you do not agree with our policies, please do not use our services.
+            Useless Achievements respects your privacy. This Privacy Policy
+            explains what information we collect, how we use it, and the choices
+            available to you when you use our website and services.
           </p>
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-3">2. Information We Collect</h2>
-          <p className="mb-2">We may collect the following types of information:</p>
-          <ul className="list-disc pl-6 space-y-1">
-            <li>Personal information (name, email address) when you create an account</li>
-            <li>Usage data about how you interact with our service</li>
-            <li>Device information including IP address and browser type</li>
-            <li>Cookies and similar tracking technologies</li>
-          </ul>
-          
-          <h3 className="text-xl font-semibold mt-4 mb-2">Analytics</h3>
+          <h2 className="mb-3 text-2xl font-semibold">
+            2. Information We Collect
+          </h2>
+
           <p className="mb-2">
-            We use Google Analytics to help us understand how visitors interact with our website. 
-            Google Analytics uses cookies and similar technologies to collect information about your use of our services 
-            and provides us with anonymized statistics about user behavior.
+            Depending on how you use Useless Achievements, we may collect:
           </p>
+
+          <ul className="list-disc space-y-1 pl-6">
+            <li>
+              Account information, such as your email address, username, profile
+              information, and account preferences
+            </li>
+
+            <li>
+              Achievement activity, including achievements unlocked, streaks,
+              packs associated with your account, and related progress
+            </li>
+
+            <li>
+              Subscription and purchase information, including which plans or
+              achievement packs you have purchased
+            </li>
+
+            <li>Usage information about how you interact with the service</li>
+
+            <li>
+              Device and technical information such as browser type, device
+              type, IP address, and approximate location derived from your
+              network connection
+            </li>
+
+            <li>
+              Cookies and similar technologies used to operate and understand
+              the service
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 className="mb-3 text-2xl font-semibold">3. Payments</h2>
+
+          <p className="mb-2">
+            Purchases and subscription payments are processed by third-party
+            payment processors. We may receive information about the
+            transaction, such as the payment status, purchased product,
+            subscription status, and transaction identifiers.
+          </p>
+
           <p>
-            You can learn more about how Google Analytics collects and processes data by visiting: 
-            <Link href="https://policies.google.com/technologies/partner-sites" className="text-blue-600 hover:underline ml-1" target="_blank" rel="noopener noreferrer">
-              Google Analytics Privacy Policy
+            Useless Achievements does not store your full payment card number or
+            card security code.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="mb-3 text-2xl font-semibold">4. Analytics</h2>
+
+          <p className="mb-2">
+            We may use analytics services such as Google Analytics to help us
+            understand how visitors use Useless Achievements. Analytics services
+            may use cookies or similar technologies to collect information about
+            visits and interactions with the service.
+          </p>
+
+          <p>
+            You can learn more about how Google processes information at{" "}
+            <Link
+              href="https://policies.google.com/technologies/partner-sites"
+              className="text-blue-600 hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Google&apos;s partner sites privacy information
             </Link>
+            .
           </p>
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-3">3. How We Use Your Information</h2>
-          <p className="mb-2">We use your information to:</p>
-          <ul className="list-disc pl-6 space-y-1">
-            <li>Provide, maintain, and improve our services</li>
-            <li>Process transactions and manage your account</li>
-            <li>Send notifications related to your account or activity</li>
-            <li>Respond to your comments and questions</li>
-            <li>Monitor and analyze trends and usage</li>
+          <h2 className="mb-3 text-2xl font-semibold">
+            5. How We Use Your Information
+          </h2>
+
+          <p className="mb-2">We may use your information to:</p>
+
+          <ul className="list-disc space-y-1 pl-6">
+            <li>Provide and operate Useless Achievements</li>
+            <li>Create and manage your account</li>
+            <li>Track achievements, streaks, and progress</li>
+            <li>Manage subscriptions and achievement pack purchases</li>
+            <li>Provide access to content associated with your purchases</li>
+            <li>Process account and service-related communications</li>
+            <li>Respond to support requests</li>
+            <li>Detect abuse, fraud, or security issues</li>
+            <li>Analyze and improve the service</li>
           </ul>
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-3">4. Sharing Your Information</h2>
+          <h2 className="mb-3 text-2xl font-semibold">
+            6. Sharing Your Information
+          </h2>
+
+          <p className="mb-2">We do not sell your personal information.</p>
+
           <p className="mb-2">
-            We do not sell your personal information. We may share your information in the following situations:
+            We may share information with service providers that help us operate
+            Useless Achievements, including providers that support:
           </p>
-          <ul className="list-disc pl-6 space-y-1">
-            <li>With service providers who help us operate our business</li>
-            <li>To comply with legal obligations</li>
-            <li>With your consent or at your direction</li>
+
+          <ul className="list-disc space-y-1 pl-6">
+            <li>Website hosting and infrastructure</li>
+            <li>Authentication and account management</li>
+            <li>Payment processing</li>
+            <li>Email delivery</li>
+            <li>Analytics</li>
+            <li>Security and fraud prevention</li>
           </ul>
-        </section>
 
-        <section>
-          <h2 className="text-2xl font-semibold mb-3">5. Data Security</h2>
-          <p>
-            We implement appropriate security measures to protect your personal information.
-            However, no internet transmission is completely secure, and we cannot guarantee the security of information you provide.
+          <p className="mt-2">
+            We may also disclose information when required by law or when
+            necessary to protect the rights, safety, or security of our users,
+            our service, or others.
           </p>
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-3">6. Your Rights</h2>
+          <h2 className="mb-3 text-2xl font-semibold">7. Data Retention</h2>
+
+          <p>
+            We retain information for as long as reasonably necessary to provide
+            the service, maintain your account, comply with legal obligations,
+            resolve disputes, and enforce our agreements.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="mb-3 text-2xl font-semibold">8. Data Security</h2>
+
+          <p>
+            We use reasonable administrative and technical safeguards designed
+            to protect your information. However, no method of transmission or
+            storage on the internet can be guaranteed to be completely secure.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="mb-3 text-2xl font-semibold">
+            9. Your Choices and Rights
+          </h2>
+
           <p className="mb-2">
-            Depending on your location, you may have certain rights regarding your personal information, including:
+            Depending on your location, you may have rights regarding your
+            personal information, including the ability to:
           </p>
-          <ul className="list-disc pl-6 space-y-1">
-            <li>Access to your personal information</li>
-            <li>Correction of inaccurate information</li>
-            <li>Deletion of your information</li>
-            <li>Objection to certain processing of your information</li>
+
+          <ul className="list-disc space-y-1 pl-6">
+            <li>Request access to your personal information</li>
+            <li>Correct inaccurate information</li>
+            <li>Request deletion of your account or personal information</li>
+            <li>Object to or restrict certain processing</li>
           </ul>
-          
-          <h3 className="text-xl font-semibold mt-4 mb-2">Opting Out of Analytics</h3>
+        </section>
+
+        <section>
+          <h2 className="mb-3 text-2xl font-semibold">10. Analytics Choices</h2>
+
           <p>
-            You can opt out of Google Analytics tracking by using the Google Analytics Opt-Out Browser Add-on, available at:
-            <Link href="https://tools.google.com/dlpage/gaoptout" className="text-blue-600 hover:underline ml-1" target="_blank" rel="noopener noreferrer">
-              https://tools.google.com/dlpage/gaoptout
+            You may be able to limit analytics tracking through your browser
+            settings or through the{" "}
+            <Link
+              href="https://tools.google.com/dlpage/gaoptout"
+              className="text-blue-600 hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Google Analytics Opt-Out Browser Add-on
             </Link>
+            .
           </p>
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-3">7. Changes to This Policy</h2>
+          <h2 className="mb-3 text-2xl font-semibold">
+            11. Children&apos;s Privacy
+          </h2>
+
           <p>
-            We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page
-            and updating the effective date.
+            Useless Achievements is not intended for children under the age of
+            13, and we do not knowingly collect personal information from
+            children under 13.
           </p>
         </section>
 
         <section>
-          <h2 className="text-2xl font-semibold mb-3">8. Contact Us</h2>
+          <h2 className="mb-3 text-2xl font-semibold">
+            12. Changes to This Policy
+          </h2>
+
           <p>
-            If you have any questions about this privacy policy, please contact us at info@uselessachievements.com.
+            We may update this Privacy Policy from time to time. When we do, we
+            will post the updated policy on this page and update the effective
+            date above.
+          </p>
+        </section>
+
+        <section>
+          <h2 className="mb-3 text-2xl font-semibold">13. Contact Us</h2>
+
+          <p>
+            Questions about this Privacy Policy can be sent to{" "}
+            <a
+              href="mailto:info@uselessachievements.com"
+              className="text-blue-600 hover:underline"
+            >
+              info@uselessachievements.com
+            </a>
+            .
           </p>
         </section>
       </div>
@@ -117,4 +251,4 @@ export default function PrivacyPolicy() {
       </div>
     </div>
   );
-} 
+}
