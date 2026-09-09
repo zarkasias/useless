@@ -1,28 +1,39 @@
-import { MetadataRoute } from 'next';
+import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://uselessachievements.com';
-  
-  // Define the main pages of your application
-  const routes = [
-    '',
-    '/achievements',
-    '/login',
-    '/signup',
-    '/privacy-policy',
-    '/terms-of-service',
-    '/about',
-    '/faq',
-    '/contact',
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL || "https://www.uselessachievements.com";
+
+  return [
+    {
+      url: baseUrl,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 1,
+    },
+    {
+      url: `${baseUrl}/pro`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/faq`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
+    {
+      url: `${baseUrl}/privacy-policy`,
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.2,
+    },
+    {
+      url: `${baseUrl}/terms-of-service`,
+      lastModified: new Date(),
+      changeFrequency: "yearly",
+      priority: 0.2,
+    },
   ];
-
-  // Generate sitemap entries for the main routes
-  const routeEntries = routes.map(route => ({
-    url: `${baseUrl}${route}`,
-    lastModified: new Date(),
-    changeFrequency: route === '' ? 'daily' : 'weekly',
-    priority: route === '' ? 1.0 : 0.8,
-  })) as MetadataRoute.Sitemap;
-
-  return routeEntries;
-} 
+}
