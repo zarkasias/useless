@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import HomeClient from "@/app/home/home-client";
 
 import {
@@ -7,6 +8,12 @@ import {
 
 import { getUserEntitlements } from "@/lib/services/entitlement-service-server";
 import { getStoreAchievementPacks } from "@/lib/services/pack-store-service-server";
+
+export const metadata: Metadata = {
+  title: "Useless Achievements - Collect Ridiculously Pointless Achievements",
+  description:
+    "Collect hilariously useless achievements, build your collection, keep a streak, and compete on the leaderboard.",
+};
 
 export default async function HomePage() {
   const user = await getAuthenticatedUser();
