@@ -389,7 +389,7 @@ function AchievementCardComponent({
       ctx.stroke();
 
       ctx.fillStyle = isDarkMode ? "#f3f4f6" : "#374151";
-      ctx.font = "600 11px system-ui, -apple-system, sans-serif";
+      ctx.font = `600 11px ${nunito.style.fontFamily}`;
 
       wrapText(ctx, shareText, shareX + 12, shareY + 16, shareWidth - 24, 14);
 
