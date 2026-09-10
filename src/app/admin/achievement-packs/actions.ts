@@ -68,6 +68,8 @@ export async function updateAchievementPack(formData: FormData) {
 
   const packType = String(formData.get("pack_type") ?? "seasonal");
 
+  const themeKey = String(formData.get("theme_key") ?? "").trim() || null;
+
   const status = String(formData.get("status") ?? "draft");
 
   const startsAt = String(formData.get("starts_at") ?? "").trim() || null;
@@ -85,6 +87,7 @@ export async function updateAchievementPack(formData: FormData) {
       slug,
       description,
       pack_type: packType,
+      theme_key: themeKey,
       status,
       starts_at: startsAt,
       ends_at: endsAt,

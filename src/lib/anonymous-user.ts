@@ -75,3 +75,21 @@ export async function updateAnonymousUserTimezone(
 
   return true;
 }
+
+export async function linkAnonymousUserToAuthenticatedUser(
+  anonymousId: string,
+  userId: string,
+): Promise<void> {
+  const { error } = await supabaseAdmin
+    .from("anonymous_users")
+    .update({
+      linked_user_id: userId,
+    })
+    .eq("anonymous_id", anonymousId);
+
+  if (error) {
+    console.error("Error linking anonymous user to authenticated user:", error);
+
+    throw new Error("Unable to link anonymous user.");
+  }
+}

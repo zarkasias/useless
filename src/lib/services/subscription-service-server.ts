@@ -20,12 +20,6 @@ const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
 export async function syncStripeSubscription(
   subscription: Stripe.Subscription,
 ) {
-  console.log("[subscription sync]", {
-    subscriptionId: subscription.id,
-    customer: subscription.customer,
-    status: subscription.status,
-    metadata: subscription.metadata,
-  });
   const userId = subscription.metadata.user_id;
 
   if (!userId) {
@@ -55,15 +49,6 @@ export async function syncStripeSubscription(
     typeof subscription.customer === "string"
       ? subscription.customer
       : subscription.customer.id;
-
-  console.log("[subscription sync] upserting", {
-    userId,
-    subscriptionId: subscription.id,
-    customerId,
-    priceId: price?.id,
-    billingInterval,
-    status: subscription.status,
-  });
 
   const { error } = await supabaseAdmin.from("subscriptions").upsert(
     {

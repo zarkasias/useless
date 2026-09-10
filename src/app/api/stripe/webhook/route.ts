@@ -58,8 +58,6 @@ export async function POST(request: Request) {
     );
   }
 
-  console.log("Stripe webhook received:", event.type);
-
   switch (event.type) {
     case "customer.subscription.created":
     case "customer.subscription.updated": {
@@ -122,8 +120,6 @@ export async function POST(request: Request) {
         stripePaymentIntentId: paymentIntentId,
         stripeCustomerId: customerId,
       });
-
-      console.log(`Achievement pack ${packId} granted to user ${userId}`);
 
       break;
     }
