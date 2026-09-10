@@ -237,7 +237,7 @@ export default function ProClient({
                 </p>
 
                 <div className="mt-6 space-y-3">
-                  <Feature text="5 free achievements" />
+                  <Feature text="10 free achievements" />
                   <Feature text="Achievement collection" />
                   <Feature text="Basic leaderboard access" />
                   <Feature text="Daily streak tracking" />
@@ -348,8 +348,8 @@ export default function ProClient({
             {/* Bottom reassurance */}
             <div className="mx-auto mt-10 max-w-2xl text-center">
               <p className="text-sm text-muted-foreground">
-                No complicated tiers. No mysterious enterprise pricing. Just
-                five free achievements or unlimited pointless progress.
+                No complicated tiers. No mysterious enterprise pricing. Just ten
+                free achievements or unlimited pointless progress.
               </p>
             </div>
           </div>
