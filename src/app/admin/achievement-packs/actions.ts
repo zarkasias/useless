@@ -76,6 +76,9 @@ export async function updateAchievementPack(formData: FormData) {
 
   const endsAt = String(formData.get("ends_at") ?? "").trim() || null;
 
+  const coverImagePath =
+    String(formData.get("cover_image_path")).trim() || null;
+
   if (!id || !name || !slug) {
     throw new Error("Pack id, name, and slug are required.");
   }
@@ -88,6 +91,7 @@ export async function updateAchievementPack(formData: FormData) {
       description,
       pack_type: packType,
       theme_key: themeKey,
+      cover_image_path: coverImagePath,
       status,
       starts_at: startsAt,
       ends_at: endsAt,

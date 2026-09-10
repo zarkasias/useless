@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+
 import {
   getAchievementPackById,
   getAchievementsForPack,
@@ -111,6 +112,17 @@ export default async function EditAchievementPackPage({
               <option value="event">Event</option>
               <option value="special">Special</option>
             </select>
+          </div>
+
+          <div className="space-y-3">
+            <Label htmlFor="cover_image">Pack icon path</Label>
+
+            <Input
+              id="cover_image_path"
+              name="cover_image_path"
+              defaultValue={pack.cover_image_path ?? ""}
+              placeholder="/icons/packs/holiday-pack.png"
+            />
           </div>
 
           <div className="space-y-2">

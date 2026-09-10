@@ -15,6 +15,7 @@ export interface AchievementPack {
   starts_at: string | null;
   ends_at: string | null;
   status: AchievementPackStatus;
+  cover_image_path: string | null;
   created_at: string;
   updated_at: string;
   stripe_product_id: string | null;
