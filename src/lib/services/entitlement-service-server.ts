@@ -15,7 +15,7 @@ if (!serviceRoleKey) {
 
 const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
 
-const FREE_ACHIEVMENT_LIMIT = 5;
+const FREE_ACHIEVMENT_LIMIT = 10;
 
 export interface UserEntitlements {
   achievementCount: number;
@@ -34,7 +34,7 @@ export async function getUserEntitlements(
   userId: string,
 ): Promise<UserEntitlements> {
   const [
-    { count: achievmentCount, error: achievementCountError },
+    { count: achievementCount, error: achievementCountError },
     { data: subscription, error: subscriptionError },
   ] = await Promise.all([
     supabaseAdmin
@@ -75,7 +75,7 @@ export async function getUserEntitlements(
     throw new Error("Unable to determine user entitlements.");
   }
 
-  const count = achievmentCount ?? 0;
+  const count = achievementCount ?? 0;
 
   const ACTIVE_SUBSCRIPTION_STATUSES = ["active", "trialing", "past_due"];
 

@@ -92,7 +92,7 @@ export default function HomeClient({
         <div className="relative z-10 mx-auto max-w-5xl text-center">
           <div className="mx-auto inline-flex -rotate-1 items-center gap-2 rounded-full border-2 border-violet-200 bg-white/90 px-3 py-1.5 text-xs font-bold text-violet-700 shadow-sm backdrop-blur sm:px-4 sm:py-2 sm:text-sm">
             <Sparkles className="size-3.5 sm:size-4" />
-            Five useless achievements are on us
+            Ten useless achievements are on us
           </div>
 
           <h1 className="mx-auto mt-5 max-w-4xl text-4xl font-black leading-[0.95] tracking-tight text-gray-800 sm:mt-6 sm:text-5xl md:text-6xl lg:text-7xl">
@@ -140,7 +140,7 @@ export default function HomeClient({
           </div>
 
           <p className="mt-4 text-xs text-muted-foreground">
-            Start free with 5 achievements. Subscribe if the nonsense gets
+            Start free with 10 achievements. Subscribe if the nonsense gets
             serious.
           </p>
         </div>
@@ -245,7 +245,7 @@ export default function HomeClient({
             </div>
 
             <h2 className="mt-2 text-2xl font-bold tracking-tight text-gray-800">
-              Your first five achievements are free.
+              Your first ten achievements are free.
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
