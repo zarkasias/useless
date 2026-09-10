@@ -114,6 +114,22 @@ export default async function EditAchievementPackPage({
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="theme_key">Theme</Label>
+
+            <select
+              id="theme_key"
+              name="theme_key"
+              defaultValue={pack.theme_key ?? "default"}
+              className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+            >
+              <option value="default">Default</option>
+              <option value="halloween">Halloween</option>
+              <option value="holiday">Holiday</option>
+              <option value="new_years">New Years</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="status">Status</Label>
 
             <select

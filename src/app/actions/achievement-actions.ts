@@ -16,6 +16,7 @@ import type { DailyClaimResult } from "@/lib/services/achievement-service-server
 import {
   createAnonymousUser,
   updateAnonymousUserTimezone,
+  linkAnonymousUserToAuthenticatedUser,
 } from "@/lib/anonymous-user";
 
 const ANONYMOUS_COOKIE = "anonymous_user_id";
@@ -46,7 +47,38 @@ export async function claimDailyAchievementAction(
   // --------------------------------------------------
 
   if (user) {
-    return await claimDailyAchievementForAuthenticatedUser();
+    const result = await claimDailyAchievementForAuthenticatedUser();
+
+    if (result.status === "claimed") {
+      const cookieStore = await cookies();
+
+      const existingAnonymousId = cookieStore.get(ANONYMOUS_COOKIE)?.value;
+
+      let anonymousId: string;
+
+      if (existingAnonymousId) {
+        anonymousId = existingAnonymousId;
+      } else {
+        const anonymousUser = await createAnonymousUser();
+        anonymousId = anonymousUser.anonymous_id;
+
+        anonymousId = anonymousUser.anonymous_id;
+
+        cookieStore.set({
+          name: ANONYMOUS_COOKIE,
+          value: anonymousId,
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 60 * 60 * 24 * 365,
+        });
+      }
+
+      await linkAnonymousUserToAuthenticatedUser(anonymousId, user.id);
+    }
+
+    return result;
   }
 
   // --------------------------------------------------

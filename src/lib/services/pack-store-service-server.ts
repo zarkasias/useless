@@ -2,7 +2,10 @@ import "server-only";
 
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 
-import { getAuthenticatedUser } from "@/lib/services/achievement-service-server";
+import {
+  getAuthenticatedUser,
+  getAuthenticatedUserProfile,
+} from "@/lib/services/achievement-service-server";
 
 import type { Achievement } from "@/lib/supabase";
 
@@ -47,6 +50,8 @@ export async function getStoreAchievementPacks(): Promise<
   StoreAchievementPack[]
 > {
   const user = await getAuthenticatedUser();
+
+  const profile = await getAuthenticatedUserProfile();
 
   const { data: packs, error: packsError } = await supabaseAdmin
     .from("achievement_packs")
@@ -186,7 +191,10 @@ export async function getStoreAchievementPacks(): Promise<
           collectedCount === packAchievements.length,
       };
     })
-    .filter((pack) => pack.availableForPurchase || pack.owned);
+    .filter(
+      (pack) =>
+        profile?.role === "admin" || pack.availableForPurchase || pack.owned,
+    );
 }
 
 export async function getPublishedAchievementsForPack(

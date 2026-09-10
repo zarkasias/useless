@@ -20,5 +20,6 @@ export interface AchievementPack {
   stripe_product_id: string | null;
   stripe_price_id: string | null;
   price_cents: number | null;
+  theme_key: string | null;
   currency: string | null;
 }

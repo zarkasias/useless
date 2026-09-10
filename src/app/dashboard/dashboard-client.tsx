@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -9,7 +10,7 @@ import { StreakCalendar } from "@/components/dashboard/streak-calendar";
 import { UnlockAchievement } from "@/components/unlock-achievement";
 import { Timezonesync } from "@/components/timezone-sync";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Flame, Trophy, Target, Check } from "lucide-react";
+import { ArrowRight, Flame, Trophy, Check, LoaderCircle } from "lucide-react";
 import { Achievement, UserProfile } from "@/lib/supabase";
 
 import {
@@ -49,13 +50,15 @@ export default function DashboardClient({
   const [unlockedAchievement, setUnlockedAchievement] =
     useState<Achievement | null>(null);
   const [showAchievementModal, setShowAchievementModal] = useState(false);
+  const [isClaimingAchievement, setIsClaimingAchievement] = useState(false);
 
   const featuredPack = initialPacks[0];
 
   const handleDailyAchievement = async () => {
-    if (!user) return;
+    if (!user || isClaimingAchievement) return;
 
     try {
+      setIsClaimingAchievement(true);
       const result = await claimDailyAchievementAction();
 
       if (result.status === "already_claimed") {
@@ -87,8 +90,9 @@ export default function DashboardClient({
       toast.success("Today's achievement unlocked!");
     } catch (error) {
       console.error("Error claiming daily achievement:", error);
-
       toast.error("Something went wrong");
+    } finally {
+      setIsClaimingAchievement(false);
     }
   };
 
@@ -147,7 +151,7 @@ export default function DashboardClient({
                         going.
                       </p>
 
-                      <div className="mt-6 inline-flex w-fit items-center gap-2 rounded-lg bg-muted px-4 py-3 text-sm font-medium">
+                      <div className="mt-6 min-w-[260px] justfiy-center inline-flex w-fit items-center gap-2 rounded-lg bg-muted px-4 py-3 text-sm font-medium">
                         <Check className="size-5 text-gray-700" />
                         Achievement claimed
                       </div>
@@ -166,12 +170,29 @@ export default function DashboardClient({
                       <Button
                         onClick={handleDailyAchievement}
                         size="lg"
-                        className="mt-6 font-black bg-gradient-to-br from-violet-600 via-indigo-900 to-blue-600"
+                        disabled={isClaimingAchievement}
+                        className="mt-6 
+    min-w-[260px] justfiy-center shadow-lg shadow-indigo-500/25 hover:from-violet-500 hover:via-indigo-500 hover:to-blue-400 font-black bg-gradient-to-br from-violet-600 via-indigo-600 to-blue-600"
                       >
-                        <span className="mr-2 rounded-full p-0.5 bg-white">
-                          <Target className="size-5 text-red-500" />
-                        </span>
-                        Claim Today&apos;s Achievement
+                        {isClaimingAchievement ? (
+                          <>
+                            <LoaderCircle className="mr-2 size-5 animate-spin" />
+                            Claiming achievement...
+                          </>
+                        ) : (
+                          <>
+                            <span className="mr-2 p-0.5">
+                              <Image
+                                alt="Claim Achievement"
+                                width={38}
+                                height={38}
+                                className="w-8 h-8 bg-transparent -scale-x-100"
+                                src="/icons/target.webp"
+                              />
+                            </span>
+                            Claim Today&apos;s Achievement
+                          </>
+                        )}
                       </Button>
                     </>
                   )}

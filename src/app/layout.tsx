@@ -190,17 +190,15 @@ function ProductHuntBadge() {
   return (
     <div className="fixed bottom-4 left-4 z-50">
       <a
-        href="https://www.producthunt.com/posts/useless-achievements?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-useless&#0045;achievements"
+        href="https://www.producthunt.com/products/useless-achievements?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-useless-achievements-2"
         target="_blank"
         rel="noopener noreferrer"
       >
         <Image
-          src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=943979&theme=neutral&t=1742414567377"
-          alt="Useless&#0032;Achievements - Unlock&#0032;hilariously&#0032;useless&#0032;digital&#0032;awards | Product Hunt"
-          style={{ width: "250px", height: "54px" }}
-          priority
+          alt="Useless Achievements - Earn ridiculous digital awards, build an unnecessary streak! | Product Hunt"
           width="250"
           height="54"
+          src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1246099&amp;theme=light&amp;t=1789058787565"
         />
       </a>
     </div>
