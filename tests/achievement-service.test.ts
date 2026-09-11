@@ -11,6 +11,7 @@ vi.mock("@/lib/anonymous-user", () => ({ getAnonymousUser: mocks.anonymous }));
 import {
   getCollectionAchievements, getAuthenticatedUserAchievements,
   claimDailyAchievementForAuthenticatedUser, claimDailyAchievementForAnonymousUser,
+  mergeAnonymousAchievementsIntoCurrentUser,
 } from "@/lib/services/achievement-service-server";
 
 let db: ReturnType<typeof database>;
@@ -24,6 +25,39 @@ beforeEach(() => {
   mocks.anonymous.mockResolvedValue({ id: "anon-1", timezone: "UTC" });
   vi.useFakeTimers(); vi.setSystemTime(new Date(now));
   vi.spyOn(console, "error").mockImplementation(() => {});
+});
+it.each([
+  [10, false, 0],
+  [9, false, 1],
+  [8, false, 2],
+  [10, true, 2],
+])("migration with %s awards and subscribed=%s imports %s", async (count, subscribed, expected) => {
+  mocks.entitlements.mockResolvedValue({
+    isSubscribed: subscribed,
+    remainingFreeAchievements: Math.max(10 - count, 0),
+  });
+  db.enqueue("anonymous_achievements", { data: [
+    { achievement_id: "first", achievement_date: "2026-09-06", created_at: now },
+    { achievement_id: "second", achievement_date: "2026-09-07", created_at: now },
+  ] });
+  for (let i = 0; i < expected; i++) {
+    db.enqueue("user_achievements", { data: [] });
+    db.enqueue("user_achievements", {});
+  }
+  db.enqueue("anonymous_achievements", {});
+  db.enqueue("anonymous_users", {});
+  expect(await mergeAnonymousAchievementsIntoCurrentUser("browser-1")).toEqual({
+    migrated: expected, skipped: 2 - expected,
+  });
+  expect(mocks.entitlements).toHaveBeenCalledWith("user-1");
+  expect(db.queries.reduce((total, query) => total + query.insert.mock.calls.length, 0)).toBe(expected);
+});
+
+it("does not migrate or clean up claims when entitlement lookup fails", async () => {
+  db.enqueue("anonymous_achievements", { data: [{ achievement_id: "first" }] });
+  mocks.entitlements.mockRejectedValueOnce(new Error("Entitlements unavailable"));
+  await expect(mergeAnonymousAchievementsIntoCurrentUser("browser-1")).rejects.toThrow("Entitlements unavailable");
+  expect(db.queries.every(query => query.insert.mock.calls.length === 0 && query.delete.mock.calls.length === 0)).toBe(true);
 });
 it("scopes the published collection catalog to the user's accessible packs", async () => {
   const catalog = db.enqueue("achievements", { data: [{ id: "visible" }] });
@@ -96,6 +130,23 @@ it("does not award duplicates when the eligible pool is exhausted", async () => 
 it("does not report a claim as successful when the insert fails", async () => {
   beginClaim(); finishClaim(); db.enqueue("user_achievements", { error: { code: "23505" } });
   expect((await claimDailyAchievementForAuthenticatedUser()).status).toBe("unavailable");
+});
+it("reports subscription required if another request fills the last slot", async () => {
+  beginClaim(); finishClaim();
+  db.enqueue("user_achievements", { error: { code: "23514", message: "Free achievement limit reached" } });
+  expect((await claimDailyAchievementForAuthenticatedUser()).status).toBe("subscription_required");
+});
+
+it("counts a database-rejected migration award as skipped", async () => {
+  mocks.entitlements.mockResolvedValue({ isSubscribed: false, remainingFreeAchievements: 1 });
+  db.enqueue("anonymous_achievements", { data: [
+    { achievement_id: "first", achievement_date: "2026-09-06", created_at: now },
+  ] });
+  db.enqueue("user_achievements", { data: [] });
+  db.enqueue("user_achievements", { error: { code: "23514", message: "Free achievement limit reached" } });
+  db.enqueue("anonymous_achievements", {});
+  db.enqueue("anonymous_users", {});
+  expect(await mergeAnonymousAchievementsIntoCurrentUser("browser-1")).toEqual({ migrated: 0, skipped: 1 });
 });
 it("uses anonymous pack eligibility for anonymous daily claims", async () => {
   db.enqueue("anonymous_achievements", { data: null });

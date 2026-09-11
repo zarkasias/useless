@@ -9,6 +9,7 @@ export function database() {
       or: vi.fn().mockReturnThis(), order: vi.fn().mockReturnThis(),
       limit: vi.fn().mockReturnThis(), insert: vi.fn().mockReturnThis(),
       upsert: vi.fn().mockReturnThis(), single: vi.fn().mockReturnThis(),
+      delete: vi.fn().mockReturnThis(), update: vi.fn().mockReturnThis(),
       maybeSingle: vi.fn().mockReturnThis(),
       then: (resolve: (value: unknown) => unknown) => Promise.resolve({ data: null, error: null, ...result }).then(resolve),
     };
