@@ -282,7 +282,7 @@ export default function HomeClient({
       </section>
 
       {/* Final CTA */}
-      <section className="bg-background px-4 py-20 text-center">
+      <section className="bg-background px-4 py-10 text-center">
         <div className="mx-auto max-w-2xl">
           <h2 className="text-3xl font-bold tracking-tight text-gray-800">
             Today&apos;s achievement isn&apos;t going to claim itself.
