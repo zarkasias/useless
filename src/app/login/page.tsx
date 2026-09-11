@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Image from "next/image";
 import { Sparkles } from "lucide-react";
+import { safeLoginRedirect } from "@/lib/auth/safe-redirect";
 
 export default async function LoginPage({
   searchParams,
@@ -14,7 +15,7 @@ export default async function LoginPage({
 }) {
   const { next } = await searchParams;
 
-  const redirectTo = next && next.startsWith("/") ? next : "/dashboard";
+  const redirectTo = safeLoginRedirect(next);
   const supabase = await createClient();
 
   const {

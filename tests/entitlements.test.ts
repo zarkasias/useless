@@ -6,9 +6,9 @@ import { getUserEntitlements } from "@/lib/services/entitlement-service-server";
 let db: ReturnType<typeof database>;
 beforeEach(() => { db = database(); mocks.from.mockImplementation(db.from); });
 it.each([
-  [0, null, true, 5], [4, null, true, 1], [5, null, false, 0], [6, null, false, 0],
-  [5, "active", true, 0], [5, "trialing", true, 0], [5, "past_due", true, 0],
-  [5, "canceled", false, 0], [5, "unpaid", false, 0],
+  [0, null, true, 10], [9, null, true, 1], [10, null, false, 0], [11, null, false, 0],
+  [10, "active", true, 0], [10, "trialing", true, 0], [10, "past_due", true, 0],
+  [10, "canceled", false, 0], [10, "unpaid", false, 0],
 ])("count %s / subscription %s => eligible %s", async (count, status, eligible, remaining) => {
   const claims = db.enqueue("user_achievements", { count: count as number });
   const subscription = db.enqueue("subscriptions", { data: status ? { status } : null });

@@ -23,6 +23,10 @@ const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
 const DAILY_CLAIM_HOURS = 20;
 const DAILY_CLAIM_COOLDOWN_MS = DAILY_CLAIM_HOURS * 60 * 60 * 1000;
 
+function isFreeLimitError(error: { code?: string; message?: string }): boolean {
+  return error.code === "23514" && error.message === "Free achievement limit reached";
+}
+
 export interface AchievementStreakData {
   currentStreak: number;
   longestStreak: number;
@@ -256,6 +260,9 @@ export async function evaluateAccountAgeAchievementsForAuthenticatedUser(): Prom
         .single();
 
     if (insertError) {
+      if (isFreeLimitError(insertError)) {
+        break;
+      }
       console.error(
         `Error awarding account age achievement ${achievement.title}:`,
         insertError,
@@ -736,6 +743,9 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Daily
     .single();
 
   if (claimError) {
+    if (isFreeLimitError(claimError)) {
+      return { status: "subscription_required", achievement: null };
+    }
     console.error(
       "Error recording authenticated daily achievement:",
       claimError,
@@ -964,10 +974,22 @@ export async function mergeAnonymousAchievementsIntoCurrentUser(
     throw new Error("Unable to migrate anonymous achievements.");
   }
 
+  const entitlements = await getUserEntitlements(user.id);
+  const migrationLimit = entitlements.isSubscribed
+    ? Number.POSITIVE_INFINITY
+    : entitlements.remainingFreeAchievements;
+
   let migrated = 0;
   let skipped = 0;
 
   for (const claim of anonymousClaims ?? []) {
+    // Migration must obey the same free limit as a normal claim, including
+    // awards already added by this batch.
+    if (migrated >= migrationLimit) {
+      skipped++;
+      continue;
+    }
+
     // Check for either type of conflict:
     //
     // 1. User already has an achievement for this date.
@@ -1008,6 +1030,10 @@ export async function mergeAnonymousAchievementsIntoCurrentUser(
       });
 
     if (insertError) {
+      if (isFreeLimitError(insertError)) {
+        skipped++;
+        continue;
+      }
       console.error("Error migrating anonymous achievement:", insertError);
 
       throw new Error("Unable to migrate anonymous achievements.");
