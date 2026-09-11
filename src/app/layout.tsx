@@ -156,6 +156,20 @@ function Footer() {
               />
             </a>
 
+            <a
+              href="https://viberank.dev/apps/Useless%20Achievements"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="https://viberank.dev/badge?app=Useless%20Achievements&theme=dark"
+                width={185}
+                height={40}
+                className="h-10 w-auto"
+                alt="Useless Achievements on VibeRank"
+              />
+            </a>
+
             {/* SaaS Hunt */}
             {/* <a
               href="https://saashunt.best/projects/useless-achievements?utm_source=badge"
