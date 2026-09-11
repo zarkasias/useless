@@ -132,7 +132,7 @@ export const metadata: Metadata = {
 function Footer() {
   return (
     <footer className="border-t">
-      <div className="container flex flex-col items-center gap-6 px-4 py-4">
+      <div className="container flex flex-col items-center gap-6 px-4 py-2">
         {/* Featured badges */}
         <div className="flex flex-col items-center gap-2">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -157,7 +157,7 @@ function Footer() {
             </a>
 
             {/* SaaS Hunt */}
-            <a
+            {/* <a
               href="https://saashunt.best/projects/useless-achievements?utm_source=badge"
               target="_blank"
               rel="noopener noreferrer"
@@ -170,7 +170,7 @@ function Footer() {
                 height={40}
                 className="h-10 w-auto"
               />
-            </a>
+            </a> */}
           </div>
         </div>
 
