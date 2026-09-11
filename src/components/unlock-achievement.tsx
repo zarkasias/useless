@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 import {
   Dialog,
   DialogContent,
@@ -8,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Achievement } from "@/lib/supabase";
 import { AchievementCard } from "@/components/achievement-card-updated";
-// import Link from 'next/link';
 
 interface UnlockAchievementProps {
   achievement: Achievement | null;
@@ -21,7 +21,7 @@ export function UnlockAchievement({
   achievement,
   isOpen,
   onClose,
-  // isLoggedIn = false
+  isLoggedIn = false,
 }: UnlockAchievementProps) {
   // Early return only if modal shouldn't be shown
   if (!isOpen) return null;
@@ -61,19 +61,16 @@ export function UnlockAchievement({
             </div>
           )}
 
-          {/* {!isLoggedIn && achievement && (
-            <div className="w-full mb-4 p-4 bg-gradient-to-r from-primary/10 to-blue-500/10 rounded-lg text-center border border-primary/20">
-              <p className="mb-2 text-sm font-medium">Create an account to save your achievement and unlock more!</p>
-              <div className="flex flex-row gap-2 justify-center">
-                <Button asChild variant="outline" size="sm" className="bg-white/10 hover:bg-primary/20 transition-all duration-300">
-                  <Link href="/login">Login</Link>
-                </Button>
-                <Button asChild size="sm" className="bg-gradient-to-r from-primary to-blue-500 hover:opacity-90 transition-all duration-300 text-white">
-                  <Link href="/signup">Sign Up</Link>
-                </Button>
-              </div>
+          {!isLoggedIn && achievement && (
+            <div className="mb-4 w-full text-center">
+              <p className="mb-3 text-sm text-muted-foreground">
+                A completely pointless achievement. Worth keeping.
+              </p>
+              <Button asChild>
+                <Link href="/signup">Create an account to keep it</Link>
+              </Button>
             </div>
-          )} */}
+          )}
 
           <Button
             onClick={() => {

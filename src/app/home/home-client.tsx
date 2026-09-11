@@ -4,12 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { CalendarDays, Flame, Medal, Sparkles, Trophy } from "lucide-react";
+import { Sparkles, Trophy } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/navbar";
 import { UnlockAchievement } from "@/components/unlock-achievement";
 import { FeaturedPackPromo } from "@/components/packs/featured-pack-promo";
+import { FeatureCard } from "@/components/feature-card";
 
 import { Achievement, UserProfile } from "@/lib/supabase";
 import { claimDailyAchievementAction } from "@/app/actions/achievement-actions";
@@ -34,8 +35,11 @@ export default function HomeClient({
   const [unlockedAchievement, setUnlockedAchievement] =
     useState<Achievement | null>(null);
   const [showAchievementModal, setShowAchievementModal] = useState(false);
+  const [isClaiming, setIsClaiming] = useState(false);
 
   const handleGetDailyAchievement = async () => {
+    if (isClaiming) return;
+    setIsClaiming(true);
     try {
       const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -62,6 +66,8 @@ export default function HomeClient({
     } catch (error) {
       console.error("Error claiming daily achievement:", error);
       toast.error("Something went wrong.");
+    } finally {
+      setIsClaiming(false);
     }
   };
 
@@ -112,21 +118,21 @@ export default function HomeClient({
             <Button
               size="lg"
               onClick={handleGetDailyAchievement}
+              disabled={isClaiming}
+              aria-busy={isClaiming}
               className="h-12 rounded-full bg-gradient-to-r from-violet-600 to-blue-500 px-6 text-base font-bold text-white shadow-lg shadow-violet-500/20 transition-transform hover:scale-105 sm:px-7"
             >
               <Trophy className="mr-2 size-5" />
-              Claim my useless achievement
+              {isClaiming ? "Claiming…" : "Claim my useless achievement"}
             </Button>
 
             {!user ? (
-              <Button
-                size="lg"
-                variant="outline"
-                asChild
-                className="h-12 rounded-full bg-white/90 px-6 font-semibold backdrop-blur sm:px-7"
+              <Link
+                href="/signup"
+                className="text-sm text-gray-700 font-medium underline underline-offset-4"
               >
-                <Link href="/signup">Join the nonsense</Link>
-              </Button>
+                Create an account
+              </Link>
             ) : (
               <Button
                 size="lg"
@@ -140,8 +146,9 @@ export default function HomeClient({
           </div>
 
           <p className="mt-4 text-xs text-muted-foreground">
-            Start free with 10 achievements. Subscribe if the nonsense gets
-            serious.
+            {user
+              ? "Your first 10 achievements are free, claimed one day at a time."
+              : "Try without an account. Create one to keep your collection."}
           </p>
         </div>
 
@@ -180,27 +187,29 @@ export default function HomeClient({
 
           <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <FeatureCard
-              icon={<CalendarDays className="size-5 text-blue-500" />}
+              variant="daily"
               title="Claim daily"
-              description="Unlock one new achievement each day and discover what completely unnecessary award you earned."
+              description="One new day. One gloriously unnecessary achievement."
             />
 
             <FeatureCard
-              icon={<Flame className="size-5 text-orange-500" />}
+              variant="streak"
               title="Build a streak"
-              description="Come back every day, protect your current streak, and keep an eye on your personal best."
+              rotate="right"
+              description="Come back tomorrow and keep your pointless progress going."
             />
 
             <FeatureCard
-              icon={<Trophy className="size-5 text-amber-500" />}
+              variant="collection"
               title="Grow your collection"
-              description="Collect Common, Rare, Epic, and Legendary achievements in one dedicated collection."
+              description="Collect Common through Legendary awards, then share your pointless glory."
             />
 
             <FeatureCard
-              icon={<Medal className="size-5 text-violet-500" />}
+              variant="leaderboard"
               title="Climb the leaderboard"
-              description="Compare your streak and total achievements with other committed collectors of nonsense."
+              rotate="right"
+              description="See how your streak and collection stack up against fellow collectors."
             />
           </div>
         </div>
@@ -249,9 +258,12 @@ export default function HomeClient({
             </h2>
 
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              Subscribe when you&apos;re ready for unlimited achievements,
-              continued streak progression, and full leaderboard participation.
-              Choose monthly or annual billing and cancel anytime.
+              Keep claiming daily, building your streak, and climbing the
+              leaderboard with Pro.{" "}
+              <span className="font-semibold text-foreground">
+                $2.99/month or $24.99/year.
+              </span>{" "}
+              Cancel anytime.
             </p>
           </div>
 
@@ -283,10 +295,17 @@ export default function HomeClient({
           <Button
             size="lg"
             onClick={handleGetDailyAchievement}
-            className="mt-6 bg-gradient-to-r from-primary to-blue-500 text-white hover:opacity-90"
+            disabled={isClaiming}
+            aria-busy={isClaiming}
+            className="mt-4 bg-gradient-to-r from-primary to-blue-500 text-white hover:opacity-90"
           >
-            Claim today&apos;s achievement
+            {isClaiming ? "Claiming…" : "Claim my useless achievement"}
           </Button>
+          {!user && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              Try without an account. Create one to keep your collection.
+            </p>
+          )}
         </div>
       </section>
 
@@ -298,30 +317,6 @@ export default function HomeClient({
           isLoggedIn={!!user}
         />
       )}
-    </div>
-  );
-}
-
-function FeatureCard({
-  icon,
-  title,
-  description,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  description: string;
-}) {
-  return (
-    <div className="rounded-xl border bg-gray-50/80 p-5 shadow-sm transition-shadow hover:shadow-md">
-      <div className="flex size-10 items-center justify-center rounded-full bg-background shadow-sm">
-        {icon}
-      </div>
-
-      <h3 className="mt-4 font-semibold text-gray-800">{title}</h3>
-
-      <p className="mt-2 text-sm leading-6 text-muted-foreground">
-        {description}
-      </p>
     </div>
   );
 }
