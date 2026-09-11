@@ -131,29 +131,82 @@ export const metadata: Metadata = {
 
 function Footer() {
   return (
-    <footer className="border-t py-6 md:py-0">
-      <div className="container flex flex-col items-center justify-between gap-4 md:h-16 md:flex-row">
-        <p className="text-center text-sm leading-loose text-muted-foreground md:text-left ml-2">
-          © {new Date().getFullYear()} Useless Achievements. All rights
-          reserved.
-        </p>
-        <nav className="flex items-center space-x-4 text-sm">
-          <Link href="/faq" className="text-muted-foreground hover:underline">
-            FAQ
-          </Link>
-          <Link
-            href="/privacy-policy"
-            className="text-muted-foreground hover:underline"
+    <footer className="border-t">
+      <div className="container flex flex-col items-center gap-6 px-4 py-4">
+        {/* Featured badges */}
+        <div className="flex flex-col items-center gap-2">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Featured on
+          </p>
+
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            {/* Product Hunt */}
+            <a
+              href="https://www.producthunt.com/products/useless-achievements?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-useless-achievements-2"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View Useless Achievements on Product Hunt"
+            >
+              <Image
+                src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1246099&theme=light&t=1789058787565"
+                alt="Useless Achievements on Product Hunt"
+                width={185}
+                height={40}
+                className="h-10 w-auto"
+              />
+            </a>
+
+            {/* SaaS Hunt */}
+            <a
+              href="https://saashunt.best/projects/useless-achievements?utm_source=badge"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View Useless Achievements on SaaS Hunt"
+            >
+              <Image
+                src="https://saashunt.best/images/badges/featured-on-light.svg"
+                alt="Useless Achievements featured on SaaS Hunt"
+                width={185}
+                height={40}
+                className="h-10 w-auto"
+              />
+            </a>
+          </div>
+        </div>
+
+        {/* Footer links / copyright */}
+        <div className="flex w-full flex-col items-center justify-between gap-4 border-t pt-5 md:flex-row">
+          <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
+            © {new Date().getFullYear()} Useless Achievements. All rights
+            reserved.
+          </p>
+
+          <nav
+            className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm"
+            aria-label="Footer navigation"
           >
-            Privacy Policy
-          </Link>
-          <Link
-            href="/terms-of-service"
-            className="text-muted-foreground hover:underline"
-          >
-            Terms of Service
-          </Link>
-        </nav>
+            <Link
+              href="/faq"
+              className="text-muted-foreground transition-colors hover:text-foreground"
+            >
+              FAQ
+            </Link>
+
+            <Link
+              href="/privacy-policy"
+              className="text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Privacy Policy
+            </Link>
+
+            <Link
+              href="/terms-of-service"
+              className="text-muted-foreground transition-colors hover:text-foreground"
+            >
+              Terms of Service
+            </Link>
+          </nav>
+        </div>
       </div>
     </footer>
   );
@@ -183,25 +236,6 @@ function StructuredData() {
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
     />
-  );
-}
-
-function ProductHuntBadge() {
-  return (
-    <div className="fixed bottom-4 left-4 z-50">
-      <a
-        href="https://www.producthunt.com/products/useless-achievements?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-useless-achievements-2"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        <Image
-          alt="Useless Achievements - Earn ridiculous digital awards, build an unnecessary streak! | Product Hunt"
-          width="250"
-          height="54"
-          src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1246099&amp;theme=light&amp;t=1789058787565"
-        />
-      </a>
-    </div>
   );
 }
 
@@ -238,7 +272,6 @@ export default function RootLayout({
         <Toaster position="top-right" expand={true} richColors />
         <main className="flex-1">{children}</main>
         <Footer />
-        <ProductHuntBadge />
       </body>
     </html>
   );
