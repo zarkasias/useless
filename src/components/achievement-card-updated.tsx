@@ -20,39 +20,16 @@ import { Button } from "@/components/ui/button";
 import { Achievement, AchievementType } from "@/lib/supabase";
 import { formatDistanceToNow } from "date-fns";
 
+import {
+  typeBorderColors,
+  typeBadgeColors,
+  typeNames,
+  rarityTagClass,
+} from "@/components/achievement-styles";
+
 import Image from "next/image";
 import { fredoka, nunito } from "./utils/title-fonts";
 import { toast } from "sonner";
-
-// Define achievement type colors with more vibrant gradients
-
-const typeBorderColors: Record<AchievementType, string> = {
-  COMMON: "from-gray-100 to-gray-500",
-
-  RARE: "from-gray-100 to-blue-500",
-
-  EPIC: "from-gray-100 to-purple-500",
-
-  LEGENDARY: "from-gray-100 to-amber-500",
-};
-
-const typeBadgeColors: Record<AchievementType, string> = {
-  COMMON: "bg-gradient-to-r from-gray-500 via-gray-400 to-gray-400 text-white",
-
-  RARE: "bg-gradient-to-r from-blue-500 via-blue-400 to-blue-400 text-white",
-
-  EPIC: "bg-gradient-to-r from-purple-500 via-purple-400 to-purple-400 text-white",
-
-  LEGENDARY:
-    "bg-gradient-to-r from-amber-500 via-amber-400 to-amber-400 text-white",
-};
-
-const typeNames: Record<AchievementType, string> = {
-  COMMON: "Common",
-  RARE: "Rare",
-  EPIC: "Epic",
-  LEGENDARY: "Legendary",
-};
 
 // Social media configurations
 // const socialPlatforms = [
@@ -135,18 +112,7 @@ function AchievementCardComponent({
   shadow-sm
 `;
 
-  const tagClass = `
-  inline-flex
-  items-center
-  rounded-full
-  border
-  px-2.5
-  py-1
-  text-xs
-  uppercase
-  font-medium
-  ${typeBadgeColors[type]}
-`;
+  const tagClass = `${rarityTagClass} ${typeBadgeColors[type]}`;
 
   // Format the unlocked time if available
   const timeAgo = unlockedAt
