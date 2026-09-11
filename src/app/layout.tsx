@@ -131,8 +131,8 @@ export const metadata: Metadata = {
 
 function Footer() {
   return (
-    <footer className="border-t">
-      <div className="container flex flex-col items-center gap-6 px-4 py-2">
+    <footer className="border-t w-full">
+      <div className="flex flex-col items-center gap-6 pt-2">
         {/* Featured badges */}
         <div className="flex flex-col items-center gap-2">
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
@@ -189,37 +189,39 @@ function Footer() {
         </div>
 
         {/* Footer links / copyright */}
-        <div className="flex w-full flex-col items-center justify-between gap-4 border-t pt-5 md:flex-row">
-          <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-            © {new Date().getFullYear()} Useless Achievements. All rights
-            reserved.
-          </p>
+        <div className="w-full gap-4 border-t pt-5">
+          <div className="px-5 container flex flex-col md:flex-row items-center justify-between">
+            <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
+              © {new Date().getFullYear()} Useless Achievements. All rights
+              reserved.
+            </p>
 
-          <nav
-            className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm"
-            aria-label="Footer navigation"
-          >
-            <Link
-              href="/faq"
-              className="text-muted-foreground transition-colors hover:text-foreground"
+            <nav
+              className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm"
+              aria-label="Footer navigation"
             >
-              FAQ
-            </Link>
+              <Link
+                href="/faq"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                FAQ
+              </Link>
 
-            <Link
-              href="/privacy-policy"
-              className="text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Privacy Policy
-            </Link>
+              <Link
+                href="/privacy-policy"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Privacy Policy
+              </Link>
 
-            <Link
-              href="/terms-of-service"
-              className="text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Terms of Service
-            </Link>
-          </nav>
+              <Link
+                href="/terms-of-service"
+                className="text-muted-foreground transition-colors hover:text-foreground"
+              >
+                Terms of Service
+              </Link>
+            </nav>
+          </div>
         </div>
       </div>
     </footer>
