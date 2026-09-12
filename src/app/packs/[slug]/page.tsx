@@ -216,12 +216,12 @@ export default async function PackDetailPage({
                       />
                     </div>
 
-                    {isCollected && (
+                    {/* {isCollected && (
                       <div className="absolute right-3 top-3 z-10 flex items-center gap-1 rounded-full bg-emerald-500 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white shadow-sm">
                         <CheckCircle2 className="size-3" />
                         Collected
                       </div>
-                    )}
+                    )} */}
                   </div>
                 );
               })}
