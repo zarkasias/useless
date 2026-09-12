@@ -808,13 +808,13 @@ function AchievementCardComponent({
             <div className="space-y-1"></div>
           </CardHeader>
 
-          {unlockedAt && (
+          {/* {unlockedAt && (
             <CardContent className="pt-0">
               <p className="text-xs text-muted-foreground">
                 Unlocked {timeAgo}
               </p>
             </CardContent>
-          )}
+          )} */}
           {showShareButton && (
             <CardFooter className="flex flex-col pt-0 gap-4">
               {/* Image Preview (if available) */}
