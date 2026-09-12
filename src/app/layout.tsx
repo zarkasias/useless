@@ -5,6 +5,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/sonner";
 import Link from "next/link";
+import { Instagram } from "lucide-react";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
 import Script from "next/script";
 import { IdleSessionManager } from "@/components/auth/idle-session-manager";
@@ -190,11 +191,28 @@ function Footer() {
 
         {/* Footer links / copyright */}
         <div className="w-full gap-4 border-t pt-5">
-          <div className="px-5 container flex flex-col md:flex-row items-center justify-between">
-            <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-              © {new Date().getFullYear()} Useless Achievements. All rights
-              reserved.
-            </p>
+          <div className="px-5 container flex flex-col gap-4 pb-4 md:flex-row items-center justify-between">
+            <div className="flex flex-col items-center md:items-start">
+              <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
+                © {new Date().getFullYear()} Useless Achievements. All rights
+                reserved.
+              </p>
+
+              <nav
+                aria-label="Social media"
+                className="-mt-2 flex items-center gap-1"
+              >
+                <a
+                  href="https://www.instagram.com/uselessachievements/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Useless Achievements on Instagram (opens in a new tab)"
+                  className="inline-flex size-10 items-center justify-center text-muted-foreground transition-colors hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <Instagram className="size-5" aria-hidden="true" />
+                </a>
+              </nav>
+            </div>
 
             <nav
               className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-sm"

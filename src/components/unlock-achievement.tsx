@@ -52,6 +52,7 @@ export function UnlockAchievement({
               </p>
               <AchievementCard
                 achievement={achievement}
+                isCollected={true}
                 showShareButton={true}
               />
             </div>
