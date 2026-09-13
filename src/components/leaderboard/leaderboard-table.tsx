@@ -1,9 +1,16 @@
+import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Medal, Flame, Trophy } from "lucide-react";
 import type { LeaderboardUser } from "@/lib/services/leaderboard-service-server";
-import React from "react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
 
 interface LeaderboardTableProps {
   users: LeaderboardUser[];
@@ -14,6 +21,11 @@ export function LeaderboardTable({
   users,
   isLoading = false,
 }: LeaderboardTableProps) {
+  const [search, setSearch] = useState("");
+  const [sortOrder, setSortOrder] = useState<"highest" | "lowest">("highest");
+  const [page, setPage] = useState(1);
+
+  const pageSize = 10;
   // Function to determine the user's rank icon
   const getRankIcon = (rank: number): React.ReactNode => {
     switch (rank) {
@@ -44,10 +56,67 @@ export function LeaderboardTable({
     }
   };
 
+  const rankedUsers = [...users]
+    .sort(
+      (a, b) =>
+        b.currentStreak - a.currentStreak ||
+        b.achievementCount - a.achievementCount ||
+        a.id.localeCompare(b.id),
+    )
+    .map((user, index) => ({
+      ...user,
+      rank: index + 1,
+    }));
+
+  const searchTerm = search.trim().toLowerCase();
+
+  const matchingUsers = rankedUsers.filter((user) =>
+    user.username.toLowerCase().includes(searchTerm),
+  );
+
+  const displayUsers =
+    sortOrder === "highest" ? matchingUsers : [...matchingUsers].reverse();
+
+  const totalPages = Math.max(1, Math.ceil(displayUsers.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const startIndex = (currentPage - 1) * pageSize;
+  const pageUsers = displayUsers.slice(startIndex, startIndex + pageSize);
+
   return (
-    <Card>
-      <CardHeader>
+    <Card className="scroll-py-4">
+      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-2 pb-2">
         <CardTitle>Achievement Leaders</CardTitle>
+
+        <div className="grid grid-cols-1 gap-2 sm:gap-3 sm:grid-cols-2 w-full sm:w-fit">
+          <div className="min-w-0">
+            <input
+              id="leaderboard-search"
+              type="search"
+              placeholder="Search User…"
+              value={search}
+              onChange={(event) => {
+                setSearch(event.target.value);
+                setPage(1);
+              }}
+              className="h-9 w-full rounded-md border bg-background px-3 text-base"
+            />
+          </div>
+
+          <div>
+            <select
+              id="leaderboard-sort"
+              value={sortOrder}
+              onChange={(event) => {
+                setSortOrder(event.target.value as "highest" | "lowest");
+                setPage(1);
+              }}
+              className="h-9 w-full rounded-md border bg-background px-3 text-base sm:w-44"
+            >
+              <option value="highest">Streak Highest</option>
+              <option value="lowest">Streak Lowest</option>
+            </select>
+          </div>
+        </div>
       </CardHeader>
       <CardContent className="p-0">
         {/* Mobile */}
@@ -70,46 +139,44 @@ export function LeaderboardTable({
                     </div>
                   </div>
                 ))
-            : users
-                .sort((a, b) => b.currentStreak - a.currentStreak)
-                .map((user, index) => (
-                  <div
-                    key={user.id}
-                    className="flex items-center gap-3 p-4 even:bg-gray-200/20"
-                  >
-                    {/* Rank */}
-                    <div className="flex w-8 shrink-0 justify-center">
-                      {getRankIcon(index + 1)}
-                    </div>
+            : pageUsers.map((user) => (
+                <div
+                  key={user.id}
+                  className="flex items-center gap-3 p-4 even:bg-gray-200/20"
+                >
+                  {/* Rank */}
+                  <div className="flex w-8 shrink-0 justify-center">
+                    {getRankIcon(user.rank)}
+                  </div>
 
-                    {/* User */}
-                    <Avatar className="h-10 w-10 shrink-0">
-                      <AvatarImage src={user.avatar_url || ""} />
+                  {/* User */}
+                  <Avatar className="h-10 w-10 shrink-0">
+                    <AvatarImage src={user.avatar_url || ""} />
 
-                      <AvatarFallback>
-                        {user.username.substring(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
+                    <AvatarFallback>
+                      {user.username.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
 
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium text-gray-700 dark:text-gray-200">
-                        {user.username}
-                      </p>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium text-gray-700 dark:text-gray-200">
+                      {user.username}
+                    </p>
 
-                      <div className="mt-1 flex items-center gap-4 text-xs text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                          <Flame className="size-4 text-orange-400" />
-                          <span>{user.currentStreak} streak</span>
-                        </div>
+                    <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-1">
+                        <Flame className="size-4 text-orange-400" />
+                        <span>{user.currentStreak} streak</span>
+                      </div>
 
-                        <div className="flex items-center gap-1">
-                          <Trophy className="size-4 text-amber-400" />
-                          <span>{user.achievementCount}</span>
-                        </div>
+                      <div className="flex items-center gap-1">
+                        <Trophy className="size-4 text-amber-400" />
+                        <span>{user.achievementCount}</span>
                       </div>
                     </div>
                   </div>
-                ))}
+                </div>
+              ))}
         </div>
 
         {/* Tablet / Desktop */}
@@ -156,53 +223,108 @@ export function LeaderboardTable({
                         </td>
                       </tr>
                     ))
-                : users
-                    .sort((a, b) => b.currentStreak - a.currentStreak)
-                    .map((user, index) => (
-                      <tr
-                        key={user.id}
-                        className="border-b transition-colors last:border-0 hover:bg-muted/60 even:bg-gray-200/20"
-                      >
-                        <td className="p-4">{getRankIcon(index + 1)}</td>
+                : pageUsers.map((user) => (
+                    <tr
+                      key={user.id}
+                      className="border-b transition-colors last:border-0 hover:bg-muted/60 even:bg-gray-200/20"
+                    >
+                      <td className="p-4">{getRankIcon(user.rank)}</td>
 
-                        <td className="p-4">
-                          <div className="flex items-center gap-3">
-                            <Avatar>
-                              <AvatarImage src={user.avatar_url || ""} />
+                      <td className="p-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar>
+                            <AvatarImage src={user.avatar_url || ""} />
 
-                              <AvatarFallback>
-                                {user.username.substring(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
+                            <AvatarFallback>
+                              {user.username.substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
 
-                            <p className="font-medium">{user.username}</p>
-                          </div>
-                        </td>
+                          <p className="font-medium">{user.username}</p>
+                        </div>
+                      </td>
 
-                        <td className="p-4 text-center">
-                          <div className="flex items-center justify-center gap-1.5">
-                            <Flame className="size-5 text-orange-400" />
+                      <td className="p-4 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <Flame className="size-5 text-orange-400" />
 
-                            <span className="text-sm">
-                              {user.currentStreak}
-                            </span>
-                          </div>
-                        </td>
+                          <span className="text-sm">{user.currentStreak}</span>
+                        </div>
+                      </td>
 
-                        <td className="p-4 text-center">
-                          <div className="flex items-center justify-center gap-1.5">
-                            <Trophy className="size-5 text-amber-400" />
+                      <td className="p-4 text-center">
+                        <div className="flex items-center justify-center gap-1.5">
+                          <Trophy className="size-5 text-amber-400" />
 
-                            <span className="text-sm">
-                              {user.achievementCount}
-                            </span>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                          <span className="text-sm">
+                            {user.achievementCount}
+                          </span>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
             </tbody>
           </table>
         </div>
+
+        {!isLoading && (
+          <div className="border-t p-4">
+            {displayUsers.length === 0 ? (
+              <p
+                role="status"
+                className="text-center text-sm text-muted-foreground"
+              >
+                {search.trim()
+                  ? "No users match your search."
+                  : "No users on the leaderboard yet."}
+              </p>
+            ) : (
+              <div className="flex flex-col items-center gap-3">
+                <p role="status" className="text-sm text-muted-foreground">
+                  Showing {startIndex + 1}–
+                  {Math.min(startIndex + pageSize, displayUsers.length)} of{" "}
+                  {displayUsers.length} users
+                </p>
+
+                {totalPages > 1 && (
+                  <Pagination aria-label="Leaderboard pages">
+                    <PaginationContent className="w-full justify-between gap-2 sm:w-auto sm:gap-4">
+                      <PaginationItem>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-11"
+                          disabled={currentPage === 1}
+                          onClick={() => setPage(currentPage - 1)}
+                        >
+                          Previous
+                        </Button>
+                      </PaginationItem>
+
+                      <PaginationItem>
+                        <span className="whitespace-nowrap text-sm text-muted-foreground">
+                          Page {currentPage} of {totalPages}
+                        </span>
+                      </PaginationItem>
+
+                      <PaginationItem>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="h-11"
+                          disabled={currentPage === totalPages}
+                          onClick={() => setPage(currentPage + 1)}
+                        >
+                          Next
+                        </Button>
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
