@@ -3,7 +3,6 @@
 import React, { memo, useRef, useState, useEffect } from "react";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
@@ -17,7 +16,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Achievement, AchievementType } from "@/lib/supabase";
+import { Achievement } from "@/lib/supabase";
 import { formatDistanceToNow } from "date-fns";
 
 import {
