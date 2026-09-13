@@ -119,54 +119,58 @@ function calculateCurrentStreak(
  * - achievement count
  * - calculated current streak
  */
-export async function getLeaderboardUsers(
-  limit = 20,
-): Promise<LeaderboardUser[]> {
-  /**
-   * Keep using your existing leaderboard RPC
-   * for the base ranking data.
-   */
-  const { data: users, error: leaderboardError } = await supabaseAdmin.rpc(
-    "get_leaderboard_users",
-    {
-      limit_count: limit,
-    },
-  );
+export async function getLeaderboardUsers(): Promise<LeaderboardUser[]> {
+  // Fetch in batches so the API row cap does not silently exclude users.
+  const batchSize = 200;
+  const users: (UserProfile & {
+    achievement_count?: number;
+    achievementCount?: number;
+  })[] = [];
+  let afterUserId: string | undefined;
 
-  if (leaderboardError) {
-    console.error("Error fetching leaderboard users:", leaderboardError);
+  while (true) {
+    // SQL LIMIT NULL removes the RPC's default top-ten cutoff.
+    let query = supabaseAdmin
+      .rpc("get_leaderboard_users", { limit_count: null })
+      .order("id", { ascending: true })
+      .limit(batchSize);
+    if (afterUserId) query = query.gt("id", afterUserId);
 
-    return [];
+    const { data, error } = await query;
+    if (error) {
+      console.error("Error fetching leaderboard users:", error);
+      return [];
+    }
+    if (!data?.length) break;
+    users.push(...data);
+    afterUserId = data[data.length - 1].id;
   }
 
-  if (!users || users.length === 0) {
-    return [];
-  }
+  if (!users.length) return [];
 
-  const userIds = users.map((user: UserProfile) => user.id);
+  // Batch both the user filter and history rows: either can exceed API limits.
+  const achievementRows: { user_id: string; achievement_date: string | null }[] = [];
+  for (let start = 0; start < users.length; start += batchSize) {
+    const userIds = users.slice(start, start + batchSize).map((user) => user.id);
+    let afterClaimId: string | undefined;
+    while (true) {
+      let query = supabaseAdmin
+        .from("user_achievements")
+        .select("id, user_id, achievement_date")
+        .in("user_id", userIds)
+        .order("id", { ascending: true })
+        .limit(batchSize);
+      if (afterClaimId) query = query.gt("id", afterClaimId);
 
-  /**
-   * Fetch all achievement dates for the users in
-   * one query instead of making one DB request
-   * per leaderboard user.
-   */
-  const { data: achievementRows, error: achievementError } = await supabaseAdmin
-    .from("user_achievements")
-    .select(
-      `
-      user_id,
-      achievement_date
-      `,
-    )
-    .in("user_id", userIds);
-
-  if (achievementError) {
-    console.error(
-      "Error fetching leaderboard achievement history:",
-      achievementError,
-    );
-
-    return [];
+      const { data, error } = await query;
+      if (error) {
+        console.error("Error fetching leaderboard achievement history:", error);
+        return [];
+      }
+      if (!data?.length) break;
+      achievementRows.push(...data);
+      afterClaimId = data[data.length - 1].id;
+    }
   }
 
   /**

@@ -14,7 +14,7 @@ export default async function LeaderboardPage() {
   const [profile, leaderboardUsers, entitlements] = await Promise.all([
     getAuthenticatedUserProfile(),
 
-    getLeaderboardUsers(20),
+    getLeaderboardUsers(),
 
     user ? getUserEntitlements(user.id) : Promise.resolve(null),
   ]);
