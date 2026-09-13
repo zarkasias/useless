@@ -70,44 +70,46 @@ export function LeaderboardTable({
                     </div>
                   </div>
                 ))
-            : users.map((user, index) => (
-                <div
-                  key={user.id}
-                  className="flex items-center gap-3 p-4 even:bg-gray-200/20"
-                >
-                  {/* Rank */}
-                  <div className="flex w-8 shrink-0 justify-center">
-                    {getRankIcon(index + 1)}
-                  </div>
+            : users
+                .sort((a, b) => b.currentStreak - a.currentStreak)
+                .map((user, index) => (
+                  <div
+                    key={user.id}
+                    className="flex items-center gap-3 p-4 even:bg-gray-200/20"
+                  >
+                    {/* Rank */}
+                    <div className="flex w-8 shrink-0 justify-center">
+                      {getRankIcon(index + 1)}
+                    </div>
 
-                  {/* User */}
-                  <Avatar className="h-10 w-10 shrink-0">
-                    <AvatarImage src={user.avatar_url || ""} />
+                    {/* User */}
+                    <Avatar className="h-10 w-10 shrink-0">
+                      <AvatarImage src={user.avatar_url || ""} />
 
-                    <AvatarFallback>
-                      {user.username.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
+                      <AvatarFallback>
+                        {user.username.substring(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
 
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium text-gray-700 dark:text-gray-200">
-                      {user.username}
-                    </p>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-medium text-gray-700 dark:text-gray-200">
+                        {user.username}
+                      </p>
 
-                    <div className="mt-1 flex items-center gap-4 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Flame className="size-4 text-orange-400" />
-                        <span>{user.currentStreak} streak</span>
-                      </div>
+                      <div className="mt-1 flex items-center gap-4 text-xs text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Flame className="size-4 text-orange-400" />
+                          <span>{user.currentStreak} streak</span>
+                        </div>
 
-                      <div className="flex items-center gap-1">
-                        <Trophy className="size-4 text-amber-400" />
-                        <span>{user.achievementCount}</span>
+                        <div className="flex items-center gap-1">
+                          <Trophy className="size-4 text-amber-400" />
+                          <span>{user.achievementCount}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
         </div>
 
         {/* Tablet / Desktop */}
@@ -154,46 +156,50 @@ export function LeaderboardTable({
                         </td>
                       </tr>
                     ))
-                : users.map((user, index) => (
-                    <tr
-                      key={user.id}
-                      className="border-b transition-colors last:border-0 hover:bg-muted/60 even:bg-gray-200/20"
-                    >
-                      <td className="p-4">{getRankIcon(index + 1)}</td>
+                : users
+                    .sort((a, b) => b.currentStreak - a.currentStreak)
+                    .map((user, index) => (
+                      <tr
+                        key={user.id}
+                        className="border-b transition-colors last:border-0 hover:bg-muted/60 even:bg-gray-200/20"
+                      >
+                        <td className="p-4">{getRankIcon(index + 1)}</td>
 
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarImage src={user.avatar_url || ""} />
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <Avatar>
+                              <AvatarImage src={user.avatar_url || ""} />
 
-                            <AvatarFallback>
-                              {user.username.substring(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
+                              <AvatarFallback>
+                                {user.username.substring(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
 
-                          <p className="font-medium">{user.username}</p>
-                        </div>
-                      </td>
+                            <p className="font-medium">{user.username}</p>
+                          </div>
+                        </td>
 
-                      <td className="p-4 text-center">
-                        <div className="flex items-center justify-center gap-1.5">
-                          <Flame className="size-5 text-orange-400" />
+                        <td className="p-4 text-center">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <Flame className="size-5 text-orange-400" />
 
-                          <span className="text-sm">{user.currentStreak}</span>
-                        </div>
-                      </td>
+                            <span className="text-sm">
+                              {user.currentStreak}
+                            </span>
+                          </div>
+                        </td>
 
-                      <td className="p-4 text-center">
-                        <div className="flex items-center justify-center gap-1.5">
-                          <Trophy className="size-5 text-amber-400" />
+                        <td className="p-4 text-center">
+                          <div className="flex items-center justify-center gap-1.5">
+                            <Trophy className="size-5 text-amber-400" />
 
-                          <span className="text-sm">
-                            {user.achievementCount}
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
+                            <span className="text-sm">
+                              {user.achievementCount}
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
             </tbody>
           </table>
         </div>
