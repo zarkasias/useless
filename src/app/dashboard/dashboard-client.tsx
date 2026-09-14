@@ -201,7 +201,7 @@ export default function DashboardClient({
 
                 {/* Streak footer */}
                 <div className="mt-auto grid grid-cols-2 divide-x divide-white/10 bg-gray-600 text-white">
-                  <div className="flex items-center justify-between pl-6 pr-2 py-4">
+                  <div className="flex flex-col sm:flex-row  sm:items-center sm:justify-between gap-3 sm:gap-0 pl-6 pr-2 py-4">
                     <div className="flex items-center gap-3">
                       <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-orange-400/80">
                         <Flame className="size-4 text-white" />
@@ -225,7 +225,7 @@ export default function DashboardClient({
                     )}
                   </div>
 
-                  <div className="flex items-center gap-3 px-6 py-4">
+                  <div className="flex sm:items-center gap-3 px-6 py-4">
                     <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-400/80">
                       <Trophy className="size-4 text-white" />
                     </div>

@@ -29,8 +29,8 @@ export function StreakShareButton(props: StreakShareProps) {
           type="button"
           variant="ghost"
           className="
-      group h-7 shrink-0 rounded-lg
-      border-2 border-white
+      group h-7 shrink-0 w-fit rounded-lg
+      border sm:border-2 border-white
       bg-transparent
       px-2
       text-xs font-black text-white
