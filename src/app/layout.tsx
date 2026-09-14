@@ -171,6 +171,20 @@ function Footer() {
               />
             </a>
 
+            {/* <a
+              href="https://tinyhunt.dev/projects/useless-achievements?utm_source=badge"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                src="https://r2.direasy-multi-tenant.focusapps.app/uploads/616d0b1a-3979-4b8c-94d1-b4f1fedd3ead/1783232956807/nynif7cioz/featured-on-light.svg"
+                alt="Featured on TinyHunt"
+                width={185}
+                height={40}
+                className="h-10 w-auto"
+              />
+            </a> */}
+
             {/* SaaS Hunt */}
             {/* <a
               href="https://saashunt.best/projects/useless-achievements?utm_source=badge"

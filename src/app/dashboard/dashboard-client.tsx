@@ -32,6 +32,7 @@ interface DashboardClientProps {
   initialStreakData: AchievementStreakData;
   initialEntitlements: UserEntitlements;
   initialPacks: StoreAchievementPack[];
+  initialTriggeredAchievements: Achievement[];
 }
 
 export default function DashboardClient({
@@ -40,6 +41,7 @@ export default function DashboardClient({
   initialStreakData,
   initialEntitlements,
   initialPacks,
+  initialTriggeredAchievements,
 }: DashboardClientProps) {
   const router = useRouter();
   const [user] = useState<UserProfile | null>(initialProfile);
@@ -48,9 +50,11 @@ export default function DashboardClient({
 
   const [streakData, setStreakData] =
     useState<AchievementStreakData>(initialStreakData);
-  const [unlockedAchievement, setUnlockedAchievement] =
-    useState<Achievement | null>(null);
-  const [showAchievementModal, setShowAchievementModal] = useState(false);
+  const [achievementQueue, setAchievementQueue] = useState<Achievement[]>(
+    initialTriggeredAchievements,
+  );
+
+  const activeAchievement = achievementQueue[0] ?? null;
   const [isClaimingAchievement, setIsClaimingAchievement] = useState(false);
 
   const featuredPack = initialPacks[0];
@@ -79,10 +83,26 @@ export default function DashboardClient({
 
       const achievement = result.achievement;
 
-      setUnlockedAchievement(achievement);
-      setShowAchievementModal(true);
+      const achievementsToShow = [
+        achievement,
+        ...(result.triggeredAchievements ?? []),
+      ].filter((item): item is Achievement =>
+        Boolean(item && item.id && item.title && item.description && item.type),
+      );
 
-      setUserAchievements((current) => [achievement, ...current]);
+      setAchievementQueue(achievementsToShow);
+
+      setUserAchievements((current) => {
+        const existingIds = new Set(
+          current.map((achievement) => achievement.id),
+        );
+
+        const newAchievements = achievementsToShow.filter(
+          (achievement) => !existingIds.has(achievement.id),
+        );
+
+        return [...newAchievements, ...current];
+      });
 
       const updatedStreakData = await getStreakDataAction();
 
@@ -312,12 +332,16 @@ export default function DashboardClient({
         </div>
       </main>
 
-      <UnlockAchievement
-        achievement={unlockedAchievement}
-        isOpen={showAchievementModal}
-        onClose={() => setShowAchievementModal(false)}
-        isLoggedIn={!!user}
-      />
+      {activeAchievement && (
+        <UnlockAchievement
+          achievement={activeAchievement}
+          isOpen={true}
+          onClose={() => {
+            setAchievementQueue((current) => current.slice(1));
+          }}
+          isLoggedIn={!!user}
+        />
+      )}
     </div>
   );
 }
