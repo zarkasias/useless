@@ -125,6 +125,7 @@ export async function claimDailyAchievementAction(
   return {
     status: "claimed",
     achievement,
+    triggeredAchievements: [],
   };
 }
 
