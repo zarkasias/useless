@@ -24,7 +24,9 @@ const DAILY_CLAIM_HOURS = 20;
 const DAILY_CLAIM_COOLDOWN_MS = DAILY_CLAIM_HOURS * 60 * 60 * 1000;
 
 function isFreeLimitError(error: { code?: string; message?: string }): boolean {
-  return error.code === "23514" && error.message === "Free achievement limit reached";
+  return (
+    error.code === "23514" && error.message === "Free achievement limit reached"
+  );
 }
 
 export interface AchievementStreakData {
@@ -38,18 +40,22 @@ export type DailyClaimResult =
   | {
       status: "claimed";
       achievement: Achievement;
+      triggeredAchievements: Achievement[];
     }
   | {
       status: "already_claimed";
       achievement: null;
+      triggeredAchievements?: never;
     }
   | {
       status: "subscription_required";
       achievement: null;
+      triggeredAchievements?: never;
     }
   | {
       status: "unavailable";
       achievement: null;
+      triggeredAchievements?: never;
     };
 
 function getToday(timeZone: string): string {
@@ -288,6 +294,155 @@ export async function evaluateAccountAgeAchievementsForAuthenticatedUser(): Prom
   return unlockedAchievements;
 }
 
+export async function evaluateStreakAchievementsForAuthenticatedUser(): Promise<
+  Achievement[]
+> {
+  const user = await getAuthenticatedUser();
+
+  if (!user) {
+    return [];
+  }
+
+  // ----------------------------------------
+  // Get the user's current streak.
+  // ----------------------------------------
+
+  const streakData = await getAuthenticatedUserStreakData();
+
+  if (streakData.currentStreak <= 0) {
+    return [];
+  }
+
+  const packFilter = await getAchievementPackFilter(user.id);
+
+  // ----------------------------------------
+  // Get published streak achievements.
+  // ----------------------------------------
+
+  const { data: streakAchievements, error: achievementsError } =
+    await supabaseAdmin
+      .from("achievements")
+      .select(
+        `
+    id,
+    title,
+    description,
+    type,
+    emoji,
+    icon_path,
+    created_at,
+    is_daily,
+    status,
+    trigger_type,
+    trigger_config
+    `,
+      )
+      .eq("status", "published")
+      .or(packFilter)
+      .eq("trigger_type", "streak")
+      .eq("is_daily", false);
+
+  if (achievementsError) {
+    console.error("Error loading streak achievements:", achievementsError);
+
+    return [];
+  }
+
+  if (!streakAchievements || streakAchievements.length === 0) {
+    return [];
+  }
+
+  // ----------------------------------------
+  // Get achievements the user already owns.
+  // ----------------------------------------
+
+  const { data: ownedAchievements, error: ownedError } = await supabaseAdmin
+    .from("user_achievements")
+    .select("achievement_id")
+    .eq("user_id", user.id);
+
+  if (ownedError) {
+    console.error(
+      "Error loading owned achievements for streak trigers:",
+      ownedError,
+    );
+
+    return [];
+  }
+
+  const ownedAchievementIds = new Set(
+    (ownedAchievements ?? []).map((achievement) => achievement.achievement_id),
+  );
+
+  const unlockedAchievements: Achievement[] = [];
+
+  // ----------------------------------------
+  // Evaluate each streak achievement.
+  // ----------------------------------------
+
+  for (const achievement of streakAchievements) {
+    if (ownedAchievementIds.has(achievement.id)) {
+      continue;
+    }
+
+    const config = achievement.trigger_config as {
+      days?: number | null;
+    } | null;
+
+    const requiredDays = config?.days;
+
+    if (typeof requiredDays !== "number" || requiredDays <= 0) {
+      console.error(
+        `Invalid streak trigger config for achievement: ${achievement.title}`,
+      );
+
+      continue;
+    }
+    if (streakData.currentStreak < requiredDays) {
+      continue;
+    }
+
+    // User qualifies
+    const { data: insertedAchievement, error: insertError } =
+      await supabaseAdmin
+        .from("user_achievements")
+        .insert({
+          user_id: user.id,
+          achievement_id: achievement.id,
+        })
+        .select("created_at")
+        .single();
+
+    if (insertError) {
+      if (isFreeLimitError(insertError)) {
+        break;
+      }
+
+      console.error(
+        `Error awarding streak achievement ${achievement.title}:`,
+        insertError,
+      );
+
+      continue;
+    }
+
+    unlockedAchievements.push({
+      id: achievement.id,
+      user_id: user.id,
+      title: achievement.title,
+      description: achievement.description,
+      type: achievement.type,
+      emoji: achievement.emoji,
+      icon_path: achievement.icon_path,
+      created_at: insertedAchievement.created_at,
+      is_daily: false,
+      status: achievement.status,
+    });
+  }
+
+  return unlockedAchievements;
+}
+
 // --------------------------------------------------
 // POST-MVP TRIGGER SYSTEM
 // Currently not called by the application.
@@ -302,6 +457,11 @@ export async function evaluateTriggeredAchievementsForAuthenticatedUser(): Promi
     await evaluateAccountAgeAchievementsForAuthenticatedUser();
 
   unlockedAchievements.push(...accountAgeAchievements);
+
+  const streakAchievements =
+    await evaluateStreakAchievementsForAuthenticatedUser();
+
+  unlockedAchievements.push(...streakAchievements);
 
   return unlockedAchievements;
 }
@@ -757,6 +917,14 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Daily
     };
   }
 
+  // --------------------------------------------------
+  // Evaluate triggered achievements after today's
+  // daily achievement has been recorded.
+  // --------------------------------------------------
+
+  const triggeredAchievements =
+    await evaluateTriggeredAchievementsForAuthenticatedUser();
+
   return {
     status: "claimed",
     achievement: {
@@ -765,6 +933,7 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Daily
       created_at: claim.created_at,
       is_daily: true,
     },
+    triggeredAchievements,
   };
 }
 
@@ -1088,7 +1257,9 @@ export async function mergeAnonymousAchievementsIntoCurrentUser(
   };
 }
 
-export async function getCollectionAchievements(userId: string): Promise<Achievement[]> {
+export async function getCollectionAchievements(
+  userId: string,
+): Promise<Achievement[]> {
   const packFilter = await getAchievementPackFilter(userId);
 
   const { data, error } = await supabaseAdmin

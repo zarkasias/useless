@@ -5,6 +5,7 @@ import {
   getAuthenticatedUserProfile,
   getAuthenticatedUserAchievements,
   getAuthenticatedUserStreakData,
+  evaluateTriggeredAchievementsForAuthenticatedUser,
 } from "@/lib/services/achievement-service-server";
 
 import { getUserEntitlements } from "@/lib/services/entitlement-service-server";
@@ -20,7 +21,8 @@ export default async function DashboardPage() {
   }
 
   // Evaluate non-daily triggered achievements first.
-  //await evaluateTriggeredAchievementsForAuthenticatedUser();
+  const triggeredAchievements =
+    await evaluateTriggeredAchievementsForAuthenticatedUser();
 
   const [profile, achievements, streakData, entitlements, packs] =
     await Promise.all([
@@ -42,6 +44,7 @@ export default async function DashboardPage() {
       initialAchievements={achievements}
       initialStreakData={streakData}
       initialEntitlements={entitlements}
+      initialTriggeredAchievements={triggeredAchievements}
     />
   );
 }

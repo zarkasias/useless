@@ -26,9 +26,12 @@ export default async function AdminAchievementsPage({
     status?: string;
     missingIcon?: string;
     category?: string;
+    q?: string;
   }>;
 }) {
   const params = await searchParams;
+
+  const search = params.q?.trim().toLowerCase() ?? "";
 
   const requestedStatus = params.status;
   const missingIcon = params.missingIcon === "true";
@@ -42,6 +45,19 @@ export default async function AdminAchievementsPage({
 
   const achievements = await getAdminAchievements(status, missingIcon);
 
+  const filteredAchievements = achievements.filter((achievement) => {
+    if (!search) {
+      return true;
+    }
+
+    return (
+      achievement.title.toLowerCase().includes(search) ||
+      achievement.description?.toLowerCase().includes(search) ||
+      achievement.category?.toLowerCase().includes(search) ||
+      achievement.trigger_type?.toLowerCase().includes(search)
+    );
+  });
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
       <div className="mb-8">
@@ -52,14 +68,43 @@ export default async function AdminAchievementsPage({
         </p>
       </div>
 
+      <form
+        action="/admin/achievements"
+        method="GET"
+        className="mb-6 flex max-w-md gap-2"
+      >
+        {status && <input type="hidden" name="status" value={status} />}
+
+        <input
+          type="search"
+          name="q"
+          defaultValue={params.q ?? ""}
+          placeholder="Search achievements..."
+          className="h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm"
+        />
+
+        <Button type="submit">Search</Button>
+      </form>
+
       <div className="mb-8 flex flex-wrap gap-2">
         {statuses.map((item) => {
           const active = item.value === "all" ? !status : status === item.value;
 
-          const href =
-            item.value === "all"
-              ? "/admin/achievements"
-              : `/admin/achievements?status=${item.value}`;
+          const linkParams = new URLSearchParams();
+
+          if (item.value !== "all") {
+            linkParams.set("status", item.value);
+          }
+
+          if (params.q) {
+            linkParams.set("q", params.q);
+          }
+
+          const queryString = linkParams.toString();
+
+          const href = queryString
+            ? `/admin/achievements?${queryString}`
+            : "/admin/achievements";
 
           return (
             <Button
@@ -73,7 +118,7 @@ export default async function AdminAchievementsPage({
         })}
       </div>
 
-      {achievements.length === 0 ? (
+      {filteredAchievements.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
             <p className="font-semibold">No achievements found.</p>
@@ -81,7 +126,7 @@ export default async function AdminAchievementsPage({
         </Card>
       ) : (
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {achievements
+          {filteredAchievements
             .sort((a, b) => a.title.localeCompare(b.title))
             .map((achievement) => {
               const pack = Array.isArray(achievement.achievement_packs)
