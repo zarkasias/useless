@@ -723,7 +723,7 @@ function AchievementCardComponent({
         <Card ref={cardRef} className={cardClass}>
           <CardHeader
             className={
-              isCompact ? "flex-1 px-3 pb-2 pt-3" : "flex-1 pb-3 px-3 pt-3"
+              isCompact ? "flex-1 px-3 pb-2 pt-3" : "flex-1 pb-2 px-3 pt-3"
             }
           >
             <div className="flex items-start justify-between gap-1">
@@ -815,7 +815,7 @@ function AchievementCardComponent({
             </CardContent>
           )} */}
           {showShareButton && (
-            <CardFooter className="flex flex-col pt-0 gap-4">
+            <CardFooter className="flex flex-col pt-0 gap-4 mb-1">
               {/* Image Preview (if available) */}
               {/* {imageUrl && (
               <div className="w-full flex justify-center mb-2">
@@ -833,11 +833,26 @@ function AchievementCardComponent({
             )} */}
 
               {/* Download and Copy Buttons */}
-              <div className="grid grid-cols-1 gap-1 w-full pb-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-2 w-full pb-2">
                 <Button
-                  variant="outline"
                   onClick={downloadImage}
-                  className="w-full"
+                  type="button"
+                  className="
+            flex-1
+            bg-gradient-to-r
+            from-orange-500
+            to-rose-500
+            font-bold
+            text-white
+            shadow-md
+            shadow-orange-500/20
+            transition-all
+            duration-200
+            hover:-translate-y-0.5
+            hover:from-orange-400
+            hover:to-rose-400
+            hover:shadow-lg
+            "
                   disabled={
                     isGeneratingImage ||
                     !imageUrl ||
@@ -847,14 +862,16 @@ function AchievementCardComponent({
                 >
                   <Download className="mr-2 size-4" />
 
-                  {isMobileDevice ? "Save & Share" : "Download"}
+                  {isMobileDevice ? "Save" : "Download"}
                 </Button>
 
                 {!isMobileDevice && (
                   <Button
                     variant="outline"
                     onClick={copyImageToClipboard}
-                    className="w-full"
+                    className="w-full  transition-all
+            duration-200
+            hover:-translate-y-0.5"
                     disabled={
                       isGeneratingImage ||
                       !imageUrl ||
@@ -867,7 +884,7 @@ function AchievementCardComponent({
                     ) : (
                       <Copy className="mr-2 size-4" />
                     )}
-                    Copy to Clipboard
+                    Copy
                   </Button>
                 )}
 

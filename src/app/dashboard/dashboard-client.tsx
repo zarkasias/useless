@@ -8,6 +8,7 @@ import { Navbar } from "@/components/navbar";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { StreakCalendar } from "@/components/dashboard/streak-calendar";
 import { UnlockAchievement } from "@/components/unlock-achievement";
+import { StreakShareButton } from "@/components/dashboard/streak-share-button";
 import { Timezonesync } from "@/components/timezone-sync";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Flame, Trophy, Check, LoaderCircle } from "lucide-react";
@@ -200,20 +201,28 @@ export default function DashboardClient({
 
                 {/* Streak footer */}
                 <div className="mt-auto grid grid-cols-2 divide-x divide-white/10 bg-gray-600 text-white">
-                  <div className="flex items-center gap-3 px-6 py-4">
-                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-orange-400/80">
-                      <Flame className="size-4 text-white" />
-                    </div>
-
-                    <div className="min-w-0">
-                      <div className="text-lg font-semibold leading-none">
-                        {streakData.currentStreak}
+                  <div className="flex items-center justify-between pl-6 pr-2 py-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-orange-400/80">
+                        <Flame className="size-4 text-white" />
                       </div>
 
-                      <div className="mt-1 text-xs font-bold text-slate-300">
-                        Current streak
+                      <div className="min-w-0">
+                        <div className="text-lg font-semibold leading-none">
+                          {streakData.currentStreak}
+                        </div>
+
+                        <div className="mt-1 text-xs font-bold text-slate-300">
+                          Current streak
+                        </div>
                       </div>
                     </div>
+                    {streakData.currentStreak > 0 && (
+                      <StreakShareButton
+                        username={initialProfile.username}
+                        currentStreak={streakData.currentStreak}
+                      />
+                    )}
                   </div>
 
                   <div className="flex items-center gap-3 px-6 py-4">
