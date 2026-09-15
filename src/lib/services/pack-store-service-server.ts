@@ -35,6 +35,8 @@ export interface StoreAchievementPack {
 
   cover_image_path: string | null;
   theme_key: string | null;
+  status: string;
+  isUpcoming: boolean;
 
   owned: boolean;
   availableForPurchase: boolean;
@@ -157,6 +159,7 @@ export async function getStoreAchievementPacks(): Promise<
       const hasEnded = endsAt !== null && now > endsAt;
 
       const isActive = pack.status === "active";
+      const isScheduled = pack.status === "scheduled";
 
       const availableForPurchase =
         !owned &&
@@ -176,9 +179,10 @@ export async function getStoreAchievementPacks(): Promise<
         currency: pack.currency,
         starts_at: pack.starts_at,
         ends_at: pack.ends_at,
-
+        status: pack.status,
         owned,
         availableForPurchase,
+        isUpcoming: isScheduled,
         hasEnded,
 
         totalAchievements: packAchievements.length,
@@ -192,7 +196,10 @@ export async function getStoreAchievementPacks(): Promise<
     })
     .filter(
       (pack) =>
-        profile?.role === "admin" || pack.availableForPurchase || pack.owned,
+        profile?.role === "admin" ||
+        pack.availableForPurchase ||
+        pack.isUpcoming ||
+        pack.owned,
     );
 }
 
