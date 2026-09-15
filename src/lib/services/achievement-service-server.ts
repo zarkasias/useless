@@ -1,11 +1,17 @@
 import "server-only";
 
-import { createClient } from "@/lib/supabase/server";
-import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { getUserEntitlements } from "./entitlement-service-server";
 import { getAnonymousUser } from "@/lib/anonymous-user";
 import { getAchievementPackFilter } from "./achievement-access-service-server";
 import { Achievement, UserProfile } from "@/lib/supabase";
+import { getAuthenticatedUser, getToday } from "./utils/achievement-utils";
+
+import { getUserStreakData } from "./streak-service-server";
+import { supabaseAdmin, isFreeLimitError } from "./utils/trigger-context";
+
+import { evaluateAccountAgeAchievements } from "./triggers/account-age-trigger";
+import { evaluateStreakAchievements } from "./triggers/streak-trigger";
+import { evaluateCollectionCountAchievements } from "./triggers/collection-count-trigger";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -18,23 +24,8 @@ if (!serviceRoleKey) {
   throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY");
 }
 
-const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
-
 const DAILY_CLAIM_HOURS = 20;
 const DAILY_CLAIM_COOLDOWN_MS = DAILY_CLAIM_HOURS * 60 * 60 * 1000;
-
-function isFreeLimitError(error: { code?: string; message?: string }): boolean {
-  return (
-    error.code === "23514" && error.message === "Free achievement limit reached"
-  );
-}
-
-export interface AchievementStreakData {
-  currentStreak: number;
-  longestStreak: number;
-  achievementDates: string[];
-  claimedToday: boolean;
-}
 
 export type DailyClaimResult =
   | {
@@ -57,51 +48,6 @@ export type DailyClaimResult =
       achievement: null;
       triggeredAchievements?: never;
     };
-
-function getToday(timeZone: string): string {
-  const formatter = new Intl.DateTimeFormat("en-CA", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
-
-  const parts = formatter.formatToParts(new Date());
-
-  const year = parts.find((part) => part.type === "year")?.value;
-  const month = parts.find((part) => part.type === "month")?.value;
-  const day = parts.find((part) => part.type === "day")?.value;
-
-  return `${year}-${month}-${day}`;
-}
-
-function addDays(dateString: string, amount: number): string {
-  const [year, month, day] = dateString.split("-").map(Number);
-
-  const date = new Date(Date.UTC(year, month - 1, day));
-
-  date.setUTCDate(date.getUTCDate() + amount);
-
-  return date.toISOString().split("T")[0];
-}
-
-/**
- * Get the currently authenticated Supabase user.
- */
-export async function getAuthenticatedUser() {
-  const supabase = await createClient();
-
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-
-  if (error || !user) {
-    return null;
-  }
-
-  return user;
-}
 
 /**
  * Get the profile belonging to the authenticated user.
@@ -128,340 +74,44 @@ export async function getAuthenticatedUserProfile(): Promise<UserProfile | null>
   return profile as UserProfile;
 }
 
-export async function evaluateAccountAgeAchievementsForAuthenticatedUser(): Promise<
-  Achievement[]
-> {
-  const user = await getAuthenticatedUser();
-
-  if (!user) {
-    return [];
-  }
-
-  // ----------------------------------------
-  // Get the user's profile creation date.
-  // ----------------------------------------
-
-  const { data: profile, error: profileError } = await supabaseAdmin
-    .from("profiles")
-    .select("created_at")
-    .eq("id", user.id)
-    .single();
-
-  if (profileError || !profile?.created_at) {
-    console.error(
-      "Error loading profile for account age achievements:",
-      profileError,
-    );
-
-    return [];
-  }
-
-  // ----------------------------------------
-  // Calculate account age in whole days.
-  // ----------------------------------------
-
-  const createdAt = new Date(profile.created_at);
-  const now = new Date();
-
-  const accountAgeMs = now.getTime() - createdAt.getTime();
-
-  const accountAgeDays = Math.floor(accountAgeMs / (1000 * 60 * 60 * 24));
-
-  const packFilter = await getAchievementPackFilter(user.id);
-
-  // ----------------------------------------
-  // Get published account_age achievements.
-  // ----------------------------------------
-
-  const { data: accountAgeAchievements, error: achievementsError } =
-    await supabaseAdmin
-      .from("achievements")
-      .select(
-        `
-        id,
-        title,
-        description,
-        type,
-        emoji,
-        icon_path,
-        created_at,
-        is_daily,
-        status,
-        trigger_type,
-        trigger_config
-      `,
-      )
-      .eq("status", "published")
-      .or(packFilter)
-      .eq("trigger_type", "account_age")
-      .eq("is_daily", false);
-
-  if (achievementsError) {
-    console.error("Error loading account age achievements:", achievementsError);
-
-    return [];
-  }
-
-  if (!accountAgeAchievements || accountAgeAchievements.length === 0) {
-    return [];
-  }
-
-  // ----------------------------------------
-  // Get achievements the user already owns.
-  // ----------------------------------------
-
-  const { data: ownedAchievements, error: ownedError } = await supabaseAdmin
-    .from("user_achievements")
-    .select("achievement_id")
-    .eq("user_id", user.id);
-
-  if (ownedError) {
-    console.error("Error loading owned achievements:", ownedError);
-
-    return [];
-  }
-
-  const ownedAchievementIds = new Set(
-    (ownedAchievements ?? []).map((achievement) => achievement.achievement_id),
-  );
-
-  const unlockedAchievements: Achievement[] = [];
-
-  // ----------------------------------------
-  // Evaluate each account-age achievement.
-  // ----------------------------------------
-
-  for (const achievement of accountAgeAchievements) {
-    if (ownedAchievementIds.has(achievement.id)) {
-      continue;
-    }
-
-    const config = achievement.trigger_config as {
-      days?: number | null;
-    } | null;
-
-    const requiredDays = config?.days;
-
-    if (typeof requiredDays !== "number" || requiredDays <= 0) {
-      console.error(
-        `Invalid account_age trigger config for achievement: ${achievement.title}`,
-      );
-
-      continue;
-    }
-
-    if (accountAgeDays < requiredDays) {
-      continue;
-    }
-
-    // User qualifies.
-    const { data: insertedAchievement, error: insertError } =
-      await supabaseAdmin
-        .from("user_achievements")
-        .insert({
-          user_id: user.id,
-          achievement_id: achievement.id,
-        })
-        .select("created_at")
-        .single();
-
-    if (insertError) {
-      if (isFreeLimitError(insertError)) {
-        break;
-      }
-      console.error(
-        `Error awarding account age achievement ${achievement.title}:`,
-        insertError,
-      );
-
-      continue;
-    }
-
-    unlockedAchievements.push({
-      id: achievement.id,
-      user_id: user.id,
-      title: achievement.title,
-      description: achievement.description,
-      type: achievement.type,
-      emoji: achievement.emoji,
-      icon_path: achievement.icon_path,
-      created_at: insertedAchievement.created_at,
-      is_daily: false,
-      status: achievement.status,
-    });
-  }
-
-  return unlockedAchievements;
-}
-
-export async function evaluateStreakAchievementsForAuthenticatedUser(): Promise<
-  Achievement[]
-> {
-  const user = await getAuthenticatedUser();
-
-  if (!user) {
-    return [];
-  }
-
-  // ----------------------------------------
-  // Get the user's current streak.
-  // ----------------------------------------
-
-  const streakData = await getAuthenticatedUserStreakData();
-
-  if (streakData.currentStreak <= 0) {
-    return [];
-  }
-
-  const packFilter = await getAchievementPackFilter(user.id);
-
-  // ----------------------------------------
-  // Get published streak achievements.
-  // ----------------------------------------
-
-  const { data: streakAchievements, error: achievementsError } =
-    await supabaseAdmin
-      .from("achievements")
-      .select(
-        `
-    id,
-    title,
-    description,
-    type,
-    emoji,
-    icon_path,
-    created_at,
-    is_daily,
-    status,
-    trigger_type,
-    trigger_config
-    `,
-      )
-      .eq("status", "published")
-      .or(packFilter)
-      .eq("trigger_type", "streak")
-      .eq("is_daily", false);
-
-  if (achievementsError) {
-    console.error("Error loading streak achievements:", achievementsError);
-
-    return [];
-  }
-
-  if (!streakAchievements || streakAchievements.length === 0) {
-    return [];
-  }
-
-  // ----------------------------------------
-  // Get achievements the user already owns.
-  // ----------------------------------------
-
-  const { data: ownedAchievements, error: ownedError } = await supabaseAdmin
-    .from("user_achievements")
-    .select("achievement_id")
-    .eq("user_id", user.id);
-
-  if (ownedError) {
-    console.error(
-      "Error loading owned achievements for streak trigers:",
-      ownedError,
-    );
-
-    return [];
-  }
-
-  const ownedAchievementIds = new Set(
-    (ownedAchievements ?? []).map((achievement) => achievement.achievement_id),
-  );
-
-  const unlockedAchievements: Achievement[] = [];
-
-  // ----------------------------------------
-  // Evaluate each streak achievement.
-  // ----------------------------------------
-
-  for (const achievement of streakAchievements) {
-    if (ownedAchievementIds.has(achievement.id)) {
-      continue;
-    }
-
-    const config = achievement.trigger_config as {
-      days?: number | null;
-    } | null;
-
-    const requiredDays = config?.days;
-
-    if (typeof requiredDays !== "number" || requiredDays <= 0) {
-      console.error(
-        `Invalid streak trigger config for achievement: ${achievement.title}`,
-      );
-
-      continue;
-    }
-    if (streakData.currentStreak < requiredDays) {
-      continue;
-    }
-
-    // User qualifies
-    const { data: insertedAchievement, error: insertError } =
-      await supabaseAdmin
-        .from("user_achievements")
-        .insert({
-          user_id: user.id,
-          achievement_id: achievement.id,
-        })
-        .select("created_at")
-        .single();
-
-    if (insertError) {
-      if (isFreeLimitError(insertError)) {
-        break;
-      }
-
-      console.error(
-        `Error awarding streak achievement ${achievement.title}:`,
-        insertError,
-      );
-
-      continue;
-    }
-
-    unlockedAchievements.push({
-      id: achievement.id,
-      user_id: user.id,
-      title: achievement.title,
-      description: achievement.description,
-      type: achievement.type,
-      emoji: achievement.emoji,
-      icon_path: achievement.icon_path,
-      created_at: insertedAchievement.created_at,
-      is_daily: false,
-      status: achievement.status,
-    });
-  }
-
-  return unlockedAchievements;
-}
-
 // --------------------------------------------------
-// POST-MVP TRIGGER SYSTEM
-// Currently not called by the application.
+// TRIGGERED ACHIEVEMENT SYSTEM
+// Evaluates automatic achievement milestones.
 // --------------------------------------------------
 
 export async function evaluateTriggeredAchievementsForAuthenticatedUser(): Promise<
   Achievement[]
 > {
+  const user = await getAuthenticatedUser();
+
+  if (!user) {
+    return [];
+  }
+
   const unlockedAchievements: Achievement[] = [];
 
-  const accountAgeAchievements =
-    await evaluateAccountAgeAchievementsForAuthenticatedUser();
+  const streakData = await getUserStreakData(user.id);
+
+  const accountAgeAchievements = await evaluateAccountAgeAchievements({
+    userId: user.id,
+  });
 
   unlockedAchievements.push(...accountAgeAchievements);
 
-  const streakAchievements =
-    await evaluateStreakAchievementsForAuthenticatedUser();
+  const streakAchievements = await evaluateStreakAchievements({
+    userId: user.id,
+    currentStreak: streakData.currentStreak,
+  });
 
   unlockedAchievements.push(...streakAchievements);
+
+  const collectionCountAchievements = await evaluateCollectionCountAchievements(
+    {
+      userId: user.id,
+    },
+  );
+
+  unlockedAchievements.push(...collectionCountAchievements);
 
   return unlockedAchievements;
 }
@@ -536,122 +186,6 @@ export async function getAuthenticatedUserAchievements(): Promise<
         status: achievement.status,
       };
     });
-}
-
-export async function getAuthenticatedUserStreakData(): Promise<AchievementStreakData> {
-  const user = await getAuthenticatedUser();
-
-  if (!user) {
-    return {
-      currentStreak: 0,
-      longestStreak: 0,
-      achievementDates: [],
-      claimedToday: false,
-    };
-  }
-
-  const { data, error } = await supabaseAdmin
-    .from("user_achievements")
-    .select("achievement_date")
-    .eq("user_id", user.id)
-    .order("achievement_date", { ascending: true });
-
-  if (error) {
-    console.error("Error fetching achievement dates:", error);
-
-    return {
-      currentStreak: 0,
-      longestStreak: 0,
-      achievementDates: [],
-      claimedToday: false,
-    };
-  }
-
-  const achievementDates = Array.from(
-    new Set(
-      (data ?? [])
-        .map((record) => record.achievement_date)
-        .filter((date): date is string => Boolean(date)),
-    ),
-  ).sort();
-
-  if (achievementDates.length === 0) {
-    return {
-      currentStreak: 0,
-      longestStreak: 0,
-      achievementDates: [],
-      claimedToday: false,
-    };
-  }
-
-  const dateSet = new Set(achievementDates);
-
-  const { data: profile } = await supabaseAdmin
-    .from("profiles")
-    .select("timezone")
-    .eq("id", user.id)
-    .single();
-
-  const timezone = profile?.timezone ?? "UTC";
-
-  const today = getToday(timezone);
-  const claimedToday = dateSet.has(today);
-
-  // ----------------------------------------
-  // Current streak
-  // ----------------------------------------
-
-  let currentStreak = 0;
-
-  const yesterday = addDays(today, -1);
-
-  let streakStartDate: string | null = null;
-
-  // If the user already claimed today, count backward from today.
-  if (dateSet.has(today)) {
-    streakStartDate = today;
-  }
-  // If they have not claimed today yet, yesterday's streak is still active.
-  else if (dateSet.has(yesterday)) {
-    streakStartDate = yesterday;
-  }
-
-  // Only count the streak if it is still active.
-  if (streakStartDate) {
-    let currentDate = streakStartDate;
-
-    while (dateSet.has(currentDate)) {
-      currentStreak++;
-      currentDate = addDays(currentDate, -1);
-    }
-  }
-
-  // ----------------------------------------
-  // Longest streak
-  // ----------------------------------------
-
-  let longestStreak = 0;
-  let runningStreak = 0;
-  let previousDate: string | null = null;
-
-  for (const date of achievementDates) {
-    if (previousDate && date === addDays(previousDate, 1)) {
-      runningStreak++;
-    } else {
-      runningStreak = 1;
-    }
-
-    longestStreak = Math.max(longestStreak, runningStreak);
-
-    previousDate = date;
-  }
-
-  return {
-    currentStreak,
-    longestStreak,
-    achievementDates,
-    claimedToday,
-  };
 }
 
 /**

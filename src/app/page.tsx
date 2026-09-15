@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import HomeClient from "@/app/home/home-client";
 
-import {
-  getAuthenticatedUser,
-  getAuthenticatedUserProfile,
-} from "@/lib/services/achievement-service-server";
+import { getAuthenticatedUserProfile } from "@/lib/services/achievement-service-server";
+
+import { getAuthenticatedUser } from "@/lib/services/utils/achievement-utils";
 
 import { getUserEntitlements } from "@/lib/services/entitlement-service-server";
 import { getStoreAchievementPacks } from "@/lib/services/pack-store-service-server";

@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import Stripe from "stripe";
 
-import { getAuthenticatedUser } from "@/lib/services/achievement-service-server";
+import { getAuthenticatedUser } from "@/lib/services/utils/achievement-utils";
 
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 

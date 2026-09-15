@@ -18,7 +18,7 @@ import {
   claimDailyAchievementAction,
   getStreakDataAction,
 } from "@/app/actions/achievement-actions";
-import type { AchievementStreakData } from "@/lib/services/achievement-service-server";
+import type { AchievementStreakData } from "@/lib/services/streak-service-server";
 import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
 import type { StoreAchievementPack } from "@/lib/services/pack-store-service-server";
 

@@ -1,6 +1,6 @@
 "use server";
 
-import { getAuthenticatedUser } from "@/lib/services/achievement-service-server";
+import { getAuthenticatedUser } from "@/lib/services/utils/achievement-utils";
 import {
   getUserEntitlements,
   UserEntitlements,

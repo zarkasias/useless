@@ -2,10 +2,9 @@ import "server-only";
 
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 
-import {
-  getAuthenticatedUser,
-  getAuthenticatedUserProfile,
-} from "@/lib/services/achievement-service-server";
+import { getAuthenticatedUserProfile } from "@/lib/services/achievement-service-server";
+
+import { getAuthenticatedUser } from "./utils/achievement-utils";
 
 import type { Achievement } from "@/lib/supabase";
 

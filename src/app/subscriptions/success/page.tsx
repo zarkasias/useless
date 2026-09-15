@@ -4,7 +4,7 @@ import { CheckCircle2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/navbar";
 import { getAuthenticatedUserProfile } from "@/lib/services/achievement-service-server";
-import { getAuthenticatedUser } from "@/lib/services/achievement-service-server";
+import { getAuthenticatedUser } from "@/lib/services/utils/achievement-utils";
 import { getUserEntitlements } from "@/lib/services/entitlement-service-server";
 import { redirect } from "next/navigation";
 
