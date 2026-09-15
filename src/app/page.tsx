@@ -24,13 +24,13 @@ export default async function HomePage() {
     // Always load packs, logged in or not
     getStoreAchievementPacks(),
   ]);
+  const initialPacks = packs.filter((pack) => pack.status !== "draft");
 
-  // return the home client
   return (
     <HomeClient
       initialProfile={profile}
       initialEntitlements={entitlements}
-      initialPacks={packs}
+      initialPacks={initialPacks}
     />
   );
 }

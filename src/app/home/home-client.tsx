@@ -71,7 +71,10 @@ export default function HomeClient({
     }
   };
 
-  const featuredPack = initialPacks?.[0] ?? null;
+  const featuredPack =
+    initialPacks?.find((pack) => pack.status === "active") ?? null;
+  const upcomingPack =
+    initialPacks?.find((pack) => pack.status === "scheduled") ?? null;
 
   return (
     <div className="flex min-h-screen flex-col bg-muted/20">
@@ -233,11 +236,22 @@ export default function HomeClient({
               </p>
             </div>
 
-            <FeaturedPackPromo
-              pack={featuredPack}
-              variant="homepage"
-              isLoggedIn={!!user}
-            />
+            <div className={`${upcomingPack ? "flex flex-col gap-2" : ""}`}>
+              <FeaturedPackPromo
+                pack={featuredPack}
+                variant="homepage"
+                isLoggedIn={!!user}
+              />
+
+              {upcomingPack && (
+                <FeaturedPackPromo
+                  pack={upcomingPack}
+                  comingsoon={true}
+                  variant="homepage"
+                  isLoggedIn={!!user}
+                />
+              )}
+            </div>
           </div>
         </section>
       )}

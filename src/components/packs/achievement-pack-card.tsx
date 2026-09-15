@@ -49,7 +49,7 @@ export function AchievementPackCard({ pack }: AchievementPackCardProps) {
 
       <CardContent className="relative p-0">
         <div className="grid md:grid-cols-[220px_1fr]">
-          <div className="relative flex flex-col min-h-[180px] items-start justify-start overflow-hidden bg-black/10 px-6 py-6">
+          <div className="relative flex flex-col min-h-[180px] items-center md:items-start justify-center md:justify-start overflow-hidden bg-black/10 px-6 py-6">
             {pack.cover_image_path ? (
               <Image
                 src={pack.cover_image_path}
@@ -70,7 +70,7 @@ export function AchievementPackCard({ pack }: AchievementPackCardProps) {
 
               {pack.owned && (
                 <>
-                  <span className="w-[80%] inline-flex items-center gap-1.5 rounded-full bg-emerald-400/15 px-5 py-1 text-xs font-bold text-emerald-200">
+                  <span className="w-[54%] md:w-[80%] inline-flex items-center gap-1.5 rounded-full border border-emerald-400/10 bg-emerald-400/15 px-5 py-1 text-xs font-bold text-emerald-200">
                     <Check className="size-3.5" />
                     Owned
                   </span>

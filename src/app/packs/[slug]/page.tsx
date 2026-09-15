@@ -106,8 +106,8 @@ export default async function PackDetailPage({
             className={`absolute -bottom-20 -left-16 size-56 rounded-full ${theme.glowTwo} blur-3xl`}
           />
           <CardContent className="p-0">
-            <div className="grid md:grid-cols-[300px_1fr]">
-              <div className="flex items-center justify-center p-6">
+            <div className="grid md:grid-cols-[240px_1fr]">
+              <div className="flex items-center justify-center py-0 md:py-6 px-4">
                 {pack.cover_image_path ? (
                   <Image
                     src={pack.cover_image_path}
@@ -123,7 +123,7 @@ export default async function PackDetailPage({
                 )}
               </div>
 
-              <div className="p-4">
+              <div className="px-4 md:p-4">
                 <p className="text-sm font-bold uppercase tracking-wider text-white/80">
                   Achievement Pack
                 </p>

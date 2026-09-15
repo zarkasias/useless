@@ -12,6 +12,7 @@ import { packThemes } from "@/components/packs/pack-themes";
 interface FeaturedPackPromoProps {
   pack: StoreAchievementPack;
   variant?: "homepage" | "dashboard";
+  comingsoon?: boolean;
   isLoggedIn?: boolean;
 }
 
@@ -19,6 +20,7 @@ export function FeaturedPackPromo({
   pack,
   variant = "dashboard",
   isLoggedIn = false,
+  comingsoon = false,
 }: FeaturedPackPromoProps) {
   const completionPercentage =
     pack.totalAchievements > 0
@@ -118,6 +120,17 @@ export function FeaturedPackPromo({
     <div
       className={`relative overflow-hidden rounded-xl border ${theme.background} px-5 py-4 text-white shadow-md sm:px-6 sm:py-5`}
     >
+      {comingsoon && (
+        <>
+          {/* Dim the upcoming pack */}
+          <div className="pointer-events-none absolute inset-0 z-10 bg-black/45" />
+
+          {/* Coming Soon badge */}
+          <div className="pointer-events-none absolute right-3 top-3 z-20 rounded-full border border-white/20 bg-black/70 px-3 py-1 text-xs font-black uppercase tracking-wider text-white shadow-lg backdrop-blur-sm">
+            Coming Soon
+          </div>
+        </>
+      )}
       <div
         className={`absolute -right-12 -top-14 size-40 rounded-full ${theme.glowOne} blur-3xl`}
       />
@@ -183,16 +196,18 @@ export function FeaturedPackPromo({
             </div>
           )}
 
-          <Button
-            asChild
-            size="sm"
-            className="mt-3 rounded-xl bg-white font-bold text-purple-950 hover:bg-purple-50"
-          >
-            <Link href={packHref}>
-              {pack.owned ? "View Pack" : "Explore Pack"}
-              <ArrowRight className="ml-2 size-4" />
-            </Link>
-          </Button>
+          {!comingsoon && (
+            <Button
+              asChild
+              size="sm"
+              className="mt-3 rounded-xl bg-white font-bold text-purple-950 hover:bg-purple-50"
+            >
+              <Link href={packHref}>
+                {pack.owned ? "View Pack" : "Explore Pack"}
+                <ArrowRight className="ml-2 size-4" />
+              </Link>
+            </Button>
+          )}
         </div>
 
         {pack.cover_image_path && (
@@ -282,18 +297,20 @@ export function FeaturedPackPromo({
           )}
         </div>
 
-        <div className="shrink-0 pl-4">
-          <Button
-            asChild
-            size="sm"
-            className="w-auto rounded-xl bg-white font-bold text-purple-950 hover:bg-purple-50"
-          >
-            <Link href={packHref}>
-              {pack.owned ? "View Pack Progress" : "Explore Pack"}
-              <ArrowRight className="ml-2 size-4" />
-            </Link>
-          </Button>
-        </div>
+        {!comingsoon && (
+          <div className="shrink-0 pl-4">
+            <Button
+              asChild
+              size="sm"
+              className="w-auto rounded-xl bg-white font-bold text-purple-950 hover:bg-purple-50"
+            >
+              <Link href={packHref}>
+                {pack.owned ? "View Pack Progress" : "Explore Pack"}
+                <ArrowRight className="ml-2 size-4" />
+              </Link>
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
