@@ -11,10 +11,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { AchievementCard } from "@/components/achievement-card-updated";
 
 import {
-  getAuthenticatedUser,
   getAuthenticatedUserAchievements,
   getAuthenticatedUserProfile,
 } from "@/lib/services/achievement-service-server";
+
+import { getAuthenticatedUser } from "@/lib/services/utils/achievement-utils";
 
 import { getUserEntitlements } from "@/lib/services/entitlement-service-server";
 import {

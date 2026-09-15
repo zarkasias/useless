@@ -3,14 +3,15 @@
 import { cookies } from "next/headers";
 
 import {
-  getAuthenticatedUser,
   claimDailyAchievementForAuthenticatedUser,
   claimDailyAchievementForAnonymousUser,
   mergeAnonymousAchievementsIntoCurrentUser,
-  getAuthenticatedUserStreakData,
 } from "@/lib/services/achievement-service-server";
 
-import type { AchievementStreakData } from "@/lib/services/achievement-service-server";
+import { getAuthenticatedUser } from "@/lib/services/utils/achievement-utils";
+
+import type { AchievementStreakData } from "@/lib/services/streak-service-server";
+import { getAuthenticatedUserStreakData } from "@/lib/services/streak-service-server";
 import type { DailyClaimResult } from "@/lib/services/achievement-service-server";
 
 import {

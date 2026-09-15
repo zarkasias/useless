@@ -1,12 +1,14 @@
 import { redirect } from "next/navigation";
 
 import {
-  getAuthenticatedUser,
   getAuthenticatedUserProfile,
   getAuthenticatedUserAchievements,
-  getAuthenticatedUserStreakData,
   evaluateTriggeredAchievementsForAuthenticatedUser,
 } from "@/lib/services/achievement-service-server";
+
+import { getAuthenticatedUserStreakData } from "@/lib/services/streak-service-server";
+
+import { getAuthenticatedUser } from "@/lib/services/utils/achievement-utils";
 
 import { getUserEntitlements } from "@/lib/services/entitlement-service-server";
 import { getStoreAchievementPacks } from "@/lib/services/pack-store-service-server";

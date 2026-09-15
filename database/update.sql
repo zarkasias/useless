@@ -59,3 +59,49 @@ where user_id in (
   'f2fe197a-4ef6-4022-8992-6d098c75ebf8',
   '51febd78-3ae7-4104-83d6-f418dac89120'
 );
+
+insert into achievements (
+  title,
+  description,
+  type,
+  emoji,
+  icon_path,
+  is_daily,
+  status,
+  trigger_type,
+  trigger_config
+)
+values
+(
+  'Collector of Nothing',
+  'Collected ten achievements of absolutely questionable value.',
+  'RARE',
+  '🏆',
+  null,
+  false,
+  'published',
+  'collection_count',
+  '{"count": 10}'::jsonb
+),
+(
+  'Hoarder of Pointlessness',
+  'Somehow accumulated twenty-five useless achievements and kept every one.',
+  'EPIC',
+  '🏆',
+  null,
+  false,
+  'published',
+  'collection_count',
+  '{"count": 25}'::jsonb
+),
+(
+  'Museum of Mediocrity',
+  'Collected fifty achievements nobody asked you to collect.',
+  'LEGENDARY',
+  '🏆',
+  null,
+  false,
+  'published',
+  'collection_count',
+  '{"count": 50}'::jsonb
+);

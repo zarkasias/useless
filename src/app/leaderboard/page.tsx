@@ -1,4 +1,4 @@
-import { getAuthenticatedUser } from "@/lib/services/achievement-service-server";
+import { getAuthenticatedUser } from "@/lib/services/utils/achievement-utils";
 
 import { getAuthenticatedUserProfile } from "@/lib/services/achievement-service-server";
 

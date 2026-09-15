@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { stripe } from "@/lib/stripe-server";
-import { getAuthenticatedUser } from "@/lib/services/achievement-service-server";
+import { getAuthenticatedUser } from "@/lib/services/utils/achievement-utils";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 
 type BillingInterval = "month" | "year";
