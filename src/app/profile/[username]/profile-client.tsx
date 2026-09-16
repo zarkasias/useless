@@ -153,7 +153,7 @@ export function ProfileClient({
               {/* Profile Information */}
               <div className="flex items-start justify-between">
                 <div className="px-6 py-2">
-                  <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+                  <div className="flex gap-5 flex-row items-center">
                     <Avatar className="size-24 border-4 border-background shadow-md">
                       <AvatarImage
                         src={profile.avatar_url || ""}
