@@ -143,6 +143,8 @@ export async function evaluateCollectionCountAchievements({
       icon_path: achievement.icon_path,
       created_at: insertedAchievement.created_at,
       is_daily: false,
+      trigger_type: achievement.trigger_type,
+      trigger_config: achievement.trigger_config,
       status: achievement.status,
     });
   }
