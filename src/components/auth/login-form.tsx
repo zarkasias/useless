@@ -98,7 +98,7 @@ export function LoginForm({ redirectTo = "/dashboard" }: LoginFormProps) {
   if (loginStage === "finishing") {
     return (
       <div className="flex min-h-[300px] flex-col items-center justify-center text-center">
-        <div className="relative flex size-16 items-center justify-center rounded-2xl bg-violet-100">
+        <div className="relative flex size-16 items-center justify-center rounded-full bg-violet-100">
           <Sparkles className="size-7 text-violet-600" />
 
           <LoaderCircle className="absolute size-20 animate-spin text-violet-300" />

@@ -6,22 +6,22 @@ import type { UserProfile } from "@/lib/supabase";
 import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
 
 import { Navbar } from "@/components/navbar";
-import Profile from "@/components/profile/profile-section";
-import Subscription from "@/components/profile/subscription-section";
-import DeleteAccount from "@/components/profile/delete-section";
+import Profile from "@/components/settings/profile-section";
+import Subscription from "@/components/settings/subscription-section";
+import DeleteAccount from "@/components/settings/delete-section";
 
-interface ProfileClientProps {
+interface SettingsClientProps {
   initialProfile: UserProfile;
 
   initialEntitlements: UserEntitlements;
   email: string;
 }
 
-export default function ProfileClient({
+export default function SettingsClient({
   initialProfile,
   initialEntitlements,
   email,
-}: ProfileClientProps) {
+}: SettingsClientProps) {
   const [profile, setProfile] = useState(initialProfile);
 
   return (
