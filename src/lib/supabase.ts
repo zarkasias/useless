@@ -9,7 +9,12 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-export type AchievementType = "COMMON" | "RARE" | "EPIC" | "LEGENDARY";
+export type AchievementType =
+  | "COMMON"
+  | "RARE"
+  | "EPIC"
+  | "LEGENDARY"
+  | "SECRET";
 
 export type AchievementStatus = "draft" | "review" | "published" | "archived";
 
