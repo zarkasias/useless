@@ -215,6 +215,18 @@ function AchievementCardComponent({
           sparkleB: "#d8b4fe",
           medallionMid: "rgba(251, 191, 36, 0.24)",
         },
+        SECRET: {
+          borderStart: "#fdf4ff",
+          borderEnd: "#d946ef",
+
+          tagStart: "#d946ef",
+          tagEnd: "#e879f9",
+
+          sparkleA: "#e879f9",
+          sparkleB: "#f5d0fe",
+
+          medallionMid: "rgba(217, 70, 239, 0.24)",
+        },
       } as const;
 
       const theme = canvasTheme[type];

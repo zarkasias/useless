@@ -23,17 +23,20 @@ export function DashboardStats({ userAchievements }: DashboardStatsProps) {
   const rareCount = achievementsByType.RARE || 0;
   const epicCount = achievementsByType.EPIC || 0;
   const legendaryCount = achievementsByType.LEGENDARY || 0;
+  const secretCount = achievementsByType.SECRET || 0;
 
   const highestRarity =
-    legendaryCount > 0
-      ? "Legendary"
-      : epicCount > 0
-        ? "Epic"
-        : rareCount > 0
-          ? "Rare"
-          : totalAchievements > 0
-            ? "Common"
-            : "None";
+    secretCount > 0
+      ? "Secret"
+      : legendaryCount > 0
+        ? "Legendary"
+        : epicCount > 0
+          ? "Epic"
+          : rareCount > 0
+            ? "Rare"
+            : totalAchievements > 0
+              ? "Common"
+              : "None";
 
   const mostRecentAchievement =
     userAchievements.length > 0

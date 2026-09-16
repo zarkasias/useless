@@ -5,6 +5,7 @@ const achievementTypeWeights: Record<AchievementType, number> = {
   RARE: 25,
   EPIC: 12,
   LEGENDARY: 3,
+  SECRET: 1,
 };
 
 /**
