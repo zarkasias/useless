@@ -218,6 +218,7 @@ export async function getPublishedAchievementsForPack(
       icon_path,
       created_at,
       is_daily,
+      is_secret,
       pack_id,
       trigger_type,
       trigger_config,

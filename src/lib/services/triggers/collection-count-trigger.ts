@@ -55,6 +55,7 @@ export async function evaluateCollectionCountAchievements({
       icon_path,
       created_at,
       is_daily,
+      is_secret,
       status,
       trigger_type,
       trigger_config
@@ -143,6 +144,7 @@ export async function evaluateCollectionCountAchievements({
       icon_path: achievement.icon_path,
       created_at: insertedAchievement.created_at,
       is_daily: false,
+      is_secret: achievement.is_secret,
       trigger_type: achievement.trigger_type,
       trigger_config: achievement.trigger_config,
       status: achievement.status,
