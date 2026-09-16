@@ -38,6 +38,7 @@ const tabs: Array<{
   { value: "RARE", label: "Rare" },
   { value: "EPIC", label: "Epic" },
   { value: "LEGENDARY", label: "Legendary" },
+  { value: "SECRET", label: "Secret" },
 ];
 
 const rarityOrder: Record<AchievementType, number> = {
@@ -45,6 +46,7 @@ const rarityOrder: Record<AchievementType, number> = {
   RARE: 2,
   EPIC: 3,
   LEGENDARY: 4,
+  SECRET: 5,
 };
 
 const sortLabels: Record<SortOption, string> = {
