@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,6 +22,7 @@ export function LeaderboardTable({
   users,
   isLoading = false,
 }: LeaderboardTableProps) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [sortOrder, setSortOrder] = useState<"highest" | "lowest">("highest");
   const [page, setPage] = useState(1);
@@ -142,7 +144,16 @@ export function LeaderboardTable({
             : pageUsers.map((user) => (
                 <div
                   key={user.id}
-                  className="flex items-center gap-3 p-4 even:bg-gray-200/20"
+                  role="link"
+                  tabIndex={0}
+                  onClick={() => router.push(`/profile/${user.username}`)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      router.push(`/profile/${user.username}`);
+                    }
+                  }}
+                  className="flex cursor-pointer items-center gap-3 p-4 transition-colors hover:bg-muted/60 even:bg-gray-200/20"
                 >
                   {/* Rank */}
                   <div className="flex w-8 shrink-0 justify-center">
@@ -226,6 +237,15 @@ export function LeaderboardTable({
                 : pageUsers.map((user) => (
                     <tr
                       key={user.id}
+                      role="link"
+                      tabIndex={0}
+                      onClick={() => router.push(`/profile/${user.username}`)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          router.push(`/profile/${user.username}`);
+                        }
+                      }}
                       className="border-b transition-colors last:border-0 hover:bg-muted/60 even:bg-gray-200/20"
                     >
                       <td className="p-4">{getRankIcon(user.rank)}</td>

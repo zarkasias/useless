@@ -24,6 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { UserProfile } from "@/lib/supabase";
+import { NotificationCenter } from "@/components/notifications/notification-center";
 
 interface NavbarProps {
   user: UserProfile | null;
@@ -56,7 +57,14 @@ export function Navbar({
   };
 
   const getNavButtonClass = (href: string) => {
-    const isActive = pathname === href || pathname.startsWith(`${href}/`);
+    const isLeaderboardSection =
+      href === "/leaderboard" &&
+      (pathname === "/leaderboard" || pathname.startsWith("/profile/"));
+
+    const isActive =
+      isLeaderboardSection ||
+      pathname === href ||
+      pathname.startsWith(`${href}/`);
 
     return `
       transition-all duration-200
@@ -172,82 +180,88 @@ export function Navbar({
                 </Button>
               </Link>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    className="h-10 gap-2 rounded-lg px-2 hover:bg-muted focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
-                  >
-                    <Avatar className="h-8 w-8 border">
-                      <AvatarImage
-                        src={user.avatar_url || ""}
-                        alt={user.username}
-                      />
-
-                      <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
-                        {user.username.slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-
-                    <span className="hidden max-w-32 truncate text-sm font-medium text-gray-700 md:block dark:text-gray-200">
-                      {user.username}
-                    </span>
-
-                    <ChevronDown className="hidden size-4 text-muted-foreground md:block" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
-                  {/* Mobile-only navigation */}
-                  <DropdownMenuItem asChild className="md:hidden">
-                    <Link href="/dashboard">
-                      <LayoutDashboard className="size-4" />
-                      Dashboard
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem asChild className="md:hidden">
-                    <Link href="/collection">
-                      <Trophy className="size-4" />
-                      Collection
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem asChild className="md:hidden">
-                    <Link href="/leaderboard">
-                      <Medal className="size-4" />
-                      Leaderboard
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuItem asChild className="md:hidden">
-                    <Link href="/packs">
-                      <Package className="size-4" />
-                      Packs
-                    </Link>
-                  </DropdownMenuItem>
-
-                  <DropdownMenuSeparator className="md:hidden" />
-                  <DropdownMenuItem asChild>
-                    <Link
-                      href="/settings"
-                      className="flex cursor-pointer items-center gap-2"
+              <div className="flex items-center gap-1">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      className="h-10 gap-2 rounded-lg px-2 hover:bg-muted focus-visible:ring-0 focus-visible:ring-offset-0 focus-visible:outline-none"
                     >
-                      <Settings className="size-4" />
-                      Settings
-                    </Link>
-                  </DropdownMenuItem>
+                      <Avatar className="h-8 w-8 border">
+                        <AvatarImage
+                          src={user.avatar_url || ""}
+                          alt={user.username}
+                        />
 
-                  <DropdownMenuSeparator />
+                        <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
+                          {user.username.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
 
-                  <DropdownMenuItem
-                    onClick={handleLogout}
-                    className="cursor-pointer text-destructive focus:text-destructive"
-                  >
-                    <LogOut className="size-4" />
-                    Logout
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+                      <span className="hidden max-w-32 truncate text-sm font-medium text-gray-700 md:block dark:text-gray-200">
+                        {user.username}
+                      </span>
+
+                      <ChevronDown className="hidden size-4 text-muted-foreground md:block" />
+                    </Button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    {/* Mobile-only navigation */}
+                    <DropdownMenuItem asChild className="md:hidden">
+                      <Link href="/dashboard">
+                        <LayoutDashboard className="size-4" />
+                        Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild className="md:hidden">
+                      <Link href="/collection">
+                        <Trophy className="size-4" />
+                        Collection
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild className="md:hidden">
+                      <Link href="/leaderboard">
+                        <Medal className="size-4" />
+                        Leaderboard
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild className="md:hidden">
+                      <Link href="/packs">
+                        <Package className="size-4" />
+                        Packs
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator className="md:hidden" />
+
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/settings"
+                        className="flex cursor-pointer items-center gap-2"
+                      >
+                        <Settings className="size-4" />
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="cursor-pointer text-destructive focus:text-destructive"
+                    >
+                      <LogOut className="size-4" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <NotificationCenter enabled />
+              </div>
             </>
           ) : (
             <>
