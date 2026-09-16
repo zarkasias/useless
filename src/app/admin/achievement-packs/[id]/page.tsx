@@ -42,6 +42,7 @@ export default async function EditAchievementPackPage({
       RARE: 0,
       EPIC: 0,
       LEGENDARY: 0,
+      SECRET: 0,
     },
   );
 
