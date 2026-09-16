@@ -138,9 +138,9 @@ export default function AchievementsClient({
       <main className="mx-auto w-full max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8">
         <div className="space-y-6">
           <header>
-            <p className="text-sm font-medium text-muted-foreground">
+            {/* <p className="text-sm font-medium text-muted-foreground">
               Collection
-            </p>
+            </p> */}
 
             <h1 className="mt-1 text-3xl font-bold tracking-tight text-gray-700 sm:text-4xl">
               Achievement Collection

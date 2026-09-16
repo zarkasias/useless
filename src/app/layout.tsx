@@ -287,7 +287,7 @@ function StructuredData() {
   );
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
@@ -318,6 +318,7 @@ export default function RootLayout({
           id="google-adsense"
         />
         <Toaster position="top-right" expand={true} richColors />
+
         <main className="flex-1">{children}</main>
         <Footer />
       </body>
