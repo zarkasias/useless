@@ -13,6 +13,12 @@ export type AchievementType = "COMMON" | "RARE" | "EPIC" | "LEGENDARY";
 
 export type AchievementStatus = "draft" | "review" | "published" | "archived";
 
+export type AchievementTriggerType =
+  | "daily_claim"
+  | "streak"
+  | "account_age"
+  | "collection_count";
+
 export interface Achievement {
   id: string;
   user_id?: string;
@@ -23,6 +29,8 @@ export interface Achievement {
   icon_path?: string | null;
   created_at: string;
   is_daily?: boolean;
+  trigger_type: AchievementTriggerType | null;
+  trigger_config: Record<string, unknown> | null;
   status: AchievementStatus;
 }
 

@@ -5,6 +5,7 @@ import { getAnonymousUser } from "@/lib/anonymous-user";
 import { getAchievementPackFilter } from "./achievement-access-service-server";
 import { Achievement, UserProfile } from "@/lib/supabase";
 import { getAuthenticatedUser, getToday } from "./utils/achievement-utils";
+import { isDailyAchievementEligible } from "./utils/daily-claim-eligible";
 
 import { getUserStreakData } from "./streak-service-server";
 import { supabaseAdmin, isFreeLimitError } from "./utils/trigger-context";
@@ -147,6 +148,8 @@ export async function getAuthenticatedUserAchievements(): Promise<
         emoji,
         icon_path,
         created_at,
+        trigger_type,
+        trigger_config,
         is_daily,
         status
       )
@@ -183,6 +186,8 @@ export async function getAuthenticatedUserAchievements(): Promise<
         icon_path: achievement.icon_path,
         created_at: record.created_at,
         is_daily: achievement.is_daily,
+        trigger_type: achievement.trigger_type,
+        trigger_config: achievement.trigger_config,
         status: achievement.status,
       };
     });
@@ -194,6 +199,7 @@ export async function getAuthenticatedUserAchievements(): Promise<
  */
 async function getRandomAvailableDailyAchievement(
   previousAchievementIds: string[],
+  timezone: string,
   userId?: string,
 ): Promise<Achievement | null> {
   const packFilter = await getAchievementPackFilter(userId);
@@ -209,6 +215,8 @@ async function getRandomAvailableDailyAchievement(
       emoji,
       icon_path,
       created_at,
+      trigger_type,
+      trigger_config,
       is_daily
       `,
     )
@@ -229,7 +237,9 @@ async function getRandomAvailableDailyAchievement(
   }
 
   const availableAchievements = achievements.filter(
-    (achievement) => !previousAchievementIds.includes(achievement.id),
+    (achievement) =>
+      !previousAchievementIds.includes(achievement.id) &&
+      isDailyAchievementEligible(achievement as Achievement, timezone),
   );
 
   if (availableAchievements.length === 0) {
@@ -293,6 +303,8 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Daily
           emoji,
           icon_path,
           created_at,
+          trigger_type,
+          trigger_config,
           is_daily
         )
         `,
@@ -411,6 +423,7 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Daily
 
   const achievement = await getRandomAvailableDailyAchievement(
     previousAchievementIds,
+    timezone,
     user.id,
   );
 
@@ -591,6 +604,7 @@ export async function claimDailyAchievementForAnonymousUser(
 
   const achievement = await getRandomAvailableDailyAchievement(
     previousAchievementIds,
+    timezone,
   );
 
   if (!achievement) {

@@ -219,6 +219,8 @@ export async function getPublishedAchievementsForPack(
       created_at,
       is_daily,
       pack_id,
+      trigger_type,
+      trigger_config,
       status
     `,
     )

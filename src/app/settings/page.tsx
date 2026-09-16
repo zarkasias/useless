@@ -6,9 +6,9 @@ import { getAuthenticatedUser } from "@/lib/services/utils/achievement-utils";
 
 import { getUserEntitlements } from "@/lib/services/entitlement-service-server";
 
-import ProfileClient from "./profile-client";
+import SettingsClient from "./settings_client";
 
-export default async function ProfilePage() {
+export default async function SettingsPage() {
   const user = await getAuthenticatedUser();
 
   if (!user) {
@@ -24,7 +24,7 @@ export default async function ProfilePage() {
     redirect("/");
   }
   return (
-    <ProfileClient
+    <SettingsClient
       initialProfile={profile}
       initialEntitlements={entitlements}
       email={user.email ?? ""}

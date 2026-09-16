@@ -8,7 +8,7 @@ import Image from "next/image";
 import {
   ChevronDown,
   LogOut,
-  User,
+  Settings,
   LayoutDashboard,
   Trophy,
   Medal,
@@ -229,11 +229,11 @@ export function Navbar({
                   <DropdownMenuSeparator className="md:hidden" />
                   <DropdownMenuItem asChild>
                     <Link
-                      href="/profile"
+                      href="/settings"
                       className="flex cursor-pointer items-center gap-2"
                     >
-                      <User className="size-4" />
-                      Profile
+                      <Settings className="size-4" />
+                      Settings
                     </Link>
                   </DropdownMenuItem>
 
