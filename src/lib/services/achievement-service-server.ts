@@ -151,6 +151,7 @@ export async function getAuthenticatedUserAchievements(): Promise<
         trigger_type,
         trigger_config,
         is_daily,
+        is_secret,
         status
       )
     `,
@@ -186,6 +187,7 @@ export async function getAuthenticatedUserAchievements(): Promise<
         icon_path: achievement.icon_path,
         created_at: record.created_at,
         is_daily: achievement.is_daily,
+        is_secret: achievement.is_secret,
         trigger_type: achievement.trigger_type,
         trigger_config: achievement.trigger_config,
         status: achievement.status,
@@ -217,7 +219,8 @@ async function getRandomAvailableDailyAchievement(
       created_at,
       trigger_type,
       trigger_config,
-      is_daily
+      is_daily,
+      is_secret
       `,
     )
     .eq("is_daily", true)
@@ -305,7 +308,8 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Daily
           created_at,
           trigger_type,
           trigger_config,
-          is_daily
+          is_daily,
+          is_secret,
         )
         `,
     )
@@ -815,6 +819,7 @@ export async function getCollectionAchievements(
     .select("*")
     .or(packFilter)
     .eq("status", "published")
+    .eq("is_secret", false)
     .order("type")
     .order("title");
 

@@ -17,6 +17,7 @@ export type AchievementTriggerType =
   | "daily_claim"
   | "streak"
   | "account_age"
+  | "manual_award"
   | "collection_count";
 
 export interface Achievement {
@@ -29,6 +30,7 @@ export interface Achievement {
   icon_path?: string | null;
   created_at: string;
   is_daily?: boolean;
+  is_secret: boolean;
   trigger_type: AchievementTriggerType | null;
   trigger_config: Record<string, unknown> | null;
   status: AchievementStatus;
