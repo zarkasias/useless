@@ -309,7 +309,7 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Daily
           trigger_type,
           trigger_config,
           is_daily,
-          is_secret,
+          is_secret
         )
         `,
     )
