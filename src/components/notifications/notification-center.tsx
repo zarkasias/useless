@@ -199,7 +199,7 @@ export function NotificationCenter({ enabled }: NotificationCenterProps) {
         </PopoverTrigger>
 
         <PopoverContent align="end" className="w-80 p-0 sm:w-96">
-          <div className="border-b px-4 py-3">
+          <div className="border-b px-4 py-2">
             <div className="flex items-center justify-between">
               <h2 className="font-semibold">Notifications</h2>
 
@@ -212,7 +212,7 @@ export function NotificationCenter({ enabled }: NotificationCenterProps) {
           </div>
 
           {notifications.length === 0 ? (
-            <div className="px-4 py-8 text-center">
+            <div className="px-4 py-6 text-center">
               <Bell className="mx-auto size-7 text-muted-foreground" />
 
               <p className="mt-2 text-sm font-medium">No notifications</p>
@@ -308,6 +308,7 @@ function NotificationItem({
   onDismiss,
 }: NotificationItemProps) {
   const isFriendRequest = notification.type === "friend_request";
+  const isSystemRequest = notification.type === "system";
 
   return (
     <div className="border-b p-4 last:border-b-0">
@@ -315,6 +316,8 @@ function NotificationItem({
         <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
           {isFriendRequest ? (
             <UserPlus className="size-4 text-primary" />
+          ) : isSystemRequest ? (
+            <Info className="size-4 text-primary" />
           ) : (
             <Bell className="size-4 text-primary" />
           )}

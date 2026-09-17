@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Medal, Flame, Trophy } from "lucide-react";
+import { Medal, Flame, Trophy, ChevronRight } from "lucide-react";
 import type { LeaderboardUser } from "@/lib/services/leaderboard-service-server";
 
 import { Button } from "@/components/ui/button";
@@ -87,7 +87,9 @@ export function LeaderboardTable({
   return (
     <Card className="scroll-py-4">
       <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-2 pb-2">
-        <CardTitle>Achievement Leaders</CardTitle>
+        <CardTitle className="text-gray-500 text-xl ml-2">
+          Select a player to view their profile
+        </CardTitle>
 
         <div className="grid grid-cols-1 gap-2 sm:gap-3 sm:grid-cols-2 w-full sm:w-fit">
           <div className="min-w-0">
@@ -186,6 +188,7 @@ export function LeaderboardTable({
                       </div>
                     </div>
                   </div>
+                  <ChevronRight className="size-5 shrink-0 text-gray-400" />
                 </div>
               ))}
         </div>
@@ -202,6 +205,9 @@ export function LeaderboardTable({
                 <th className="p-4 text-center font-medium">Streak</th>
 
                 <th className="p-4 text-center font-medium">Achievements</th>
+                <th className="w-12 p-4">
+                  <span className="sr-only">View profile</span>
+                </th>
               </tr>
             </thead>
 
@@ -246,7 +252,7 @@ export function LeaderboardTable({
                           router.push(`/profile/${user.username}`);
                         }
                       }}
-                      className="border-b transition-colors last:border-0 hover:bg-muted/60 even:bg-gray-200/20"
+                      className="group cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/60 even:bg-gray-200/20"
                     >
                       <td className="p-4">{getRankIcon(user.rank)}</td>
 
@@ -280,6 +286,21 @@ export function LeaderboardTable({
                             {user.achievementCount}
                           </span>
                         </div>
+                      </td>
+                      <td className="w-12 p-4">
+                        <ChevronRight
+                          className="
+      ml-auto size-5
+      translate-x-1
+      text-gray-400
+      opacity-80
+      transition-all
+      duration-200
+      group-hover:translate-x-0
+      group-hover:text-gray-600
+      group-hover:opacity-100
+    "
+                        />
                       </td>
                     </tr>
                   ))}
