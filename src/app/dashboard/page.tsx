@@ -9,7 +9,7 @@ import {
 import { getAuthenticatedUserStreakData } from "@/lib/services/streak-service-server";
 
 import { getAuthenticatedUser } from "@/lib/services/utils/achievement-utils";
-
+import { getFriendActivity } from "@/lib/services/activity-service-server";
 import { getUserEntitlements } from "@/lib/services/entitlement-service-server";
 import { getStoreAchievementPacks } from "@/lib/services/pack-store-service-server";
 
@@ -26,14 +26,21 @@ export default async function DashboardPage() {
   const triggeredAchievements =
     await evaluateTriggeredAchievementsForAuthenticatedUser();
 
-  const [profile, achievements, streakData, entitlements, packs] =
-    await Promise.all([
-      getAuthenticatedUserProfile(),
-      getAuthenticatedUserAchievements(),
-      getAuthenticatedUserStreakData(),
-      getUserEntitlements(user.id),
-      getStoreAchievementPacks(),
-    ]);
+  const [
+    profile,
+    achievements,
+    streakData,
+    entitlements,
+    packs,
+    friendsActivity,
+  ] = await Promise.all([
+    getAuthenticatedUserProfile(),
+    getAuthenticatedUserAchievements(),
+    getAuthenticatedUserStreakData(),
+    getUserEntitlements(user.id),
+    getStoreAchievementPacks(),
+    getFriendActivity(user.id),
+  ]);
 
   if (!profile) {
     redirect("/");
@@ -47,6 +54,7 @@ export default async function DashboardPage() {
       initialStreakData={streakData}
       initialEntitlements={entitlements}
       initialTriggeredAchievements={triggeredAchievements}
+      friendActivity={friendsActivity}
     />
   );
 }

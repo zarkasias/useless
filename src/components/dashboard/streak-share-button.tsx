@@ -29,25 +29,21 @@ export function StreakShareButton(props: StreakShareProps) {
           type="button"
           variant="ghost"
           className="
-      group h-7 shrink-0 w-fit rounded-lg
-      border sm:border-2 border-white
+      group h-7 shrink-0 w-fit
       bg-transparent
-      px-2
+      px-0
       text-xs font-black text-white
-      shadow-md shadow-fuchsia-950/20
       transition-all
       duration-300
-      hover:text-gray-700
-      hover:bg-white
-      hover:shadow-sm
+      hover:text-white/80
+      hover:bg-transparent
     "
           aria-label="Share current streak"
         >
           <Share2
-            className="mr-1.5 size-4 transition-transform group-hover:rotate-6"
+            className="size-5 transition-transform group-hover:rotate-6"
             aria-hidden="true"
           />
-          Share
         </Button>
       </DialogTrigger>
       <DialogContent

@@ -163,6 +163,7 @@ function Footer() {
               target="_blank"
               rel="noopener noreferrer"
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src="https://viberank.dev/badge?app=Useless%20Achievements&theme=dark"
                 width={185}

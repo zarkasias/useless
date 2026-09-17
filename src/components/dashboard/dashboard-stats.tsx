@@ -49,8 +49,8 @@ export function DashboardStats({ userAchievements }: DashboardStatsProps) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
       {/* Total achievements */}
-      <Card className="shadow-sm bg-gray-50">
-        <CardContent className="px-4 py-2">
+      <Card className="shadow-sm bg-gray-50 py-4">
+        <CardContent className="px-4 py-1">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">
@@ -74,8 +74,8 @@ export function DashboardStats({ userAchievements }: DashboardStatsProps) {
       </Card>
 
       {/* Highest rarity */}
-      <Card className="shadow-sm bg-gray-100">
-        <CardContent className="px-4 py-2">
+      <Card className="shadow-sm bg-gray-100 py-4">
+        <CardContent className="px-4 py-1">
           <div className="flex items-start justify-between">
             <div>
               <p className="text-sm font-medium text-muted-foreground">
@@ -118,8 +118,8 @@ export function DashboardStats({ userAchievements }: DashboardStatsProps) {
       </Card>
 
       {/* Latest achievement */}
-      <Card className="shadow-sm bg-blue-50">
-        <CardContent className="px-4 py-2">
+      <Card className="shadow-sm bg-blue-50 py-4">
+        <CardContent className="px-4 py-1">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <p className="text-sm font-medium text-muted-foreground">

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { Navbar } from "@/components/navbar";
@@ -139,13 +138,14 @@ export function ProfileClient({
       <main className="mx-auto w-full max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8">
         <div className="space-y-3">
           {viewer && (
-            <Link
-              href="/leaderboard"
-              className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               <ArrowLeft className="size-4" />
-              Back to Leaderboard
-            </Link>
+              Back
+            </button>
           )}
           {/* Profile Header */}
           <section className="overflow-hidden rounded-lg border bg-background shadow-sm">

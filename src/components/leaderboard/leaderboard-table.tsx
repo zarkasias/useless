@@ -15,16 +15,19 @@ import {
 
 interface LeaderboardTableProps {
   users: LeaderboardUser[];
+  friendIds: string[];
   isLoading?: boolean;
 }
 
 export function LeaderboardTable({
   users,
+  friendIds,
   isLoading = false,
 }: LeaderboardTableProps) {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [sortOrder, setSortOrder] = useState<"highest" | "lowest">("highest");
+  const [scope, setScope] = useState<"all" | "friends">("all");
   const [page, setPage] = useState(1);
 
   const pageSize = 10;
@@ -72,7 +75,12 @@ export function LeaderboardTable({
 
   const searchTerm = search.trim().toLowerCase();
 
-  const matchingUsers = rankedUsers.filter((user) =>
+  const scopedUsers =
+    scope === "friends"
+      ? rankedUsers.filter((user) => friendIds.includes(user.id))
+      : rankedUsers;
+
+  const matchingUsers = scopedUsers.filter((user) =>
     user.username.toLowerCase().includes(searchTerm),
   );
 
@@ -85,28 +93,58 @@ export function LeaderboardTable({
   const pageUsers = displayUsers.slice(startIndex, startIndex + pageSize);
 
   return (
-    <Card className="scroll-py-4">
-      <CardHeader className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-2 pb-2">
-        <CardTitle className="text-gray-500 text-xl ml-2">
+    <Card className="scroll-py-4 py-0 !rounded-t-xl gap-1">
+      <CardHeader className="bg-gray-600 rounded-t-xl flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-2 pt-4 pb-4">
+        <CardTitle className="text-white text-md ml-2">
           Select a player to view their profile
         </CardTitle>
 
-        <div className="grid grid-cols-1 gap-2 sm:gap-3 sm:grid-cols-2 w-full sm:w-fit">
-          <div className="min-w-0">
+        <div className="flex w-full flex-col gap-3 p-1 sm:flex-row sm:items-center sm:justify-end">
+          {/* Search */}
+          <div className="relative w-full sm:w-64">
             <input
               id="leaderboard-search"
               type="search"
-              placeholder="Search User…"
+              placeholder="Search users..."
               value={search}
               onChange={(event) => {
                 setSearch(event.target.value);
                 setPage(1);
               }}
-              className="h-9 w-full rounded-md border bg-background px-3 text-base"
+              className="h-9 w-full rounded-md border bg-background px-3 text-sm shadow-sm outline-none transition focus:border-primary"
             />
           </div>
 
-          <div>
+          {/* Filters row */}
+          <div className="flex w-full items-center gap-2 sm:w-auto">
+            <div className="flex flex-1 rounded-md bg-background p-1 shadow-sm sm:flex-none">
+              <Button
+                type="button"
+                size="sm"
+                variant={scope === "all" ? "default" : "ghost"}
+                className="flex-1 sm:min-w-24"
+                onClick={() => {
+                  setScope("all");
+                  setPage(1);
+                }}
+              >
+                All Users
+              </Button>
+
+              <Button
+                type="button"
+                size="sm"
+                variant={scope === "friends" ? "default" : "ghost"}
+                className="flex-1 sm:min-w-24"
+                onClick={() => {
+                  setScope("friends");
+                  setPage(1);
+                }}
+              >
+                Friends
+              </Button>
+            </div>
+
             <select
               id="leaderboard-sort"
               value={sortOrder}
@@ -114,10 +152,10 @@ export function LeaderboardTable({
                 setSortOrder(event.target.value as "highest" | "lowest");
                 setPage(1);
               }}
-              className="h-9 w-full rounded-md border bg-background px-3 text-base sm:w-44"
+              className="h-9 w-40 shrink-0 rounded-md border bg-background px-3 text-sm shadow-sm outline-none transition focus:border-primary sm:w-44"
             >
-              <option value="highest">Streak Highest</option>
-              <option value="lowest">Streak Lowest</option>
+              <option value="highest">Streak: Highest</option>
+              <option value="lowest">Streak: Lowest</option>
             </select>
           </div>
         </div>
@@ -254,9 +292,9 @@ export function LeaderboardTable({
                       }}
                       className="group cursor-pointer border-b transition-colors last:border-0 hover:bg-muted/60 even:bg-gray-200/20"
                     >
-                      <td className="p-4">{getRankIcon(user.rank)}</td>
+                      <td className="p-3">{getRankIcon(user.rank)}</td>
 
-                      <td className="p-4">
+                      <td className="p-3">
                         <div className="flex items-center gap-3">
                           <Avatar>
                             <AvatarImage src={user.avatar_url || ""} />
@@ -270,7 +308,7 @@ export function LeaderboardTable({
                         </div>
                       </td>
 
-                      <td className="p-4 text-center">
+                      <td className="p-3 text-center">
                         <div className="flex items-center justify-center gap-1.5">
                           <Flame className="size-5 text-orange-400" />
 
@@ -278,7 +316,7 @@ export function LeaderboardTable({
                         </div>
                       </td>
 
-                      <td className="p-4 text-center">
+                      <td className="p-3 text-center">
                         <div className="flex items-center justify-center gap-1.5">
                           <Trophy className="size-5 text-amber-400" />
 
@@ -287,7 +325,7 @@ export function LeaderboardTable({
                           </span>
                         </div>
                       </td>
-                      <td className="w-12 p-4">
+                      <td className="w-12 p-3">
                         <ChevronRight
                           className="
       ml-auto size-5
@@ -315,9 +353,13 @@ export function LeaderboardTable({
                 role="status"
                 className="text-center text-sm text-muted-foreground"
               >
-                {search.trim()
-                  ? "No users match your search."
-                  : "No users on the leaderboard yet."}
+                {scope === "friends"
+                  ? search.trim()
+                    ? "No friends match your search."
+                    : "None of your friends are on the leaderboard yet."
+                  : search.trim()
+                    ? "No users match your search."
+                    : "No users on the leaderboard yet."}
               </p>
             ) : (
               <div className="flex flex-col items-center gap-3">

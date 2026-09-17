@@ -14,6 +14,8 @@ import {
   Medal,
   Sparkles,
   Package,
+  Users,
+  Shield,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -142,17 +144,6 @@ export function Navbar({
                     Packs
                   </Button>
                 </Link>
-
-                {role === "admin" && (
-                  <Link href="/admin">
-                    <Button
-                      variant="ghost"
-                      className={getNavButtonClass("/admin")}
-                    >
-                      Admin
-                    </Button>
-                  </Link>
-                )}
               </div>
 
               <Link href="/pro">
@@ -237,6 +228,28 @@ export function Navbar({
                     </DropdownMenuItem>
 
                     <DropdownMenuSeparator className="md:hidden" />
+
+                    {role === "admin" && (
+                      <DropdownMenuItem asChild>
+                        <Link
+                          href="/admin"
+                          className="flex cursor-pointer items-center gap-2"
+                        >
+                          <Shield className="size-4" />
+                          Admin
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href="/friends"
+                        className="flex cursor-pointer items-center gap-2"
+                      >
+                        <Users className="size-4" />
+                        Friends
+                      </Link>
+                    </DropdownMenuItem>
 
                     <DropdownMenuItem asChild>
                       <Link
