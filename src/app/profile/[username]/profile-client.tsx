@@ -262,22 +262,24 @@ export function ProfileClient({
                       </>
                     )}
 
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="icon"
-                      className="size-8 shadow-sm"
-                      title="Share Profile"
-                      aria-label="Share Profile"
-                      onClick={() => {
-                        navigator.share?.({
-                          title: `${profile.username} on Useless Achievements`,
-                          url: window.location.href,
-                        });
-                      }}
-                    >
-                      <Share2 className="size-5" />
-                    </Button>
+                    {isOwnProfile && (
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        size="icon"
+                        className="size-8 shadow-sm"
+                        title="Share Profile"
+                        aria-label="Share Profile"
+                        onClick={() => {
+                          navigator.share?.({
+                            title: `${profile.username} on Useless Achievements`,
+                            url: window.location.href,
+                          });
+                        }}
+                      >
+                        <Share2 className="size-5" />
+                      </Button>
+                    )}
                   </div>
                 )}
               </div>

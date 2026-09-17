@@ -4,7 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 
-import { Bell, Check, UserPlus, X } from "lucide-react";
+import { Bell, Info, Check, UserPlus, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -246,6 +246,8 @@ export function NotificationCenter({ enabled }: NotificationCenterProps) {
               <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
                 {previewNotification.type === "friend_request" ? (
                   <UserPlus className="size-4 text-primary" />
+                ) : previewNotification.type === "system" ? (
+                  <Info className="size-4 text-primary" />
                 ) : (
                   <Bell className="size-4 text-primary" />
                 )}
