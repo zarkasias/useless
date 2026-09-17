@@ -24,6 +24,19 @@ export interface FriendshipState {
   status: FriendshipStatus;
 }
 
+export interface FriendProfile {
+  id: string;
+  username: string;
+  avatar_url: string | null;
+}
+
+export interface FriendListItem {
+  friendshipId: string;
+  friend: FriendProfile;
+  created_at: string;
+  updated_at: string;
+}
+
 // --------------------------------------------------
 // Private lookup helper
 // --------------------------------------------------
@@ -291,7 +304,7 @@ export async function removeFriend(friendshipId: string): Promise<void> {
 // Get accepted friends
 // --------------------------------------------------
 
-export async function getFriends(userId: string) {
+export async function getFriends(userId: string): Promise<FriendListItem[]> {
   const { data, error } = await supabaseAdmin
     .from("friendships")
     .select(
@@ -326,11 +339,25 @@ export async function getFriends(userId: string) {
   return (data ?? []).map((friendship) => {
     const isRequester = friendship.requester_id === userId;
 
-    const friend = isRequester ? friendship.addressee : friendship.requester;
+    const relatedProfile = isRequester
+      ? friendship.addressee
+      : friendship.requester;
+
+    const friend = Array.isArray(relatedProfile)
+      ? relatedProfile[0]
+      : relatedProfile;
+
+    if (!friend) {
+      throw new Error("Friend profile not found.");
+    }
 
     return {
       friendshipId: friendship.id,
-      friend,
+      friend: {
+        id: friend.id,
+        username: friend.username,
+        avatar_url: friend.avatar_url,
+      },
       created_at: friendship.created_at,
       updated_at: friendship.updated_at,
     };

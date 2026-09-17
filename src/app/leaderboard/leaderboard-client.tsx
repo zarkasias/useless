@@ -10,12 +10,14 @@ interface LeaderboardClientProps {
   initialProfile: UserProfile | null;
   initialUsers: LeaderboardUser[];
   initialEntitlements: UserEntitlements | null;
+  friendIds: string[];
 }
 
 export default function LeaderboardClient({
   initialProfile,
   initialUsers,
   initialEntitlements,
+  friendIds,
 }: LeaderboardClientProps) {
   const user = initialProfile;
 
@@ -44,7 +46,11 @@ export default function LeaderboardClient({
             </p>
           </header>
 
-          <LeaderboardTable users={initialUsers} isLoading={false} />
+          <LeaderboardTable
+            users={initialUsers}
+            isLoading={false}
+            friendIds={friendIds}
+          />
         </div>
       </main>
     </div>

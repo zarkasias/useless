@@ -21,9 +21,11 @@ import {
 import type { AchievementStreakData } from "@/lib/services/streak-service-server";
 import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
 import type { StoreAchievementPack } from "@/lib/services/pack-store-service-server";
+import type { FriendActivityItem } from "@/lib/services/activity-service-server";
 
 import { toast } from "sonner";
 import { AchievementCard } from "@/components/achievement-card-updated";
+import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { FeaturedPackPromo } from "@/components/packs/featured-pack-promo";
 
 interface DashboardClientProps {
@@ -33,6 +35,7 @@ interface DashboardClientProps {
   initialEntitlements: UserEntitlements;
   initialPacks: StoreAchievementPack[];
   initialTriggeredAchievements: Achievement[];
+  friendActivity: FriendActivityItem[];
 }
 
 export default function DashboardClient({
@@ -42,6 +45,7 @@ export default function DashboardClient({
   initialEntitlements,
   initialPacks,
   initialTriggeredAchievements,
+  friendActivity,
 }: DashboardClientProps) {
   const router = useRouter();
   const [user] = useState<UserProfile | null>(initialProfile);
@@ -282,8 +286,14 @@ export default function DashboardClient({
             <DashboardStats userAchievements={userAchievements} />
           </section>
 
+          {friendActivity.length > 0 && (
+            <section className="pt-2">
+              <ActivityFeed friendActivity={friendActivity} />
+            </section>
+          )}
+
           {/* Recent Achievements */}
-          <section className="space-y-4 pt-4">
+          <section className="space-y-4 pt-2">
             <div className="flex items-center justify-between gap-4">
               <div className="min-w-0">
                 <h2 className="sm:text-2xl text-gray-700 font-semibold tracking-tight">
