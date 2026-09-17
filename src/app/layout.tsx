@@ -151,6 +151,7 @@ function Footer() {
               <Image
                 src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1246099&theme=light&t=1789058787565"
                 alt="Useless Achievements on Product Hunt"
+                priority
                 width={185}
                 height={40}
                 className="h-10 w-auto"
