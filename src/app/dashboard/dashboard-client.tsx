@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/navbar";
-import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import { StreakCalendar } from "@/components/dashboard/streak-calendar";
 import { UnlockAchievement } from "@/components/unlock-achievement";
 import { StreakShareButton } from "@/components/dashboard/streak-share-button";
