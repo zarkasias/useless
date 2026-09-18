@@ -36,6 +36,7 @@ export interface Achievement {
   created_at: string;
   is_daily?: boolean;
   is_secret: boolean;
+  pack_id?: string | null;
   trigger_type: AchievementTriggerType | null;
   trigger_config: Record<string, unknown> | null;
   status: AchievementStatus;
