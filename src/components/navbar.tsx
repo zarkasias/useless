@@ -15,6 +15,7 @@ import {
   Sparkles,
   Package,
   Users,
+  User,
   Shield,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -240,6 +241,16 @@ export function Navbar({
                         </Link>
                       </DropdownMenuItem>
                     )}
+
+                    <DropdownMenuItem asChild>
+                      <Link
+                        href={`/profile/${user.username}`}
+                        className="flex cursor-pointer items-center gap-2"
+                      >
+                        <User className="size-4" />
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
 
                     <DropdownMenuItem asChild>
                       <Link
