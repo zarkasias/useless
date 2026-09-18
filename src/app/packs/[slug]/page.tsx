@@ -152,7 +152,7 @@ export default async function PackDetailPage({
 
                 <div className="mt-6">
                   {pack.owned ? (
-                    <div className="rounded-xl bg-emerald-50 p-4 text-sm font-medium text-emerald-800">
+                    <div className="rounded-xl bg-emerald-50/80 p-2 text-sm font-medium text-emerald-800">
                       You own this pack.
                     </div>
                   ) : (

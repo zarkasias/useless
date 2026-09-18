@@ -8,6 +8,7 @@ import {
   Flame,
   Trophy,
   UserPlus,
+  UserMinus,
   Share2,
   ArrowLeft,
   Check,
@@ -29,6 +30,7 @@ import {
   sendFriendRequestAction,
   acceptFriendRequestAction,
   declineFriendRequestAction,
+  removeFriendAction,
 } from "./actions";
 
 import type { Achievement, UserProfile } from "@/lib/supabase";
@@ -127,6 +129,24 @@ export function ProfileClient({
     });
   };
 
+  const handleRemoveFriend = () => {
+    if (!friendshipState.id) return;
+
+    startTransition(async () => {
+      const result = await removeFriendAction(
+        friendshipState.id!,
+        profile.username,
+      );
+
+      if (!result.success) {
+        console.error(result.message);
+        return;
+      }
+
+      router.refresh();
+    });
+  };
+
   return (
     <div className="min-h-screen bg-transparent">
       <Navbar
@@ -184,21 +204,21 @@ export function ProfileClient({
                         {friendshipStatus === "none" && (
                           <Button
                             type="button"
-                            variant="secondary"
-                            size="icon"
-                            className="size-8 shadow-sm"
+                            variant="outline"
+                            className="h-8 gap-2 px-3 shadow-sm font-semibold"
                             title="Add Friend"
                             aria-label="Add Friend"
                             disabled={isPending}
                             onClick={handleAddFriend}
                           >
                             <UserPlus
-                              className={`size-5 ${
+                              className={`size-4 ${
                                 isPending
                                   ? "animate-pulse text-muted-foreground"
                                   : ""
                               }`}
                             />
+                            Add friend
                           </Button>
                         )}
 
@@ -206,58 +226,71 @@ export function ProfileClient({
                           <Button
                             type="button"
                             variant="secondary"
-                            size="icon"
-                            className="size-8 shadow-sm"
+                            className="h-8 gap-2 px-3 shadow-sm bg-amber-500 font-semibold text-white"
                             title="Friend Request Sent"
                             aria-label="Friend Request Sent"
                             disabled
                           >
-                            <UserPlus className="size-5 text-amber-500" />
+                            <UserPlus className="size-4 text-white" />
+                            Friend Request Sent
                           </Button>
                         )}
 
                         {friendshipStatus === "pending_received" && (
-                          <>
+                          <div className="flex flex-col gap-2">
                             <Button
                               type="button"
                               variant="secondary"
-                              size="icon"
-                              className="size-8 shadow-sm"
+                              className="sh-8 gap-2 px-3 shadow-sm bg-green-600 font-semibold text-white"
                               title="Accept Friend Request"
                               aria-label="Accept Friend Request"
                               disabled={isPending}
                               onClick={handleAcceptFriend}
                             >
-                              <Check className="size-5 text-green-600" />
+                              <Check className="size-4" />
+                              Accept Friend Request
                             </Button>
 
                             <Button
                               type="button"
                               variant="secondary"
-                              size="icon"
-                              className="size-8 shadow-sm"
+                              className="h-8 gap-2 px-3 shadow-sm bg-red-500 font-semibold text-white"
                               title="Decline Friend Request"
                               aria-label="Decline Friend Request"
                               disabled={isPending}
                               onClick={handleDeclineFriend}
                             >
-                              <X className="size-5 text-red-500" />
+                              <X className="size-4" />
+                              Decline Friend Request
                             </Button>
-                          </>
+                          </div>
                         )}
 
                         {friendshipStatus === "friends" && (
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            size="icon"
-                            className="size-8 shadow-sm"
-                            title="Friends"
-                            aria-label="Friends"
-                            disabled
-                          >
-                            <UserPlus className="size-5 text-green-600" />
-                          </Button>
+                          <>
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              className="h-8 gap-2 px-3 shadow-sm text-white font-semibold bg-green-600"
+                              title="Friends"
+                              aria-label="Friends"
+                              disabled
+                            >
+                              <UserPlus className="size-4" />
+                              Friend
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              className="h-8 gap-2 px-3 shadow-sm bg-red-500 text-white font-semibold"
+                              title="Remove Friend"
+                              disabled={isPending}
+                              onClick={handleRemoveFriend}
+                            >
+                              <UserMinus className="size-4" />
+                              Remove Friend
+                            </Button>
+                          </>
                         )}
                       </>
                     )}

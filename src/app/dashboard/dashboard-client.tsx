@@ -11,7 +11,14 @@ import { UnlockAchievement } from "@/components/unlock-achievement";
 import { StreakShareButton } from "@/components/dashboard/streak-share-button";
 import { Timezonesync } from "@/components/timezone-sync";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Flame, Trophy, Check, LoaderCircle } from "lucide-react";
+import {
+  ArrowRight,
+  Flame,
+  Trophy,
+  Award,
+  Check,
+  LoaderCircle,
+} from "lucide-react";
 import { Achievement, UserProfile } from "@/lib/supabase";
 
 import {
@@ -60,8 +67,9 @@ export default function DashboardClient({
 
   const activeAchievement = achievementQueue[0] ?? null;
   const [isClaimingAchievement, setIsClaimingAchievement] = useState(false);
+  const [packs, setPacks] = useState<StoreAchievementPack[]>(initialPacks);
 
-  const featuredPack = initialPacks[0];
+  const featuredPack = packs[0];
 
   const handleDailyAchievement = async () => {
     if (!user || isClaimingAchievement) return;
@@ -96,17 +104,35 @@ export default function DashboardClient({
 
       setAchievementQueue(achievementsToShow);
 
-      setUserAchievements((current) => {
-        const existingIds = new Set(
-          current.map((achievement) => achievement.id),
-        );
+      const existingIds = new Set(
+        userAchievements.map((achievement) => achievement.id),
+      );
 
-        const newAchievements = achievementsToShow.filter(
-          (achievement) => !existingIds.has(achievement.id),
-        );
+      const newAchievements = achievementsToShow.filter(
+        (achievement) => !existingIds.has(achievement.id),
+      );
 
-        return [...newAchievements, ...current];
-      });
+      setUserAchievements((current) => [...newAchievements, ...current]);
+
+      setPacks((currentPacks) =>
+        currentPacks.map((pack) => {
+          const newlyCollectedFromPack = newAchievements.filter(
+            (achievement) => achievement.pack_id === pack.id,
+          ).length;
+
+          if (newlyCollectedFromPack === 0) {
+            return pack;
+          }
+
+          return {
+            ...pack,
+            collectedAchievements: Math.min(
+              pack.collectedAchievements + newlyCollectedFromPack,
+              pack.totalAchievements,
+            ),
+          };
+        }),
+      );
 
       const updatedStreakData = await getStreakDataAction();
 
@@ -224,8 +250,8 @@ export default function DashboardClient({
                 </div>
 
                 {/* Streak footer */}
-                <div className="mt-auto grid grid-cols-2 divide-x divide-white/10 bg-gray-600 text-white">
-                  <div className="flex flex-col sm:flex-row  sm:items-center sm:justify-between gap-3 sm:gap-0 pl-6 pr-2 py-4">
+                <div className="mt-auto grid md:grid-cols-3 divide-y sm:divide-x divide-white/10 bg-gray-600 text-white">
+                  <div className="flex flex-row items-center justify-between gap-3 sm:gap-0 pl-6 pr-2 py-4">
                     <div className="flex items-center gap-3">
                       <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-orange-400/80">
                         <Flame className="size-4 text-white" />
@@ -264,6 +290,22 @@ export default function DashboardClient({
                       </div>
                     </div>
                   </div>
+
+                  <div className="flex sm:items-center gap-3 px-6 py-4">
+                    <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/80">
+                      <Award className="size-4 text-white" />
+                    </div>
+
+                    <div className="min-w-0">
+                      <div className="text-lg font-semibold leading-none">
+                        {userAchievements.length}
+                      </div>
+
+                      <div className="mt-1 text-xs font-bold text-slate-300">
+                        Total Achievements
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -282,9 +324,9 @@ export default function DashboardClient({
           )}
 
           {/* Stats */}
-          <section>
+          {/* <section>
             <DashboardStats userAchievements={userAchievements} />
-          </section>
+          </section> */}
 
           {friendActivity.length > 0 && (
             <section className="pt-2">
