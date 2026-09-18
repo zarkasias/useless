@@ -172,8 +172,8 @@ export function ProfileClient({
             <div className="flex flex-col">
               {/* Profile Information */}
               <div className="flex items-start justify-between">
-                <div className="px-6 py-2">
-                  <div className="flex gap-5 flex-row items-center">
+                <div className="px-4 sm:px-6 py-2">
+                  <div className="flex gap-3 flex-row items-center">
                     <Avatar className="size-24 border-4 border-background shadow-md">
                       <AvatarImage
                         src={profile.avatar_url || ""}
@@ -190,7 +190,7 @@ export function ProfileClient({
                         Useless Achiever
                       </p>
 
-                      <h1 className="truncate text-3xl font-bold tracking-tight text-gray-700 sm:text-4xl dark:text-gray-200">
+                      <h1 className="truncate text-2xl font-bold tracking-tight text-gray-700 sm:text-4xl dark:text-gray-200">
                         {profile.username}
                       </h1>
                     </div>
@@ -205,7 +205,8 @@ export function ProfileClient({
                           <Button
                             type="button"
                             variant="outline"
-                            className="h-8 gap-2 px-3 shadow-sm font-semibold"
+                            size="icon"
+                            className="h-8 w-8 shadow-sm font-semibold sm:w-auto sm:gap-2 sm:px-3"
                             title="Add Friend"
                             aria-label="Add Friend"
                             disabled={isPending}
@@ -218,7 +219,7 @@ export function ProfileClient({
                                   : ""
                               }`}
                             />
-                            Add friend
+                            <span className="hidden sm:inline">Add friend</span>
                           </Button>
                         )}
 
@@ -226,13 +227,16 @@ export function ProfileClient({
                           <Button
                             type="button"
                             variant="secondary"
-                            className="h-8 gap-2 px-3 shadow-sm bg-amber-500 font-semibold text-white"
+                            size="icon"
+                            className="h-8 w-8 shadow-sm bg-amber-500 hover:bg-amber-300 translation-all duration-200 font-semibold text-white sm:w-auto sm:gap-2 sm:px-3"
                             title="Friend Request Sent"
                             aria-label="Friend Request Sent"
                             disabled
                           >
                             <UserPlus className="size-4 text-white" />
-                            Friend Request Sent
+                            <span className="hidden sm:inline">
+                              Friend Request Sent
+                            </span>
                           </Button>
                         )}
 
@@ -241,27 +245,33 @@ export function ProfileClient({
                             <Button
                               type="button"
                               variant="secondary"
-                              className="sh-8 gap-2 px-3 shadow-sm bg-green-600 font-semibold text-white"
+                              size="icon"
+                              className="w-8 h-8 shadow-sm bg-green-600 hover:bg-green-300 transition-all duration-200 font-semibold text-white sm:w-auto sm:gap-2 sm:px-3"
                               title="Accept Friend Request"
                               aria-label="Accept Friend Request"
                               disabled={isPending}
                               onClick={handleAcceptFriend}
                             >
                               <Check className="size-4" />
-                              Accept Friend Request
+                              <span className="hidden sm:inline">
+                                Accept Friend Request
+                              </span>
                             </Button>
 
                             <Button
                               type="button"
                               variant="secondary"
-                              className="h-8 gap-2 px-3 shadow-sm bg-red-500 font-semibold text-white"
+                              size="icon"
+                              className="w-8 h-8 shadow-sm bg-red-500 hover:bg-red-300 transition-all duration-200 font-semibold text-white sm:w-auto sm:gap-2 sm:px-3"
                               title="Decline Friend Request"
                               aria-label="Decline Friend Request"
                               disabled={isPending}
                               onClick={handleDeclineFriend}
                             >
                               <X className="size-4" />
-                              Decline Friend Request
+                              <span className="hidden sm:inline">
+                                Decline Friend Request
+                              </span>
                             </Button>
                           </div>
                         )}
@@ -271,24 +281,28 @@ export function ProfileClient({
                             <Button
                               type="button"
                               variant="secondary"
-                              className="h-8 gap-2 px-3 shadow-sm text-white font-semibold bg-green-600"
+                              size="icon"
+                              className="h-8 w-8 cursor-none shadow-sm text-white font-semibold bg-green-600/80 sm:w-auto sm:gap-2 sm:px-3"
                               title="Friends"
                               aria-label="Friends"
                               disabled
                             >
                               <UserPlus className="size-4" />
-                              Friend
+                              <span className="hidden sm:inline">Friend</span>
                             </Button>
                             <Button
                               type="button"
                               variant="secondary"
-                              className="h-8 gap-2 px-3 shadow-sm bg-red-500 text-white font-semibold"
+                              size="icon"
+                              className="h-8 w-8 shadow-sm bg-red-500 hover:bg-red-400 transition-all duration-200 text-white font-semibold sm:w-auto sm:gap-2 sm:px-3"
                               title="Remove Friend"
                               disabled={isPending}
                               onClick={handleRemoveFriend}
                             >
                               <UserMinus className="size-4" />
-                              Remove Friend
+                              <span className="hidden sm:inline">
+                                Remove Friend
+                              </span>
                             </Button>
                           </>
                         )}
