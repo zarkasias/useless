@@ -11,18 +11,16 @@ interface ActivityFeedProps {
 export function ActivityFeed({ friendActivity }: ActivityFeedProps) {
   return (
     <section className="overflow-hidden rounded-lg border bg-background shadow-sm">
-      <div className="flex items-center justify-between border-b px-4 py-3">
+      <div className="flex items-center justify-between border-b px-4 py-3 bg-gray-600">
         <div>
-          <h2 className="text-lg font-semibold text-gray-700">
-            Friend activity
-          </h2>
+          <h2 className="text-lg font-semibold text-white">Friend activity</h2>
 
-          <p className="mt-0.5 text-xs text-muted-foreground">
+          <p className="mt-0.5 text-xs text-gray-100">
             Pointless accomplishments your friends have unlocked.
           </p>
         </div>
 
-        <Users className="size-5 text-primary" />
+        <Users className="size-6 text-white" />
       </div>
 
       {friendActivity.length > 0 ? (
