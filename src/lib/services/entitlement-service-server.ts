@@ -36,6 +36,7 @@ export async function getUserEntitlements(
   const [
     { count: achievementCount, error: achievementCountError },
     { data: subscription, error: subscriptionError },
+    { data: complimentarySubscription, error: complimentarySubscriptionError },
   ] = await Promise.all([
     supabaseAdmin
       .from("user_achievements")
@@ -54,6 +55,19 @@ export async function getUserEntitlements(
         `,
       )
       .eq("user_id", userId)
+      .maybeSingle(),
+
+    supabaseAdmin
+      .from("complimentary_subscriptions")
+      .select(
+        `
+        id,
+        expires_at,
+        revoked_at
+      `,
+      )
+      .eq("user_id", userId)
+      .is("revoked_at", null)
       .maybeSingle(),
   ]);
 
@@ -75,13 +89,30 @@ export async function getUserEntitlements(
     throw new Error("Unable to determine user entitlements.");
   }
 
+  if (complimentarySubscriptionError) {
+    console.error(
+      "Error fetching complimentary subscription for entitlements",
+      complimentarySubscriptionError,
+    );
+
+    throw new Error("Unable to determine user entitlements");
+  }
+
   const count = achievementCount ?? 0;
 
   const ACTIVE_SUBSCRIPTION_STATUSES = ["active", "trialing", "past_due"];
 
-  const isSubscribed =
+  const hasActivePaidSubscription =
     subscription != null &&
     ACTIVE_SUBSCRIPTION_STATUSES.includes(subscription.status);
+
+  const hasComplimentarySubscription =
+    complimentarySubscription != null &&
+    (complimentarySubscription.expires_at === null ||
+      new Date(complimentarySubscription.expires_at) > new Date());
+
+  const isSubscribed =
+    hasActivePaidSubscription || hasComplimentarySubscription;
 
   const hasReachedFreeLimit = count >= FREE_ACHIEVMENT_LIMIT && !isSubscribed;
 
@@ -96,9 +127,13 @@ export async function getUserEntitlements(
 
     isSubscribed,
 
-    subscriptionStatus: subscription?.status ?? null,
+    subscriptionStatus: hasComplimentarySubscription
+      ? "complimentary"
+      : (subscription?.status ?? null),
 
-    billingInterval: subscription?.billing_interval ?? null,
+    billingInterval: hasComplimentarySubscription
+      ? null
+      : (subscription?.billing_interval ?? null),
 
     hasReachedFreeLimit,
 
