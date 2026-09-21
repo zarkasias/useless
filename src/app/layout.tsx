@@ -209,14 +209,18 @@ function Footer() {
         <div className="w-full gap-4 border-t pt-5">
           <div className="px-5 container flex flex-col gap-4 pb-4 md:flex-row items-center justify-between">
             <div className="flex flex-col items-center md:items-start">
-              <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-                © {new Date().getFullYear()} Useless Achievements. All rights
-                reserved.
-              </p>
+              <div className="flex flex-wrap items-baseline justify-center gap-x-2 md:justify-start">
+                <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
+                  © {new Date().getFullYear()} Useless Achievements. All rights
+                  reserved.
+                </p>
+
+                <p className="text-xs text-muted-foreground/70">v1.1.0</p>
+              </div>
 
               <nav
                 aria-label="Social media"
-                className="-mt-2 flex items-center gap-1"
+                className="-mt-2 sm:-ml-3 flex items-center gap-1"
               >
                 <a
                   href="https://www.instagram.com/uselessachievements/"

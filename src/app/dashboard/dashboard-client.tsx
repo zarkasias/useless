@@ -17,6 +17,7 @@ import {
   Award,
   Check,
   LoaderCircle,
+  Sparkles,
 } from "lucide-react";
 import { Achievement, UserProfile } from "@/lib/supabase";
 
@@ -41,6 +42,7 @@ interface DashboardClientProps {
   initialEntitlements: UserEntitlements;
   initialPacks: StoreAchievementPack[];
   initialTriggeredAchievements: Achievement[];
+  latestMetaAchievement: Achievement | null;
   friendActivity: FriendActivityItem[];
 }
 
@@ -51,6 +53,7 @@ export default function DashboardClient({
   initialEntitlements,
   initialPacks,
   initialTriggeredAchievements,
+  latestMetaAchievement,
   friendActivity,
 }: DashboardClientProps) {
   const router = useRouter();
@@ -60,12 +63,13 @@ export default function DashboardClient({
 
   const [streakData, setStreakData] =
     useState<AchievementStreakData>(initialStreakData);
-  const [achievementQueue, setAchievementQueue] = useState<Achievement[]>(
-    initialTriggeredAchievements,
-  );
+  const [achievementQueue, setAchievementQueue] = useState<Achievement[]>([]);
 
   const activeAchievement = achievementQueue[0] ?? null;
   const [isClaimingAchievement, setIsClaimingAchievement] = useState(false);
+  const [latestMeta, setLatestMeta] = useState<Achievement | null>(
+    latestMetaAchievement ?? initialTriggeredAchievements[0] ?? null,
+  );
   const [packs, setPacks] = useState<StoreAchievementPack[]>(initialPacks);
 
   const featuredPack = packs[0];
@@ -94,14 +98,20 @@ export default function DashboardClient({
 
       const achievement = result.achievement;
 
-      const achievementsToShow = [
-        achievement,
-        ...(result.triggeredAchievements ?? []),
-      ].filter((item): item is Achievement =>
-        Boolean(item && item.id && item.title && item.description && item.type),
+      const triggeredAchievements = result.triggeredAchievements ?? [];
+
+      const achievementsToShow = [achievement, ...triggeredAchievements].filter(
+        (item): item is Achievement =>
+          Boolean(
+            item && item.id && item.title && item.description && item.type,
+          ),
       );
 
-      setAchievementQueue(achievementsToShow);
+      setAchievementQueue([achievement]);
+
+      if (triggeredAchievements.length > 0) {
+        setLatestMeta(triggeredAchievements[0]);
+      }
 
       const existingIds = new Set(
         userAchievements.map((achievement) => achievement.id),
@@ -176,76 +186,164 @@ export default function DashboardClient({
           </section>
 
           {/* Today's Achievement */}
-          <section className="overflow-hidden rounded-lg border bg-background shadow-sm">
+          <section className="rounded-lg border bg-background shadow-sm">
             <div className="grid gap-2 lg:grid-cols-[1.5fr_0.85fr]">
               <div className="flex h-full flex-col border-r">
                 {/* Main content */}
                 <div className="p-4">
-                  <div className="mb-3 inline-flex w-fit items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                    Today ·{" "}
-                    {new Date().toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                    })}
-                  </div>
-
-                  {streakData.claimedToday ? (
-                    <>
-                      <h2 className="text-2xl font-semibold tracking-tight text-gray-700">
-                        You&apos;re done for today
-                      </h2>
-
-                      <p className="mt-2 max-w-lg text-muted-foreground">
-                        Today&apos;s useless achievement is safely in your
-                        collection. Come back tomorrow to keep your streak
-                        going.
-                      </p>
-
-                      <div className="mt-6 min-w-[260px] justfiy-center inline-flex w-fit items-center gap-2 rounded-lg bg-muted px-4 py-3 text-sm font-medium">
-                        <Check className="size-5 text-gray-700" />
-                        Achievement claimed
+                  <div
+                    className={`grid gap-6 ${latestMeta ? "lg:grid-cols-[1fr_280px]" : ""}  lg:items-start`}
+                  >
+                    <div>
+                      <div className="mb-3 inline-flex w-fit items-center rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                        Today ·{" "}
+                        {new Date().toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        })}
                       </div>
-                    </>
-                  ) : (
-                    <>
-                      <h2 className="text-2xl font-semibold tracking-tight text-gray-700">
-                        Today&apos;s achievement is waiting
-                      </h2>
 
-                      <p className="mt-2 max-w-lg text-muted-foreground">
-                        Claim one new achievement today and keep your streak
-                        alive.
-                      </p>
+                      {streakData.claimedToday ? (
+                        <>
+                          <h2 className="text-2xl font-semibold tracking-tight text-gray-700">
+                            You&apos;re done for today
+                          </h2>
 
-                      <Button
-                        onClick={handleDailyAchievement}
-                        size="lg"
-                        disabled={isClaimingAchievement}
-                        className="mt-6 
-    min-w-[260px] justfiy-center shadow-lg shadow-indigo-500/25 hover:from-violet-500 hover:via-indigo-500 hover:to-blue-400 font-black bg-gradient-to-br from-violet-600 via-indigo-600 to-blue-600"
-                      >
-                        {isClaimingAchievement ? (
-                          <>
-                            <LoaderCircle className="mr-2 size-5 animate-spin" />
-                            Claiming achievement...
-                          </>
-                        ) : (
-                          <>
-                            <span className="mr-2 p-0.5">
-                              <Image
-                                alt="Claim Achievement"
-                                width={38}
-                                height={38}
-                                className="w-8 h-8 bg-transparent -scale-x-100"
-                                src="/icons/target.webp"
-                              />
-                            </span>
-                            Claim Today&apos;s Achievement
-                          </>
-                        )}
-                      </Button>
-                    </>
-                  )}
+                          <p className="mt-2 max-w-lg text-muted-foreground">
+                            Today&apos;s useless achievement is safely in your
+                            collection. Come back tomorrow to keep your streak
+                            going.
+                          </p>
+
+                          <div className="mt-6 min-w-[260px] justify-center inline-flex w-fit items-center gap-2 rounded-lg bg-muted px-4 py-3 text-sm font-medium">
+                            <Check className="size-5 text-gray-700" />
+                            Achievement claimed
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <h2 className="text-2xl font-semibold tracking-tight text-gray-700">
+                            Today&apos;s achievement is waiting
+                          </h2>
+
+                          <p className="mt-2 max-w-lg text-muted-foreground">
+                            Claim one new achievement today and keep your streak
+                            alive.
+                          </p>
+
+                          <Button
+                            onClick={handleDailyAchievement}
+                            size="lg"
+                            disabled={isClaimingAchievement}
+                            className="mt-6 
+    min-w-[260px] justify-center shadow-lg shadow-indigo-500/25 hover:from-violet-500 hover:via-indigo-500 hover:to-blue-400 font-black bg-gradient-to-br from-violet-600 via-indigo-600 to-blue-600"
+                          >
+                            {isClaimingAchievement ? (
+                              <>
+                                <LoaderCircle className="mr-2 size-5 animate-spin" />
+                                Claiming achievement...
+                              </>
+                            ) : (
+                              <>
+                                <span className="mr-2 p-0.5">
+                                  <Image
+                                    alt="Claim Achievement"
+                                    width={38}
+                                    height={38}
+                                    className="w-8 h-8 bg-transparent -scale-x-100"
+                                    src="/icons/target.webp"
+                                  />
+                                </span>
+                                Claim Today&apos;s Achievement
+                              </>
+                            )}
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                    <div className="hidden lg:block">
+                      {latestMeta && (
+                        <div
+                          className="
+                            relative
+                            rotate-2
+                            -mr-2
+                            ml-2
+                            overflow-hidden
+                            rounded-2xl
+                            border-2
+                            border-violet-400/60
+                            bg-gradient-to-br
+                            from-violet-600/80
+                            via-fuchsia-600/80
+                            to-pink-500/80
+                            p-4
+                            text-white
+                            shadow-xl
+                            shadow-violet-500/25
+                            transition-transform
+                            duration-300
+                            hover:rotate-0
+                            hover:scale-[1.02]
+                          "
+                        >
+                          <div className="pointer-events-none absolute -right-6 -top-8 size-24 rounded-full bg-white/20 blur-2xl" />
+                          <div className="pointer-events-none absolute -bottom-8 -left-6 size-24 rounded-full bg-pink-300/20 blur-2xl" />
+
+                          {/* <Sparkles className="pointer-events-none absolute right-3 top-3 size-5 text-yellow-200" /> */}
+
+                          <div className="relative">
+                            <div className="mb-2 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.1em] text-yellow-300">
+                              <Sparkles className="size-3.5" />
+                              Special Achievement Unlocked
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                              <div
+                                className="
+                                  flex
+                                  size-16
+                                  shrink-0
+                                  items-center
+                                  justify-center
+                                  rounded-2xl
+                                  border
+                                  border-white/20
+                                  bg-white/15
+                                  shadow-inner
+                                  backdrop-blur-sm
+                                "
+                              >
+                                {latestMeta.icon_path ? (
+                                  <Image
+                                    src={latestMeta.icon_path}
+                                    alt={latestMeta.title}
+                                    width={60}
+                                    height={60}
+                                    className="size-14 object-contain drop-shadow-lg"
+                                  />
+                                ) : (
+                                  <span className="text-3xl">
+                                    {latestMeta.emoji}
+                                  </span>
+                                )}
+                              </div>
+
+                              <div className="min-w-0">
+                                <h3 className="text-lg font-black leading-tight text-white">
+                                  {latestMeta.title}
+                                </h3>
+
+                                <p className="mt-1 line-clamp-2 text-xs font-semibold leading-4 text-white/80">
+                                  {latestMeta.description}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Streak footer */}
@@ -361,7 +459,8 @@ export default function DashboardClient({
                     key={achievement.id}
                     achievement={achievement}
                     ingrid={true}
-                    showShareButton={false}
+                    isCollected={true}
+                    showShareButton={true}
                     variant="compact"
                   />
                 ))}

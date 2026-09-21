@@ -138,9 +138,9 @@ export function FeaturedPackPromo({
       {/* Mobile homepage layout */}
       <div className="relative flex items-center gap-3 sm:hidden">
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-2">
             <span
-              className={`inline-flex items-center gap-1 rounded-full border ${theme.badge} px-2.5 py-1 text-[10px] font-black uppercase tracking-wider`}
+              className={`inline-flex whitespace-nowrap items-center gap-1 rounded-full border ${theme.badge} px-2.5 py-1 text-[10px] font-black uppercase tracking-wider`}
             >
               <Sparkles className="size-3" />
               Featured Pack
@@ -200,7 +200,7 @@ export function FeaturedPackPromo({
             <Button
               asChild
               size="sm"
-              className="mt-3 rounded-xl bg-white font-bold text-purple-950 hover:bg-purple-50"
+              className="mt-3 rounded-lg h-7 bg-white/80 font-bold text-purple-950 hover:bg-purple-50"
             >
               <Link href={packHref}>
                 {pack.owned ? "View Pack" : "Explore Pack"}

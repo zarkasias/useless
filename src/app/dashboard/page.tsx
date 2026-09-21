@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import {
   getAuthenticatedUserProfile,
+  getLatestMetaAchievement,
   getAuthenticatedUserAchievements,
   evaluateTriggeredAchievementsForAuthenticatedUser,
 } from "@/lib/services/achievement-service-server";
@@ -33,6 +34,7 @@ export default async function DashboardPage() {
     entitlements,
     packs,
     friendsActivity,
+    lastMetaAchievement,
   ] = await Promise.all([
     getAuthenticatedUserProfile(),
     getAuthenticatedUserAchievements(),
@@ -40,6 +42,7 @@ export default async function DashboardPage() {
     getUserEntitlements(user.id),
     getStoreAchievementPacks(),
     getFriendActivity(user.id),
+    getLatestMetaAchievement(user.id),
   ]);
 
   if (!profile) {
@@ -54,6 +57,7 @@ export default async function DashboardPage() {
       initialStreakData={streakData}
       initialEntitlements={entitlements}
       initialTriggeredAchievements={triggeredAchievements}
+      latestMetaAchievement={lastMetaAchievement}
       friendActivity={friendsActivity}
     />
   );
