@@ -9,10 +9,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
-  Copy,
   Download,
   LoaderCircle,
   RefreshCw,
+  Share2,
   Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -79,11 +79,9 @@ function AchievementCardComponent({
   const cardRef = useRef<HTMLDivElement>(null);
   const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const generationAttemptedRef = useRef(false);
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
 
   const generateImageRef = useRef<() => Promise<void>>(async () => {});
 
@@ -117,16 +115,6 @@ function AchievementCardComponent({
   const timeAgo = unlockedAt
     ? formatDistanceToNow(new Date(unlockedAt), { addSuffix: true })
     : "";
-
-  // Detect mobile devices on component mount
-  useEffect(() => {
-    const detectMobile = () => {
-      return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent,
-      );
-    };
-    setIsMobileDevice(detectMobile());
-  }, []);
 
   const loadImage = (src: string): Promise<HTMLImageElement> => {
     return new Promise((resolve, reject) => {
@@ -545,187 +533,62 @@ function AchievementCardComponent({
     }
   };
 
-  // Function to copy image to clipboard for pasting into social media
-  const copyImageToClipboard = async () => {
-    if (!imageUrl) {
+  const shareAchievement = async () => {
+    if (!imageFile) {
       toast.error("Image not ready yet", {
         description: "Please wait for the image to generate",
       });
+
       return;
     }
 
     try {
-      setSocialLoading("Copy");
+      setSocialLoading("Share");
 
-      // Check if it's a mobile device
-      const isMobile =
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-          navigator.userAgent,
-        );
+      const shareData: ShareData = {
+        title: `${title} - Useless Achievements`,
+        text: getShareText(),
+        files: [imageFile],
+      };
 
-      // Check if Clipboard API is available and properly supports images
-      if (!navigator.clipboard || !navigator.clipboard.write || isMobile) {
-        // Fallback for mobile devices or browsers that don't support clipboard.write with images
-        toast.info("Clipboard image copy not supported on your device", {
-          description:
-            "Downloading the image instead. You can manually share it.",
-          duration: 4000,
-        });
-        downloadImage();
+      if (
+        navigator.share &&
+        navigator.canShare?.({
+          files: [imageFile],
+        })
+      ) {
+        await navigator.share(shareData);
+
         return;
       }
 
-      // Create a blob from the data URL
-      const res = await fetch(imageUrl);
-      const blob = await res.blob();
+      if (navigator.share) {
+        await navigator.share({
+          title: `${title} - Useless Achievements`,
+          text: getShareText(),
+          url: window.location.origin,
+        });
 
-      // Copy the image to clipboard
-      await navigator.clipboard.write([
-        new ClipboardItem({
-          [blob.type]: blob,
-        }),
-      ]);
+        return;
+      }
 
-      toast.success("Image copied to clipboard!", {
-        description:
-          "Now you can paste it directly into your social media post",
+      toast.info("Sharing is not supported in this browser", {
+        description: "Download the image and share it manually.",
       });
     } catch (error) {
-      console.error("Error copying image to clipboard:", error);
-      toast.error("Failed to copy image", {
-        description: "Downloading instead for you to share manually",
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+
+      console.error("Error sharing achievement:", error);
+
+      toast.error("Unable to share achievement", {
+        description: "Try downloading the image instead.",
       });
-      // Offer download as fallback
-      downloadImage();
     } finally {
       setSocialLoading(null);
     }
   };
-
-  // Share functions utilizing direct platform APIs where possible
-  // const shareFacebook = async () => {
-  //   setSocialLoading('Facebook');
-  //   try {
-  //     // Check if FB SDK is loaded
-  //     if (typeof window.FB !== 'undefined') {
-  //       // Use proper FB SDK sharing
-  //       window.FB.ui({
-  //         method: 'share',
-  //         href: getShareUrl(),
-  //         hashtag: '#UselessAchievements',
-  //         quote: getShareText(),
-  //       }, function(response) {
-  //         if (response && !response.error_message) {
-  //           toast.success("Shared to Facebook!");
-  //         } else {
-  //           toast.error("Facebook sharing failed");
-  //           // Fallback to direct sharing
-  //           window.open(`https://www.facebook.com/sharer.php?u=${encodeURIComponent(getShareUrl())}&quote=${encodeURIComponent(getShareText())}`, '_blank', 'width=600,height=400');
-  //         }
-  //       });
-  //     } else {
-  //       // Fallback if FB SDK not loaded
-  //       window.open(`https://www.facebook.com/sharer.php?u=${encodeURIComponent(getShareUrl())}&quote=${encodeURIComponent(getShareText())}`, '_blank', 'width=600,height=400');
-  //       toast.info("Opening Facebook share dialog", {
-  //         description: "Add your achievement image to complete sharing",
-  //       });
-  //       // Also download the image for manual sharing
-  //       downloadImage();
-  //     }
-  //   } catch (error) {
-  //     console.error("Error sharing to Facebook:", error);
-  //     toast.error("Facebook sharing failed", {
-  //       description: "Please try downloading and sharing manually",
-  //     });
-  //     downloadImage();
-  //   } finally {
-  //     setSocialLoading(null);
-  //   }
-  // };
-
-  // const shareTwitter = async () => {
-  //   setSocialLoading('Twitter');
-  //   try {
-  //     // X/Twitter Web Intent (most reliable method)
-  //     const textToShare = `I just unlocked "${title}" ${emoji} on Useless Achievements!`;
-  //     const url = getShareUrl();
-  //     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(textToShare)}&url=${encodeURIComponent(url)}&hashtags=UselessAchievements,GameAchievement`, '_blank');
-
-  //     toast.info("X/Twitter share dialog opened", {
-  //       description: "Download the image to add it to your tweet",
-  //     });
-  //     // Also download the image for manual sharing
-  //     downloadImage();
-  //   } catch (error) {
-  //     console.error("Error sharing to X/Twitter:", error);
-  //     toast.error("X/Twitter sharing failed", {
-  //       description: "Please try downloading and sharing manually",
-  //     });
-  //   } finally {
-  //     setSocialLoading(null);
-  //   }
-  // };
-
-  // const shareLinkedIn = async () => {
-  //   setSocialLoading('LinkedIn');
-  //   try {
-  //     // LinkedIn sharing API (OAuth required for more advanced features)
-  //     const url = getShareUrl();
-  //     const shareTitle = `I unlocked "${title}" on Useless Achievements!`;
-  //     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}&title=${encodeURIComponent(shareTitle)}&summary=${encodeURIComponent(description)}`, '_blank', 'width=600,height=400');
-
-  //     toast.info("LinkedIn share dialog opened", {
-  //       description: "Download the image to add it to your post",
-  //     });
-  //     // Also download the image for manual sharing
-  //     downloadImage();
-  //   } catch (error) {
-  //     console.error("Error sharing to LinkedIn:", error);
-  //     toast.error("LinkedIn sharing failed", {
-  //       description: "Please try downloading and sharing manually",
-  //     });
-  //   } finally {
-  //     setSocialLoading(null);
-  //   }
-  // };
-
-  // const shareInstagram = async () => {
-  //   setSocialLoading('Instagram');
-  //   try {
-  //     // Instagram doesn't have a web API for direct sharing
-  //     // Best approach is to download the image and instruct the user
-  //     downloadImage();
-  //     toast.info("Instagram sharing guide", {
-  //       description: "Open Instagram → Create a post → Select the downloaded image → Add the achievement text to your caption",
-  //       duration: 6000
-  //     });
-  //   } catch (error) {
-  //     console.error("Error preparing for Instagram:", error);
-  //     toast.error("Instagram preparation failed", {
-  //       description: "Please try downloading and sharing manually",
-  //     });
-  //   } finally {
-  //     setSocialLoading(null);
-  //   }
-  // };
-
-  // Create a map of share functions by platform name
-  // const shareFunctions = {
-  //   'Facebook': shareFacebook,
-  //   'Twitter': shareTwitter,
-  //   'LinkedIn': shareLinkedIn,
-  //   'Instagram': shareInstagram
-  // };
-
-  // Function to handle sharing based on platform name
-  // const handleShare = (platformName: string) => {
-  //   const shareFunction = shareFunctions[platformName as keyof typeof shareFunctions];
-  //   if (shareFunction) {
-  //     shareFunction();
-  //   } else {
-  //     toast.error(`Sharing to ${platformName} not implemented`);
-  //   }
-  // };
 
   return (
     <div className="relative w-full">
@@ -828,27 +691,10 @@ function AchievementCardComponent({
           )} */}
           {showShareButton && (
             <CardFooter className="flex flex-col pt-0 gap-4 mb-1">
-              {/* Image Preview (if available) */}
-              {/* {imageUrl && (
-              <div className="w-full flex justify-center mb-2">
-                <div className="relative w-64 h-38 rounded-md overflow-hidden border border-gray-200 dark:border-gray-800">
-                  <img 
-                    src={imageUrl} 
-                    alt={`${title} achievement`} 
-                    className="object-cover w-full h-full"
-                  />
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-1">
-                    <p className="text-[10px] text-white text-center font-medium">Achievement Image</p>
-                  </div>
-                </div>
-              </div>
-            )} */}
-
-              {/* Download and Copy Buttons */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-2 w-full pb-2">
+              <div className="grid w-full grid-cols-2 gap-2 pb-1">
                 <Button
-                  onClick={downloadImage}
                   type="button"
+                  onClick={shareAchievement}
                   className="
             flex-1
             bg-gradient-to-r
@@ -864,77 +710,43 @@ function AchievementCardComponent({
             hover:from-orange-400
             hover:to-rose-400
             hover:shadow-lg
-            "
+    "
+                  disabled={
+                    isGeneratingImage ||
+                    !imageFile ||
+                    !!socialLoading ||
+                    !isCollected
+                  }
+                >
+                  {socialLoading === "Share" ? (
+                    <LoaderCircle className="mr-2 size-4 animate-spin" />
+                  ) : (
+                    <Share2 className="mr-2 size-4" />
+                  )}
+                  Share
+                </Button>
+
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={downloadImage}
+                  className="
+      w-full
+      transition-all
+      duration-200
+      hover:-translate-y-0.5
+    "
                   disabled={
                     isGeneratingImage ||
                     !imageUrl ||
-                    socialLoading === "Copy" ||
+                    !!socialLoading ||
                     !isCollected
                   }
                 >
                   <Download className="mr-2 size-4" />
-
-                  {isMobileDevice ? "Save" : "Download"}
+                  Download
                 </Button>
-
-                {!isMobileDevice && (
-                  <Button
-                    variant="outline"
-                    onClick={copyImageToClipboard}
-                    className="w-full  transition-all
-            duration-200
-            hover:-translate-y-0.5"
-                    disabled={
-                      isGeneratingImage ||
-                      !imageUrl ||
-                      !!socialLoading ||
-                      !isCollected
-                    }
-                  >
-                    {socialLoading === "Copy" ? (
-                      <LoaderCircle className="mr-2 size-4 animate-spin" />
-                    ) : (
-                      <Copy className="mr-2 size-4" />
-                    )}
-                    Copy
-                  </Button>
-                )}
-
-                {isMobileDevice && imageUrl && (
-                  <p className="text-xs text-muted-foreground text-center mt-1">
-                    Save the image and share it.
-                  </p>
-                )}
               </div>
-
-              {/* Social Media Buttons */}
-              {/* <div className="grid grid-cols-4 gap-2 w-full">
-              {socialPlatforms.map((platform) => (
-                <Button 
-                  key={platform.name}
-                  variant="ghost" 
-                  onClick={() => handleShare(platform.name)}
-                  className={`
-                    flex flex-col items-center justify-center py-1 h-auto
-                    border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700
-                    bg-white/0 dark:bg-gray-950/50 hover:bg-white dark:hover:bg-gray-900
-                    transition-all rounded-lg
-                  `}
-                  disabled={isGeneratingImage || !imageUrl || !!socialLoading}
-                >
-                  {socialLoading === platform.name ? (
-                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                  ) : (
-                    <>
-                      <div className="mb-1">{platform.icon}</div>
-                    </>
-                  )}
-                </Button>
-              ))}
-            </div> */}
 
               {/* Regenerate button if image generation failed */}
               {!imageUrl &&

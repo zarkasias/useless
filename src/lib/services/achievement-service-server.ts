@@ -835,3 +835,59 @@ export async function getCollectionAchievements(
 
   return data ?? [];
 }
+
+export async function getLatestMetaAchievement(
+  userId: string,
+): Promise<Achievement | null> {
+  const { data, error } = await supabaseAdmin
+    .from("user_achievements")
+    .select(
+      `
+      created_at,
+      achievements!inner (
+        id,
+        title,
+        description,
+        type,
+        emoji,
+        icon_path,
+        created_at,
+        trigger_type,
+        trigger_config,
+        is_daily,
+        is_secret,
+        pack_id,
+        status
+      )
+    `,
+    )
+    .eq("user_id", userId)
+    .not("achievements.trigger_type", "is", null)
+    .neq("achievements.trigger_type", "daily_claim")
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Error fetching latest meta achievement:", error);
+    return null;
+  }
+
+  if (!data?.achievements) {
+    return null;
+  }
+
+  const achievement = Array.isArray(data.achievements)
+    ? data.achievements[0]
+    : data.achievements;
+
+  if (!achievement) {
+    return null;
+  }
+
+  return {
+    ...achievement,
+    user_id: userId,
+    created_at: data.created_at,
+  } as Achievement;
+}
