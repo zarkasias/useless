@@ -566,7 +566,6 @@ function AchievementCardComponent({
         await navigator.share({
           title: `${title} - Useless Achievements`,
           text: getShareText(),
-          url: window.location.origin,
         });
 
         return;
