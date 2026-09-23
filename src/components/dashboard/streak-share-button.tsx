@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Copy, Download, Share2 } from "lucide-react";
+import { Download, LoaderCircle, Share2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -60,8 +60,8 @@ export function StreakShareButton(props: StreakShareProps) {
         <DialogHeader>
           <DialogTitle>Share your streak</DialogTitle>
           <DialogDescription>
-            Download your badge and share your completely unnecessary dedication
-            with the world.
+            Share your badge and your completely unnecessary dedication with the
+            world.
           </DialogDescription>
         </DialogHeader>
         {open && <StreakBadgePreview {...props} />}
@@ -74,19 +74,15 @@ function StreakBadgePreview({ username, currentStreak }: StreakShareProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [ready, setReady] = useState(false);
   const [imageError, setImageError] = useState(false);
-  const [copying, setCopying] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const caption =
     currentStreak > 0
       ? `I've somehow maintained a ${currentStreak}-day streak of accomplishing absolutely nothing.
 My current uselessness streak: ${currentStreak} day${
           currentStreak === 1 ? "" : "s"
-        }.
-
-https://uselessachievements.com`
+        }.`
       : `My uselessness streak is currently 0.
-        Every pointless journey starts somewhere.
-
-https://uselessachievements.com`;
+Every pointless journey starts somewhere.`;
 
   useEffect(() => {
     let cancelled = false;
@@ -341,17 +337,77 @@ https://uselessachievements.com`;
     }
   };
 
-  const copyCaption = async () => {
-    setCopying(true);
+  const getBadgeFile = async (): Promise<File | null> => {
+    if (!ready || !canvasRef.current) return null;
+
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvasRef.current?.toBlob(resolve, "image/png");
+    });
+
+    if (!blob) return null;
+
+    return new File(
+      [blob],
+      `useless-achievements-streak-${currentStreak}.png`,
+      { type: "image/png" },
+    );
+  };
+
+  const shareBadge = async () => {
+    if (!ready || !canvasRef.current) return;
+
     try {
-      await navigator.clipboard.writeText(caption);
-      toast.success("Caption copied. Paste it into your LinkedIn post.");
-    } catch {
-      toast.error(
-        "Couldn't copy. Select the caption below and copy it manually.",
-      );
+      setSharing(true);
+
+      if (!window.isSecureContext) {
+        toast.info("Sharing requires a secure connection", {
+          description: "Open the site using HTTPS to share your streak.",
+        });
+        return;
+      }
+
+      if (!navigator.share) {
+        toast.info("Native sharing isn't available", {
+          description: "Download the badge and share it manually.",
+        });
+        return;
+      }
+
+      const badgeFile = await getBadgeFile();
+
+      if (!badgeFile) {
+        toast.error("Couldn't prepare your badge for sharing.");
+        return;
+      }
+
+      const canShareFile =
+        typeof navigator.canShare === "function" &&
+        navigator.canShare({ files: [badgeFile] });
+
+      if (canShareFile) {
+        await navigator.share({
+          title: `${currentStreak} Day Useless Streak`,
+          text: caption,
+          files: [badgeFile],
+        });
+        return;
+      }
+
+      await navigator.share({
+        title: `${currentStreak} Day Useless Streak`,
+        text: caption,
+      });
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return;
+      }
+
+      console.error("Failed to share streak badge:", error);
+      toast.error("Couldn't share your badge", {
+        description: "Try downloading it instead.",
+      });
     } finally {
-      setCopying(false);
+      setSharing(false);
     }
   };
 
@@ -413,8 +469,8 @@ https://uselessachievements.com`;
       <div className="flex flex-col gap-2 sm:flex-row">
         <Button
           type="button"
-          onClick={downloadBadge}
-          disabled={!ready}
+          onClick={shareBadge}
+          disabled={!ready || sharing}
           className="
             flex-1
             bg-gradient-to-r
@@ -432,26 +488,33 @@ https://uselessachievements.com`;
             hover:shadow-lg
           "
         >
-          <Download className="mr-2 size-4" aria-hidden="true" />
-          Download achievement
+          {sharing ? (
+            <LoaderCircle
+              className="mr-2 size-4 animate-spin"
+              aria-hidden="true"
+            />
+          ) : (
+            <Share2 className="mr-2 size-4" aria-hidden="true" />
+          )}
+
+          {sharing ? "Sharing…" : "Share achievement"}
         </Button>
 
         <Button
           type="button"
           variant="outline"
-          onClick={copyCaption}
-          disabled={copying}
+          onClick={downloadBadge}
+          disabled={!ready || sharing}
           className="
             flex-1
             transition-colors
             duration-200
-            hover:border-violet-300
-            hover:bg-violet-50
+            hover:border-orange-300
+            hover:bg-orange-50
           "
         >
-          <Copy className="mr-2 size-4" aria-hidden="true" />
-
-          {copying ? "Copying…" : "Copy caption"}
+          <Download className="mr-2 size-4" aria-hidden="true" />
+          Download image
         </Button>
       </div>
 
@@ -467,14 +530,14 @@ https://uselessachievements.com`;
             text-gray-700
           "
         >
-          Suggested caption
+          Share caption
         </label>
 
         <textarea
           id="streak-share-caption"
           readOnly
           value={caption}
-          rows={5}
+          rows={3}
           className="
             w-full
             resize-none
