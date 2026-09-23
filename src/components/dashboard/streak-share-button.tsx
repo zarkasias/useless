@@ -77,10 +77,7 @@ function StreakBadgePreview({ username, currentStreak }: StreakShareProps) {
   const [sharing, setSharing] = useState(false);
   const caption =
     currentStreak > 0
-      ? `I've somehow maintained a ${currentStreak}-day streak of accomplishing absolutely nothing.
-My current uselessness streak: ${currentStreak} day${
-          currentStreak === 1 ? "" : "s"
-        }.`
+      ? `I've  maintained a ${currentStreak}-day streak of accomplishing absolutely nothing.`
       : `My uselessness streak is currently 0.
 Every pointless journey starts somewhere.`;
 
