@@ -502,7 +502,7 @@ function AchievementCardComponent({
 
   // Share text and basic information for social media
   const getShareText = () =>
-    `I just unlocked "${title}" on Useless Achievements!\n${window.location.origin}`;
+    `I just unlocked "${title}" on Useless Achievements!`;
   // const getShareUrl = () => window.location.origin;
 
   // Function to download the generated image
