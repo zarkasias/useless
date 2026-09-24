@@ -61,13 +61,17 @@ export async function getUserEntitlements(
       .from("complimentary_subscriptions")
       .select(
         `
-        id,
-        expires_at,
-        revoked_at
-      `,
+    id,
+    expires_at,
+    revoked_at
+  `,
       )
       .eq("user_id", userId)
       .is("revoked_at", null)
+      .order("granted_at", {
+        ascending: false,
+      })
+      .limit(1)
       .maybeSingle(),
   ]);
 
