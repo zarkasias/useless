@@ -87,6 +87,9 @@ export default function DashboardClient({
       }
 
       if (result.status === "subscription_required") {
+        toast.info(
+          "You've reached the free limit of 10 achievements. Subscribe to continue collecting.",
+        );
         router.push("/pro");
         return;
       }
