@@ -55,7 +55,7 @@ export function GameScreen({
                   className="mb-2 inline-flex items-center gap-1 text-xs font-bold text-muted-foreground transition-colors hover:text-primary"
                 >
                   <ArrowLeft className="size-3.5" />
-                  Game cabinet
+                  Back
                 </Link>
 
                 <div className="mb-1 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.15em] text-violet-600">
@@ -90,11 +90,11 @@ export function GameScreen({
       </section>
 
       {/* Actual game module */}
-      <section className="relative overflow-hidden rounded-2xl border bg-slate-50/70 shadow-sm dark:bg-slate-900/30">
+      <section className="relative overflow-hidden dark:bg-slate-900/30">
         <div className="pointer-events-none absolute -right-24 -top-24 size-64 rounded-full bg-violet-300/10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -left-24 size-64 rounded-full bg-orange-300/10 blur-3xl" />
 
-        <div className="relative p-4 sm:p-6">{children}</div>
+        <div className="relative">{children}</div>
       </section>
     </div>
   );
