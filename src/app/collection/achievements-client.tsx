@@ -5,11 +5,17 @@ import { Navbar } from "@/components/navbar";
 import { Achievement, UserProfile } from "@/lib/supabase";
 
 import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
-import { useDeferredValue, useMemo, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { AchievementCard } from "@/components/achievement-card-updated";
 import { Search, Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
+
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+} from "@/components/ui/pagination";
 
 import {
   Select,
@@ -30,6 +36,8 @@ type CollectionFilter = "all" | "collected" | "uncollected";
 
 type RarityFilter = "all" | "COMMON" | "RARE" | "EPIC" | "LEGENDARY";
 
+const PAGE_SIZE = 12;
+
 export default function AchievementsClient({
   initialProfile,
   allAchievements,
@@ -38,6 +46,7 @@ export default function AchievementsClient({
 }: AchievementClientProps) {
   const [filter, setFilter] = useState<CollectionFilter>("collected");
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const [rarityFilter, setRarityFilter] = useState<RarityFilter>("all");
@@ -118,6 +127,31 @@ export default function AchievementsClient({
     return results;
   }, [collection, filter, rarityFilter, deferredSearchQuery]);
 
+  const sortedCollection = useMemo(
+    () =>
+      [...filteredCollection].sort((a, b) =>
+        a.achievement.title.localeCompare(b.achievement.title),
+      ),
+    [filteredCollection],
+  );
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(sortedCollection.length / PAGE_SIZE),
+  );
+
+  const paginatedCollection = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+
+    return sortedCollection.slice(start, start + PAGE_SIZE);
+  }, [sortedCollection, currentPage]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
   const collectedCount = publishedCollectedAchievements.length;
 
   const totalCount = publishedAchievements.length;
@@ -196,7 +230,10 @@ export default function AchievementsClient({
                   <Button
                     size="sm"
                     variant={filter === "collected" ? "default" : "outline"}
-                    onClick={() => setFilter("collected")}
+                    onClick={() => {
+                      setFilter("collected");
+                      setCurrentPage(1);
+                    }}
                     className="w-full sm:w-auto"
                   >
                     Collected
@@ -222,7 +259,10 @@ export default function AchievementsClient({
 
                     <Input
                       value={searchQuery}
-                      onChange={(event) => setSearchQuery(event.target.value)}
+                      onChange={(event) => {
+                        setSearchQuery(event.target.value);
+                        setCurrentPage(1);
+                      }}
                       placeholder="Search achievements..."
                       className="w-full pl-9"
                     />
@@ -230,9 +270,10 @@ export default function AchievementsClient({
 
                   <Select
                     value={rarityFilter}
-                    onValueChange={(value) =>
-                      setRarityFilter(value as RarityFilter)
-                    }
+                    onValueChange={(value) => {
+                      setRarityFilter(value as RarityFilter);
+                      setCurrentPage(1);
+                    }}
                   >
                     <SelectTrigger className="w-full sm:w-[190px]">
                       <SelectValue placeholder="All rarities" />
@@ -249,8 +290,18 @@ export default function AchievementsClient({
                 </div>
 
                 <p className="text-xs text-muted-foreground">
-                  Showing {filteredCollection.length} of {totalCount}{" "}
-                  achievements
+                  {sortedCollection.length > 0 ? (
+                    <>
+                      Showing {(currentPage - 1) * PAGE_SIZE + 1}–
+                      {Math.min(
+                        currentPage * PAGE_SIZE,
+                        sortedCollection.length,
+                      )}{" "}
+                      of {sortedCollection.length} matching achievements
+                    </>
+                  ) : (
+                    <>No matching achievements</>
+                  )}
                 </p>
               </div>
             </div>
@@ -260,37 +311,33 @@ export default function AchievementsClient({
 
           {filteredCollection.length > 0 ? (
             <div className="grid items-stretch gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {filteredCollection
-                .sort((a, b) =>
-                  a.achievement.title.localeCompare(b.achievement.title),
-                )
-                .map(({ achievement, isCollected }) => (
+              {paginatedCollection.map(({ achievement, isCollected }) => (
+                <div
+                  key={achievement.id}
+                  className="relative h-full w-full [content-visibility:auto] [contain-intrinsic-size:220px]"
+                >
                   <div
-                    key={achievement.id}
-                    className="relative h-full w-full [content-visibility:auto] [contain-intrinsic-size:220px]"
+                    className={
+                      isCollected
+                        ? "h-full"
+                        : "h-full grayscale opacity-55 transition-all hover:grayscale-[70%] hover:opacity-75"
+                    }
                   >
-                    <div
-                      className={
-                        isCollected
-                          ? "h-full"
-                          : "h-full grayscale opacity-55 transition-all hover:grayscale-[70%] hover:opacity-75"
-                      }
-                    >
-                      <AchievementCard
-                        achievement={achievement}
-                        isCollected={isCollected}
-                        ingrid
-                        showShareButton={true}
-                      />
-                    </div>
-
-                    {!isCollected && (
-                      <div className="pointer-events-none absolute right-3 top-3 flex size-10 items-center justify-center rounded-full border bg-gray-300/90 text-muted-foreground shadow-sm backdrop-blur">
-                        <Lock className="size-6 text-gray-700" />
-                      </div>
-                    )}
+                    <AchievementCard
+                      achievement={achievement}
+                      isCollected={isCollected}
+                      ingrid
+                      showShareButton={true}
+                    />
                   </div>
-                ))}
+
+                  {!isCollected && (
+                    <div className="pointer-events-none absolute right-3 top-3 flex size-10 items-center justify-center rounded-full border bg-gray-300/90 text-muted-foreground shadow-sm backdrop-blur">
+                      <Lock className="size-6 text-gray-700" />
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           ) : (
             <div className="rounded-lg border bg-background p-10 text-center shadow-sm">
@@ -300,6 +347,45 @@ export default function AchievementsClient({
                 Try another collection filter.
               </p>
             </div>
+          )}
+          {totalPages > 1 && (
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === 1}
+                    onClick={() =>
+                      setCurrentPage((page) => Math.max(1, page - 1))
+                    }
+                  >
+                    Previous
+                  </Button>
+                </PaginationItem>
+
+                <PaginationItem>
+                  <span className="px-3 text-sm font-medium text-muted-foreground">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                </PaginationItem>
+
+                <PaginationItem>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === totalPages}
+                    onClick={() =>
+                      setCurrentPage((page) => Math.min(totalPages, page + 1))
+                    }
+                  >
+                    Next
+                  </Button>
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           )}
         </div>
       </main>

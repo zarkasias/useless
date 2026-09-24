@@ -47,9 +47,9 @@ export function DashboardStats({ userAchievements }: DashboardStatsProps) {
       : null;
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-2">
       {/* Total achievements */}
-      <Card className="shadow-sm bg-gray-50 py-4">
+      <Card className="shadow-sm bg-gray-50 py-2">
         <CardContent className="px-4 py-1">
           <div className="flex items-start justify-between">
             <div>
@@ -74,7 +74,7 @@ export function DashboardStats({ userAchievements }: DashboardStatsProps) {
       </Card>
 
       {/* Highest rarity */}
-      <Card className="shadow-sm bg-gray-100 py-4">
+      <Card className="shadow-sm bg-gray-100 py-2">
         <CardContent className="px-4 py-1">
           <div className="flex items-start justify-between">
             <div>
@@ -118,7 +118,7 @@ export function DashboardStats({ userAchievements }: DashboardStatsProps) {
       </Card>
 
       {/* Latest achievement */}
-      <Card className="shadow-sm bg-blue-50 py-4">
+      {/* <Card className="shadow-sm bg-blue-50 py-4">
         <CardContent className="px-4 py-1">
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
@@ -141,7 +141,7 @@ export function DashboardStats({ userAchievements }: DashboardStatsProps) {
               "Claim your first achievement to get started."}
           </p>
         </CardContent>
-      </Card>
+      </Card> */}
     </div>
   );
 }
