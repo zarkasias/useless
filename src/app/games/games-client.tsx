@@ -1,26 +1,30 @@
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 import { Gamepad2, LockKeyhole, Sparkles } from "lucide-react";
 
 import { Navbar } from "@/components/navbar";
 import type { UserProfile } from "@/lib/supabase";
 import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
-import type { GameAchievement } from "@/lib/services/game-service-server";
 
 interface GamesClientProps {
   initialProfile: UserProfile;
   initialEntitlements: UserEntitlements;
-  initialMemoryAchievements: GameAchievement[];
 }
 
 export default function GamesClient({
   initialProfile,
   initialEntitlements,
-  initialMemoryAchievements,
 }: GamesClientProps) {
-  console.log(initialMemoryAchievements);
+  const router = useRouter();
+
+  const toMemory = () => {
+    if (initialEntitlements.isSubscribed) {
+      router.push("/games/memory");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-transparent">
@@ -97,24 +101,26 @@ export default function GamesClient({
             <div className="grid gap-4 md:grid-cols-2">
               {/* Memory */}
               <div
-                className="
-      group
-      relative
-      overflow-hidden
-      rounded-2xl
-      border
-      border-violet-200
-      bg-gradient-to-br
-      from-violet-50
-      via-white
-      to-fuchsia-50
-      shadow-sm
-      transition-all
-      duration-300
-      hover:-translate-y-1
-      hover:shadow-lg
-      hover:shadow-violet-500/10
-    "
+                onClick={toMemory}
+                className={`
+                  ${initialEntitlements.isSubscribed ? "cursor-pointer" : ""}
+                  group
+                  relative
+                  overflow-hidden
+                  rounded-2xl
+                  border
+                  border-violet-200
+                  bg-gradient-to-br
+                  from-violet-50
+                  via-white
+                  to-fuchsia-50
+                  shadow-sm
+                  transition-all
+                  duration-300
+                  hover:-translate-y-1
+                  hover:shadow-lg
+                  hover:shadow-violet-500/10
+                `}
               >
                 <div className="absolute -right-10 -top-10 size-36 rounded-full bg-violet-300/20 blur-3xl" />
 
