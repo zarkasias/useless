@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 
-import { Brain, Gamepad2, LockKeyhole, Spade, Sparkles } from "lucide-react";
+import { Gamepad2, LockKeyhole, Sparkles } from "lucide-react";
 
 import { Navbar } from "@/components/navbar";
 import type { UserProfile } from "@/lib/supabase";

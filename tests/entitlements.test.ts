@@ -12,15 +12,35 @@ it.each([
 ])("count %s / subscription %s => eligible %s", async (count, status, eligible, remaining) => {
   const claims = db.enqueue("user_achievements", { count: count as number });
   const subscription = db.enqueue("subscriptions", { data: status ? { status } : null });
+  db.enqueue("complimentary_subscriptions", { data: null });
   const result = await getUserEntitlements("user-1");
   expect(result.canClaimAchievement).toBe(eligible);
   expect(result.remainingFreeAchievements).toBe(remaining);
   expect(claims.eq).toHaveBeenCalledWith("user_id", "user-1");
   expect(subscription.eq).toHaveBeenCalledWith("user_id", "user-1");
 });
-it.each(["count", "subscription"])("fails closed on %s errors", async (failure) => {
+it.each(["count", "subscription", "complimentary"])("fails closed on %s errors", async (failure) => {
   vi.spyOn(console, "error").mockImplementation(() => {});
   db.enqueue("user_achievements", failure === "count" ? { error: {} } : { count: 0 });
   db.enqueue("subscriptions", failure === "subscription" ? { error: {} } : { data: null });
+  db.enqueue("complimentary_subscriptions", failure === "complimentary" ? { error: {} } : { data: null });
   await expect(getUserEntitlements("user-1")).rejects.toThrow();
+});
+
+it.each([
+  [null, true],
+  ["2099-01-01T00:00:00Z", true],
+  ["2020-01-01T00:00:00Z", false],
+])("complimentary expiry %s => eligible %s above the free limit", async (expires_at, eligible) => {
+  db.enqueue("user_achievements", { count: 12 });
+  db.enqueue("subscriptions", { data: { status: "canceled" } });
+  const complimentary = db.enqueue("complimentary_subscriptions", {
+    data: { id: "gift-1", expires_at, revoked_at: null },
+  });
+  const result = await getUserEntitlements("user-1");
+  expect(result.canClaimAchievement).toBe(eligible);
+  expect(result.isSubscribed).toBe(eligible);
+  expect(result.hasReachedFreeLimit).toBe(!eligible);
+  expect(complimentary.eq).toHaveBeenCalledWith("user_id", "user-1");
+  expect(complimentary.is).toHaveBeenCalledWith("revoked_at", null);
 });
