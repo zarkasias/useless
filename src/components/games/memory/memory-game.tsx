@@ -172,9 +172,10 @@ export function MemoryGame({ achievements }: MemoryGameProps) {
         </GameButton>
       </div>
 
-      {/* Board */}
-      <div
-        className="
+      <div className="relative roundex-xl p-4 sm:p-6">
+        {/* Board */}
+        <div
+          className="
           mx-auto
           grid
           max-w-4xl
@@ -183,18 +184,18 @@ export function MemoryGame({ achievements }: MemoryGameProps) {
           sm:grid-cols-4
           lg:grid-cols-6
         "
-      >
-        {cards.map((card) => {
-          const isFlipped =
-            card.isMatched || flippedCards.includes(card.cardId);
+        >
+          {cards.map((card) => {
+            const isFlipped =
+              card.isMatched || flippedCards.includes(card.cardId);
 
-          return (
-            <button
-              key={card.cardId}
-              type="button"
-              onClick={() => handleCardClick(card)}
-              disabled={card.isMatched}
-              className="
+            return (
+              <button
+                key={card.cardId}
+                type="button"
+                onClick={() => handleCardClick(card)}
+                disabled={card.isMatched || isComplete}
+                className="
                 group
                 relative
                 w-[90%]
@@ -203,10 +204,10 @@ export function MemoryGame({ achievements }: MemoryGameProps) {
                 rounded-xl
                 focus-visible:outline-none
               "
-              aria-label={isFlipped ? card.title : "Hidden achievement card"}
-            >
-              <div
-                className={`
+                aria-label={isFlipped ? card.title : "Hidden achievement card"}
+              >
+                <div
+                  className={`
                   absolute
                   inset-0
                   flex
@@ -233,25 +234,27 @@ export function MemoryGame({ achievements }: MemoryGameProps) {
                       `
                   }
                 `}
-              >
-                {isFlipped ? (
-                  <div className="flex h-full w-full flex-col items-center justify-center p-2 text-center sm:p-3">
-                    {card.icon_path ? (
-                      <div className="relative size-12 sm:size-16">
-                        <Image
-                          src={card.icon_path}
-                          alt=""
-                          fill
-                          sizes="64px"
-                          className="object-contain drop-shadow-md"
-                        />
-                      </div>
-                    ) : (
-                      <span className="text-3xl sm:text-4xl">{card.emoji}</span>
-                    )}
+                >
+                  {isFlipped ? (
+                    <div className="flex h-full w-full flex-col items-center justify-center p-2 text-center sm:p-3">
+                      {card.icon_path ? (
+                        <div className="relative size-12 sm:size-16">
+                          <Image
+                            src={card.icon_path}
+                            alt=""
+                            fill
+                            sizes="64px"
+                            className="object-contain drop-shadow-md"
+                          />
+                        </div>
+                      ) : (
+                        <span className="text-3xl sm:text-4xl">
+                          {card.emoji}
+                        </span>
+                      )}
 
-                    <span
-                      className="
+                      <span
+                        className="
                         line-clamp-2
                         mt-1
                         text-[8px]
@@ -261,50 +264,70 @@ export function MemoryGame({ achievements }: MemoryGameProps) {
                         sm:mt-2
                         sm:text-[11px]
                       "
-                    >
-                      {card.title}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="relative h-full w-full">
-                    <Image
-                      src="/game_icons/card-back.webp"
-                      alt=""
-                      width={400}
-                      height={600}
-                      className="h-full w-full object-contain"
+                      >
+                        {card.title}
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="relative h-full w-full">
+                      <Image
+                        src="/game_icons/card-back.webp"
+                        alt=""
+                        width={400}
+                        height={600}
+                        className="h-full w-full object-contain"
+                      />
+                    </div>
+                  )}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Completed state */}
+        {isComplete && (
+          <div
+            className="
+        absolute
+        inset-0
+        z-20
+        flex
+        items-center
+        justify-center
+        rounded-xl
+        bg-black/60
+        p-5
+        backdrop-blur-[2px]
+        animate-in fade-in-0 duration-300
+        sm:p-8
+      "
+          >
+            <div className="w-full max-w-xl animate-in zoom-in-95 duration-300">
+              <GameResult
+                eyebrow="Completely unnecessary victory"
+                title="You remembered all the things."
+                description="Against all odds, your collection has finally proven useful."
+                actionLabel="Play again"
+                actionIcon={<RotateCcw className="size-4" />}
+                onAction={resetGame}
+                stats={
+                  <>
+                    <GameMetric label="Moves" value={moves} />
+
+                    <GameMetric label="Mistakes" value={mistakes} />
+
+                    <GameMetric
+                      label="Time"
+                      value={durationSeconds ? `${durationSeconds}s` : "—"}
                     />
-                  </div>
-                )}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Completed state */}
-      {isComplete && (
-        <GameResult
-          eyebrow="Completely unnecessary victory"
-          title="You remembered all the things."
-          description="Against all odds, your collection has finally proven useful."
-          actionLabel="Play again"
-          actionIcon={<RotateCcw className="size-4" />}
-          onAction={resetGame}
-          stats={
-            <>
-              <GameMetric label="Moves" value={moves} />
-
-              <GameMetric label="Mistakes" value={mistakes} />
-
-              <GameMetric
-                label="Time"
-                value={durationSeconds ? `${durationSeconds}s` : "—"}
+                  </>
+                }
               />
-            </>
-          }
-        />
-      )}
+            </div>
+          </div>
+        )}
+      </div>
     </GameTable>
   );
 }
