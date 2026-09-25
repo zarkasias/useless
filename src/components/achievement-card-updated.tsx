@@ -167,6 +167,18 @@ function AchievementCardComponent({
       // soft gray interior, subtle rarity gradient border,
       // gradient rarity badge, and decorated emoji medallion.
       const canvasTheme = {
+        GAME: {
+          borderStart: "#bbf7d0",
+          borderEnd: "#4ade80",
+
+          tagStart: "#15803d",
+          tagEnd: "#84cc16",
+
+          sparkleA: "#22c55e",
+          sparkleB: "#bef264",
+
+          medallionMid: "rgba(74, 222, 128, 0.32)",
+        },
         COMMON: {
           borderStart: "#f3f4f6",
           borderEnd: "#d1d5db",

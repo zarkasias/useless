@@ -10,8 +10,10 @@ import { GameTable } from "../system/game-table";
 import GameMetric from "../game-metric";
 import GameResult from "../system/game-result";
 import GameButton from "../system/game-button";
+import { AchievementCard } from "@/components/achievement-card-updated";
 
 import type { GameAchievement } from "@/lib/types/games";
+import type { Achievement } from "@/lib/supabase";
 
 import { shuffleAchievements } from "@/lib/services/utils/game-utils";
 import { calculateMemoryScore } from "@/lib/games/memory/memory-scoring";
@@ -40,6 +42,9 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [completedAt, setCompletedAt] = useState<number | null>(null);
   const [finalScore, setFinalScore] = useState<number | null>(null);
+  const [unlockedAchievements, setUnlockedAchievements] = useState<
+    Achievement[]
+  >([]);
   const hasRecordedResult = useRef(false);
 
   const matchedCount = useMemo(
@@ -84,6 +89,7 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
     setStartedAt(null);
     setCompletedAt(null);
     setFinalScore(null);
+    setUnlockedAchievements([]);
   };
 
   useEffect(() => {
@@ -105,7 +111,7 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
 
     const durationSeconds = Math.max(
       1,
-      Math.round((completedTime - startedAt) / 2000),
+      Math.round((completedTime - startedAt) / 1000),
     );
 
     const score = calculateMemoryScore({
@@ -129,6 +135,7 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
       });
 
       if (result.success) {
+        setUnlockedAchievements(result.unlockedAchievements ?? []);
         onGameRecorded?.();
       }
     })();
@@ -361,8 +368,8 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
             <div className="w-full max-w-xl animate-in zoom-in-95 duration-300">
               <GameResult
                 eyebrow="Completely unnecessary victory"
-                title="You remembered all the things."
-                description="Against all odds, your collection has finally proven useful."
+                title="You've got a great Useless Memory!!"
+                description="Your collection has finally proven useful."
                 actionLabel="Play again"
                 actionIcon={<RotateCcw className="size-4" />}
                 onAction={resetGame}
@@ -380,6 +387,28 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
                   </>
                 }
               />
+              {unlockedAchievements.length > 0 && (
+                <div className="mt-5 space-y-3">
+                  <div className="text-center text-xs font-black uppercase tracking-[0.2em] text-amber-200/70">
+                    Achievement Unlocked
+                  </div>
+
+                  <div className="flex justify-center">
+                    <div className="w-full max-w-xs">
+                      {unlockedAchievements.map((achievement) => (
+                        <AchievementCard
+                          key={achievement.id}
+                          achievement={achievement}
+                          ingrid={true}
+                          isCollected={true}
+                          showShareButton={false}
+                          variant="compact"
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

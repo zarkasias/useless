@@ -6,6 +6,7 @@ export const typeBorderColors: Record<AchievementType, string> = {
   EPIC: "from-gray-100 to-purple-500",
   LEGENDARY: "from-gray-100 to-amber-500",
   SECRET: "from-gray-100 to-fuchsia-500",
+  GAME: "from-gray-100 to-emerald-500",
 };
 
 export const typeBadgeColors: Record<AchievementType, string> = {
@@ -16,6 +17,7 @@ export const typeBadgeColors: Record<AchievementType, string> = {
     "bg-gradient-to-r from-amber-500 via-amber-400 to-amber-400 text-white",
   SECRET:
     "bg-gradient-to-r from-fuchsia-500 via-fuchsia-400 to-fuchsia-400 text-white",
+  GAME: "bg-gradient-to-r from-emerald-500 via-green-500 to-lime-400 text-white",
 };
 
 export const typeNames: Record<AchievementType, string> = {
@@ -24,6 +26,7 @@ export const typeNames: Record<AchievementType, string> = {
   EPIC: "Epic",
   LEGENDARY: "Legendary",
   SECRET: "Secret",
+  GAME: "Game",
 };
 
 export const rarityTagClass =

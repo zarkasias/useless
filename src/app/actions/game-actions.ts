@@ -1,7 +1,8 @@
 "use server";
 
 import { recordAuthenticatedGameSession } from "@/lib/services/game-service-server";
-import type { GameSession } from "@/lib/types/games";
+import type { GameSession, UserGameStats } from "@/lib/types/games";
+import type { Achievement } from "@/lib/supabase";
 
 interface RecordMemoryGameResultInput {
   result: "win" | "loss" | "abandoned";
@@ -16,6 +17,8 @@ interface RecordMemoryGameResultInput {
 interface RecordMemoryGameResultResponse {
   success: boolean;
   session?: GameSession;
+  stats?: UserGameStats;
+  unlockedAchievements?: Achievement[];
   error?: string;
 }
 
@@ -40,7 +43,7 @@ export async function recordMemoryGameResultAction(
       };
     }
 
-    const session = await recordAuthenticatedGameSession({
+    const gameResult = await recordAuthenticatedGameSession({
       gameType: "memory",
       result,
       score,
@@ -55,7 +58,9 @@ export async function recordMemoryGameResultAction(
 
     return {
       success: true,
-      session,
+      session: gameResult.session,
+      stats: gameResult.stats,
+      unlockedAchievements: gameResult.unlockedAchievements,
     };
   } catch (error) {
     console.error("Failed to record Memory game result:", error);
