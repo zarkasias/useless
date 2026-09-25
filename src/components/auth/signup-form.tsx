@@ -20,7 +20,8 @@ import {
 } from "@/components/ui/form";
 
 import { migrateAnonymousAchievementsAction } from "@/app/actions/achievement-actions";
-import { useRouter } from "next/navigation";
+
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 const formSchema = z
@@ -48,6 +49,23 @@ export function SignupForm() {
 
   const supabase = createClient();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const next = searchParams.get("next");
+  const plan = searchParams.get("plan");
+
+  const loginParams = new URLSearchParams();
+
+  if (next) {
+    loginParams.set("next", next);
+  }
+
+  if (plan) {
+    loginParams.set("plan", plan);
+  }
+
+  const loginHref =
+    loginParams.size > 0 ? `/login?${loginParams.toString()}` : "/login";
 
   const isLoading = signupStage === "creating" || signupStage === "finishing";
 
@@ -134,7 +152,7 @@ export function SignupForm() {
         if (next === "/pro" && (plan === "month" || plan === "year")) {
           router.push(`/pro?plan=${plan}&checkout=1`);
         } else {
-          router.push("/dashboard");
+          router.push(next);
         }
         router.refresh();
         return;
@@ -206,7 +224,7 @@ export function SignupForm() {
         <Button
           variant="outline"
           className="w-full rounded-full"
-          onClick={() => router.push("/login")}
+          onClick={() => router.push(loginHref)}
         >
           Back to login
         </Button>
@@ -323,7 +341,7 @@ export function SignupForm() {
         <span className="text-muted-foreground">Already have an account? </span>
 
         <a
-          href="/login"
+          href={loginHref}
           className="underline underline-offset-4 hover:text-primary"
         >
           Log in

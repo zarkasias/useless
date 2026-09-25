@@ -21,7 +21,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 const formSchema = z.object({
@@ -42,6 +42,24 @@ export function LoginForm({ redirectTo = "/dashboard" }: LoginFormProps) {
 
   const supabase = createClient();
   const router = useRouter();
+
+  const searchParams = useSearchParams();
+
+  const next = searchParams.get("next");
+  const plan = searchParams.get("plan");
+
+  const signupParams = new URLSearchParams();
+
+  if (next) {
+    signupParams.set("next", next);
+  }
+
+  if (plan) {
+    signupParams.set("plan", plan);
+  }
+
+  const signupHref =
+    signupParams.size > 0 ? `/signup?${signupParams.toString()}` : "/signup";
 
   const isLoading = loginStage !== "idle";
 
@@ -85,7 +103,7 @@ export function LoginForm({ redirectTo = "/dashboard" }: LoginFormProps) {
         console.error("Anonymous achievement migration error:", migrationError);
       }
 
-      router.push(redirectTo);
+      router.push(next ?? redirectTo);
       router.refresh();
     } catch (err) {
       console.error("Login error:", err);
@@ -200,7 +218,7 @@ export function LoginForm({ redirectTo = "/dashboard" }: LoginFormProps) {
         </span>
 
         <a
-          href="/signup"
+          href={signupHref}
           className="underline underline-offset-4 hover:text-primary"
         >
           Sign up
