@@ -1,24 +1,28 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/navbar";
 import { GameScreen } from "@/components/games/game-screen";
 import { MemoryGame } from "@/components/games/memory/memory-game";
 
 import type { UserProfile } from "@/lib/supabase";
 import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
-import type { GameAchievement } from "@/lib/services/game-service-server";
+import type { GameAchievement, UserGameStats } from "@/lib/types/games";
 
 interface MemoryClientProps {
   initialProfile: UserProfile;
   initialEntitlements: UserEntitlements;
   initialAchievements: GameAchievement[];
+  initialStats: UserGameStats | null;
 }
 
 export default function MemoryClient({
   initialProfile,
   initialEntitlements,
   initialAchievements,
+  initialStats,
 }: MemoryClientProps) {
+  const router = useRouter();
   return (
     <div className="min-h-screen bg-transparent">
       <Navbar
@@ -32,12 +36,17 @@ export default function MemoryClient({
           title="Achievement Memory"
           description="Match pairs made from achievements you've already collected."
           icon="/game_icons/memory.webp"
-          gamesPlayed={0}
-          wins={0}
+          gamesPlayed={initialStats?.games_played ?? 0}
+          wins={initialStats?.wins ?? 0}
           bestScoreLabel="Best"
-          bestScore={null}
+          bestScore={initialStats?.best_score ?? null}
         >
-          <MemoryGame achievements={initialAchievements} />
+          <MemoryGame
+            achievements={initialAchievements}
+            onGameRecorded={() => {
+              router.refresh();
+            }}
+          />
         </GameScreen>
       </main>
     </div>

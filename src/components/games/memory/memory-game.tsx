@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 
 import Image from "next/image";
 
@@ -11,12 +11,15 @@ import GameMetric from "../game-metric";
 import GameResult from "../system/game-result";
 import GameButton from "../system/game-button";
 
-import type { GameAchievement } from "@/lib/services/game-service-server";
+import type { GameAchievement } from "@/lib/types/games";
 
 import { shuffleAchievements } from "@/lib/services/utils/game-utils";
+import { calculateMemoryScore } from "@/lib/games/memory/memory-scoring";
+import { recordMemoryGameResultAction } from "@/app/actions/game-actions";
 
 interface MemoryGameProps {
   achievements: GameAchievement[];
+  onGameRecorded?: () => void;
 }
 
 interface MemoryCard {
@@ -29,13 +32,15 @@ interface MemoryCard {
   isMatched: boolean;
 }
 
-export function MemoryGame({ achievements }: MemoryGameProps) {
+export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
   const [cards, setCards] = useState<MemoryCard[]>([]);
   const [flippedCards, setFlippedCards] = useState<string[]>([]);
   const [moves, setMoves] = useState(0);
   const [mistakes, setMistakes] = useState(0);
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [completedAt, setCompletedAt] = useState<number | null>(null);
+  const [finalScore, setFinalScore] = useState<number | null>(null);
+  const hasRecordedResult = useRef(false);
 
   const matchedCount = useMemo(
     () => cards.filter((card) => card.isMatched).length,
@@ -70,23 +75,72 @@ export function MemoryGame({ achievements }: MemoryGameProps) {
   };
 
   const resetGame = () => {
+    hasRecordedResult.current = false;
+
     setCards(createDeck());
     setFlippedCards([]);
     setMoves(0);
     setMistakes(0);
     setStartedAt(null);
     setCompletedAt(null);
+    setFinalScore(null);
   };
 
   useEffect(() => {
-    resetGame();
+    if (cards.length === 0) {
+      resetGame();
+    }
   }, [achievements]);
 
   useEffect(() => {
-    if (isComplete && !completedAt) {
-      setCompletedAt(Date.now());
+    if (!isComplete || completedAt || !startedAt || hasRecordedResult.current) {
+      return;
     }
-  }, [isComplete, completedAt]);
+
+    const completedTime = Date.now();
+
+    setCompletedAt(completedTime);
+
+    hasRecordedResult.current = true;
+
+    const durationSeconds = Math.max(
+      1,
+      Math.round((completedTime - startedAt) / 2000),
+    );
+
+    const score = calculateMemoryScore({
+      pairs: achievements.length,
+      moves,
+      mistakes,
+      durationSeconds,
+    });
+
+    setFinalScore(score);
+
+    void (async () => {
+      const result = await recordMemoryGameResultAction({
+        result: "win",
+        moves,
+        mistakes,
+        durationSeconds,
+        pairs: achievements.length,
+        achievementIds: achievements.map((achievement) => achievement.id),
+        score,
+      });
+
+      if (result.success) {
+        onGameRecorded?.();
+      }
+    })();
+  }, [
+    isComplete,
+    completedAt,
+    startedAt,
+    moves,
+    mistakes,
+    achievements,
+    onGameRecorded,
+  ]);
 
   const handleCardClick = (card: MemoryCard) => {
     if (card.isMatched) return;
@@ -272,6 +326,7 @@ export function MemoryGame({ achievements }: MemoryGameProps) {
                     <div className="relative h-full w-full">
                       <Image
                         src="/game_icons/card-back.webp"
+                        priority
                         alt=""
                         width={400}
                         height={600}
@@ -313,6 +368,7 @@ export function MemoryGame({ achievements }: MemoryGameProps) {
                 onAction={resetGame}
                 stats={
                   <>
+                    <GameMetric label="Score" value={finalScore ?? "—"} />
                     <GameMetric label="Moves" value={moves} />
 
                     <GameMetric label="Mistakes" value={mistakes} />

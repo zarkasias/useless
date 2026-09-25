@@ -1,9 +1,12 @@
 import { redirect } from "next/navigation";
 
 import { getAuthenticatedUserProfile } from "@/lib/services/achievement-service-server";
-import { getAuthenticatedMemoryAchievements } from "@/lib/services/game-service-server";
 import { getAuthenticatedUser } from "@/lib/services/utils/achievement-utils";
 import { getUserEntitlements } from "@/lib/services/entitlement-service-server";
+import {
+  getAuthenticatedGameStats,
+  getAuthenticatedMemoryAchievements,
+} from "@/lib/services/game-service-server";
 
 import MemoryClient from "./memory-client";
 
@@ -14,11 +17,13 @@ export default async function MemoryGamePage() {
     redirect("/");
   }
 
-  const [profile, entitlements, memoryAchievements] = await Promise.all([
-    getAuthenticatedUserProfile(),
-    getUserEntitlements(user.id),
-    getAuthenticatedMemoryAchievements(6),
-  ]);
+  const [profile, entitlements, memoryAchievements, memoryStats] =
+    await Promise.all([
+      getAuthenticatedUserProfile(),
+      getUserEntitlements(user.id),
+      getAuthenticatedMemoryAchievements(6),
+      getAuthenticatedGameStats("memory"),
+    ]);
 
   if (!profile) {
     redirect("/");
@@ -37,6 +42,7 @@ export default async function MemoryGamePage() {
       initialProfile={profile}
       initialEntitlements={entitlements}
       initialAchievements={memoryAchievements}
+      initialStats={memoryStats}
     />
   );
 }

@@ -1,9 +1,7 @@
 "use server";
 
-import {
-  recordAuthenticatedGameSession,
-  type GameSession,
-} from "@/lib/services/game-service-server";
+import { recordAuthenticatedGameSession } from "@/lib/services/game-service-server";
+import type { GameSession } from "@/lib/types/games";
 
 interface RecordMemoryGameResultInput {
   result: "win" | "loss" | "abandoned";
@@ -12,6 +10,7 @@ interface RecordMemoryGameResultInput {
   durationSeconds: number;
   achievementIds: string[];
   pairs: number;
+  score: number;
 }
 
 interface RecordMemoryGameResultResponse {
@@ -24,8 +23,15 @@ export async function recordMemoryGameResultAction(
   input: RecordMemoryGameResultInput,
 ): Promise<RecordMemoryGameResultResponse> {
   try {
-    const { result, moves, mistakes, durationSeconds, achievementIds, pairs } =
-      input;
+    const {
+      result,
+      moves,
+      mistakes,
+      durationSeconds,
+      achievementIds,
+      pairs,
+      score,
+    } = input;
 
     if (moves < 0 || mistakes < 0 || durationSeconds < 0 || pairs <= 0) {
       return {
@@ -37,6 +43,7 @@ export async function recordMemoryGameResultAction(
     const session = await recordAuthenticatedGameSession({
       gameType: "memory",
       result,
+      score,
       moves,
       mistakes,
       durationSeconds,
