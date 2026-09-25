@@ -4,6 +4,13 @@ import { createClient as createAdminClient } from "@supabase/supabase-js";
 
 import { getAuthenticatedUser } from "@/lib/services/utils/achievement-utils";
 import { shuffleAchievements } from "./utils/game-utils";
+import {
+  GameAchievement,
+  RecordGameSessionInput,
+  GameSession,
+  GameType,
+  UserGameStats,
+} from "../types/games";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -17,47 +24,6 @@ if (!serviceRoleKey) {
 }
 
 const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
-
-export type GameType = "memory" | "solitaire";
-
-export type GameResult = "win" | "loss" | "abandoned";
-
-interface RecordGameSessionInput {
-  gameType: GameType;
-  result: GameResult;
-
-  score?: number | null;
-  moves?: number | null;
-  mistakes?: number | null;
-  durationSeconds?: number | null;
-
-  metadata?: Record<string, unknown>;
-}
-
-export interface GameSession {
-  id: string;
-  user_id: string;
-  game_type: GameType;
-  result: GameResult;
-
-  score: number | null;
-  moves: number | null;
-  mistakes: number | null;
-  duration_seconds: number | null;
-
-  metadata: Record<string, unknown>;
-
-  started_at: string;
-  completed_at: string | null;
-}
-
-export interface GameAchievement {
-  id: string;
-  title: string;
-  emoji: string;
-  icon_path: string | null;
-  type: string;
-}
 
 export async function getAuthenticatedMemoryAchievements(
   limit = 6,
@@ -132,32 +98,65 @@ export async function recordAuthenticatedGameSession({
     throw new Error("User must be authenticated");
   }
 
-  const completedAt = new Date().toISOString();
-
-  const { data, error } = await supabaseAdmin
-    .from("game_sessions")
-    .insert({
-      user_id: user.id,
-      game_type: gameType,
-      result,
-
-      score,
-      moves,
-      mistakes,
-      duration_seconds: durationSeconds,
-
-      metadata,
-
-      completed_at: completedAt,
-    })
-    .select("*")
-    .single();
+  const { data: sessionId, error } = await supabaseAdmin.rpc(
+    "record_game_result",
+    {
+      p_user_id: user.id,
+      p_game_type: gameType,
+      p_result: result,
+      p_score: score,
+      p_moves: moves,
+      p_mistakes: mistakes,
+      p_duration_seconds: durationSeconds,
+      p_metadata: metadata,
+    },
+  );
 
   if (error) {
-    console.error("Failed to record game session:", error);
+    console.error("Failed to record game result:", error);
 
-    throw new Error("Failed to record game session");
+    throw new Error("Failed to record game result");
   }
 
-  return data as GameSession;
+  const { data: session, error: sessionError } = await supabaseAdmin
+    .from("game_sessions")
+    .select("*")
+    .eq("id", sessionId)
+    .single();
+
+  if (sessionError) {
+    console.error(
+      "Game result recorded but session could not be loaded:",
+      sessionError,
+    );
+
+    throw new Error("Failed to load recorded game session");
+  }
+
+  return session as GameSession;
+}
+
+export async function getAuthenticatedGameStats(
+  gameType: GameType,
+): Promise<UserGameStats | null> {
+  const user = await getAuthenticatedUser();
+
+  if (!user) {
+    throw new Error("User must be authenticated");
+  }
+
+  const { data, error } = await supabaseAdmin
+    .from("user_game_stats")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("game_type", gameType)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Failed to load game stats:", error);
+
+    throw new Error("Failed to load game stats");
+  }
+
+  return data as UserGameStats | null;
 }
