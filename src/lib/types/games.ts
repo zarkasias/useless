@@ -1,3 +1,38 @@
+import type { Achievement } from "@/lib/supabase";
+
+export type GameTriggerType = "game_stat" | "game_session";
+
+export type GameTriggerMetric =
+  | "games_played"
+  | "games_completed"
+  | "wins"
+  | "losses"
+  | "abandoned"
+  | "score"
+  | "best_score"
+  | "moves"
+  | "mistakes"
+  | "duration_seconds"
+  | "current_win_streak"
+  | "best_win_streak"
+  | "total_score"
+  | "total_duration_seconds";
+
+export type GameTriggerOperator = "=" | ">=" | "<=" | ">" | "<";
+
+export interface GameTriggerConfig {
+  game: GameType | "all";
+  metric: GameTriggerMetric;
+  operator: GameTriggerOperator;
+  value: number;
+}
+
+export interface RecordedGameResult {
+  session: GameSession;
+  stats: UserGameStats;
+  unlockedAchievements: Achievement[];
+}
+
 export type GameType = "memory" | "solitaire";
 
 export type GameResult = "win" | "loss" | "abandoned";

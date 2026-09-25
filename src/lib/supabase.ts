@@ -14,7 +14,8 @@ export type AchievementType =
   | "RARE"
   | "EPIC"
   | "LEGENDARY"
-  | "SECRET";
+  | "SECRET"
+  | "GAME";
 
 export type AchievementStatus = "draft" | "review" | "published" | "archived";
 

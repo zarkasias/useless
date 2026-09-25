@@ -285,6 +285,8 @@ export default function AchievementsClient({
                       <SelectItem value="RARE">Rare</SelectItem>
                       <SelectItem value="EPIC">Epic</SelectItem>
                       <SelectItem value="LEGENDARY">Legendary</SelectItem>
+                      <SelectItem value="SECRET">Secret</SelectItem>
+                      <SelectItem value="GAME">Game</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

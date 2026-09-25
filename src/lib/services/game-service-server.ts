@@ -2,11 +2,13 @@ import "server-only";
 
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 
+import { evaluateGameAchievements } from "./triggers/game-trigger";
 import { getAuthenticatedUser } from "@/lib/services/utils/achievement-utils";
 import { shuffleAchievements } from "./utils/game-utils";
 import {
   GameAchievement,
   RecordGameSessionInput,
+  RecordedGameResult,
   GameSession,
   GameType,
   UserGameStats,
@@ -91,7 +93,7 @@ export async function recordAuthenticatedGameSession({
   mistakes = null,
   durationSeconds = null,
   metadata = {},
-}: RecordGameSessionInput): Promise<GameSession> {
+}: RecordGameSessionInput): Promise<RecordedGameResult> {
   const user = await getAuthenticatedUser();
 
   if (!user) {
@@ -118,11 +120,23 @@ export async function recordAuthenticatedGameSession({
     throw new Error("Failed to record game result");
   }
 
-  const { data: session, error: sessionError } = await supabaseAdmin
-    .from("game_sessions")
-    .select("*")
-    .eq("id", sessionId)
-    .single();
+  const [
+    { data: session, error: sessionError },
+    { data: stats, error: statsError },
+  ] = await Promise.all([
+    supabaseAdmin
+      .from("game_sessions")
+      .select("*")
+      .eq("id", sessionId)
+      .single(),
+
+    supabaseAdmin
+      .from("user_game_stats")
+      .select("*")
+      .eq("user_id", user.id)
+      .eq("game_type", gameType)
+      .single(),
+  ]);
 
   if (sessionError) {
     console.error(
@@ -133,7 +147,29 @@ export async function recordAuthenticatedGameSession({
     throw new Error("Failed to load recorded game session");
   }
 
-  return session as GameSession;
+  if (statsError) {
+    console.error(
+      "Game result recorded but stats could not be loaded:",
+      statsError,
+    );
+
+    throw new Error("Failed to load updated game stats");
+  }
+
+  const typedSession = session as GameSession;
+  const typedStats = stats as UserGameStats;
+
+  const unlockedAchievements = await evaluateGameAchievements({
+    userId: user.id,
+    session: typedSession,
+    stats: typedStats,
+  });
+
+  return {
+    session: typedSession,
+    stats: typedStats,
+    unlockedAchievements,
+  };
 }
 
 export async function getAuthenticatedGameStats(
