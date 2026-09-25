@@ -1,4 +1,4 @@
-import { Gem, Sparkles, Trophy } from "lucide-react";
+import { Gem, Trophy } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -37,14 +37,6 @@ export function DashboardStats({ userAchievements }: DashboardStatsProps) {
             : totalAchievements > 0
               ? "Common"
               : "None";
-
-  const mostRecentAchievement =
-    userAchievements.length > 0
-      ? [...userAchievements].sort(
-          (a, b) =>
-            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-        )[0]
-      : null;
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-2">
