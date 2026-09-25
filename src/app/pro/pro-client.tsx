@@ -165,8 +165,9 @@ export default function ProClient({
             </h1>
 
             <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:text-lg sm:leading-8">
-              Collect unlimited ridiculous achievements, protect your streak,
-              and climb the leaderboard for absolutely no good reason.
+              Collect unlimited ridiculous achievements, play
+              achievement-powered games, protect your streak, and climb the
+              leaderboard for absolutely no good reason.
             </p>
           </div>
         </section>
@@ -299,6 +300,7 @@ export default function ProClient({
 
                 <div className="mt-6 space-y-3">
                   <Feature text="Unlimited achievements" />
+                  <Feature text="Achievement-powered games" />
                   <Feature text="Keep building your streak" />
                   <Feature text="Full leaderboard participation" />
                   <Feature text="Full achievement collection" />

@@ -17,6 +17,7 @@ import {
   Users,
   User,
   Shield,
+  Gamepad2,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -70,7 +71,7 @@ export function Navbar({
       pathname.startsWith(`${href}/`);
 
     return `
-      transition-all duration-200
+      transition-all duration-200 text-xs
       ${
         isActive
           ? "bg-primary/10 text-primary font-medium"
@@ -128,6 +129,15 @@ export function Navbar({
                   </Button>
                 </Link>
 
+                <Link href="/games">
+                  <Button
+                    variant="ghost"
+                    className={getNavButtonClass("/games")}
+                  >
+                    Games
+                  </Button>
+                </Link>
+
                 <Link href="/leaderboard">
                   <Button
                     variant="ghost"
@@ -154,8 +164,8 @@ export function Navbar({
                     hasBillingIssue
                       ? "flex gap-2 border border-amber-300 bg-amber-50 font-semibold text-amber-700 hover:bg-amber-100"
                       : isProPage
-                        ? "flex gap-2 bg-muted text-gray-700 font-medium hover:bg-muted"
-                        : "flex gap-2 bg-gradient-to-r from-blue-600 to-violet-600 font-semibold text-white shadow-sm hover:opacity-90"
+                        ? "flex gap-2 bg-muted text-gray-700 font-medium hover:bg-muted text-xs"
+                        : "flex gap-2 bg-gradient-to-r from-blue-600 to-violet-600 font-semibold text-xs text-white shadow-sm hover:opacity-90"
                   }
                 >
                   <Sparkles
@@ -185,12 +195,12 @@ export function Navbar({
                           alt={user.username}
                         />
 
-                        <AvatarFallback className="bg-primary/10 text-sm font-semibold text-primary">
+                        <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
                           {user.username.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
 
-                      <span className="hidden max-w-32 truncate text-sm font-medium text-gray-700 md:block dark:text-gray-200">
+                      <span className="hidden max-w-32 truncate text-xs font-medium text-gray-700 md:block dark:text-gray-200">
                         {user.username}
                       </span>
 
@@ -211,6 +221,13 @@ export function Navbar({
                       <Link href="/collection">
                         <Trophy className="size-4" />
                         Collection
+                      </Link>
+                    </DropdownMenuItem>
+
+                    <DropdownMenuItem asChild className="md:hidden">
+                      <Link href="/games">
+                        <Gamepad2 className="size-4" />
+                        Games
                       </Link>
                     </DropdownMenuItem>
 

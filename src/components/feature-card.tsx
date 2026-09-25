@@ -6,15 +6,21 @@ import {
   rarityTagClass,
 } from "@/components/achievement-styles";
 
-import { CalendarDays, Flame, Trophy } from "lucide-react";
+import { CalendarDays, Flame, Trophy, Gamepad2 } from "lucide-react";
 
-type FeatureVariant = "daily" | "streak" | "collection" | "leaderboard";
+type FeatureVariant =
+  | "daily"
+  | "streak"
+  | "collection"
+  | "leaderboard"
+  | "games";
 
 const featureStyles: Record<FeatureVariant, string> = {
   daily: typeBorderColors.RARE,
   streak: "from-gray-100 to-orange-500",
   collection: typeBorderColors.EPIC,
   leaderboard: typeBorderColors.LEGENDARY,
+  games: "from-emerald-200 to-lime-500",
 };
 
 export function FeatureCard({
@@ -134,6 +140,36 @@ function FeatureVisual({ variant }: { variant: FeatureVariant }) {
 
           <div className="flex h-9 w-12 items-center justify-center rounded-t-lg border border-amber-200 bg-white font-bold text-amber-800">
             3
+          </div>
+        </div>
+      );
+
+    case "games":
+      return (
+        <div className="text-center">
+          <div
+            aria-hidden="true"
+            className="
+          mx-auto
+          flex
+          size-16
+          -rotate-3
+          items-center
+          justify-center
+          rounded-2xl
+          border-2
+          border-emerald-200
+          bg-gradient-to-br
+          from-emerald-50
+          to-lime-100
+          shadow-sm
+        "
+          >
+            <Gamepad2 className="size-8 text-emerald-600" />
+          </div>
+
+          <div className="mt-2 inline-flex rounded-full bg-emerald-100 px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-700">
+            Pro Games
           </div>
         </div>
       );

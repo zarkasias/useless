@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { Sparkles, Trophy } from "lucide-react";
+import { Sparkles, Trophy, Gamepad2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/navbar";
@@ -99,10 +99,38 @@ export default function HomeClient({
         </div>
 
         <div className="relative z-10 mx-auto max-w-5xl text-center">
-          <div className="mx-auto inline-flex -rotate-1 items-center gap-2 rounded-full border-2 border-violet-200 bg-white/90 px-3 py-1.5 text-xs font-bold text-violet-700 shadow-sm backdrop-blur sm:px-4 sm:py-2 sm:text-sm">
-            <Sparkles className="size-3.5 sm:size-4" />
-            Ten useless achievements are on us
-          </div>
+          <Link
+            href={user ? "/games" : "/signup?next=/games"}
+            className="
+    mx-auto
+    inline-flex
+    -rotate-1
+    items-center
+    gap-2
+    rounded-full
+    border-2
+    border-emerald-200
+    bg-white/90
+    px-3
+    py-1.5
+    text-xs
+    font-bold
+    text-emerald-700
+    shadow-sm
+    backdrop-blur
+    transition-transform
+    hover:scale-105
+    sm:px-4
+    sm:py-2
+    sm:text-sm
+  "
+          >
+            <Gamepad2 className="size-3.5 sm:size-4" />
+
+            <span className="uppercase tracking-wide">New</span>
+
+            <span className="text-gray-700">Achievement Games are here</span>
+          </Link>
 
           <h1 className="mx-auto mt-5 max-w-4xl text-4xl font-black leading-[0.95] tracking-tight text-gray-800 sm:mt-6 sm:text-5xl md:text-6xl lg:text-7xl">
             Accomplish absolutely{" "}
@@ -113,8 +141,8 @@ export default function HomeClient({
 
           <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-muted-foreground sm:mt-6 sm:text-lg sm:leading-8">
             Earn ridiculous digital awards, build a completely unnecessary
-            streak, and prove once and for all that pointless progress is still
-            progress.
+            streak, and put your collection to work in achievement-powered
+            games.
           </p>
 
           <div className="mt-7 flex flex-col items-stretch justify-center gap-3 sm:mt-8 sm:flex-row sm:items-center">
@@ -188,7 +216,13 @@ export default function HomeClient({
             </p>
           </div>
 
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            <FeatureCard
+              variant="games"
+              title="Play with your collection"
+              rotate="right"
+              description="Turn collected achievements into games and unlock even more useless rewards."
+            />
             <FeatureCard
               variant="daily"
               title="Claim daily"
