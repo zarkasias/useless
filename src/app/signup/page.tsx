@@ -42,7 +42,7 @@ export default async function SignupPage() {
 
             <div className="mx-auto inline-flex -rotate-1 items-center gap-2 rounded-full border-2 border-violet-200 bg-white/90 px-3 py-1.5 text-xs font-bold text-violet-700 shadow-sm backdrop-blur">
               <Sparkles className="size-3.5" />
-              Your first five are free
+              Your first ten are free
             </div>
 
             <h1 className="mt-4 text-3xl font-black tracking-tight text-gray-800 sm:text-4xl">

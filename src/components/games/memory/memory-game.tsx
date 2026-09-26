@@ -42,6 +42,7 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [completedAt, setCompletedAt] = useState<number | null>(null);
   const [finalScore, setFinalScore] = useState<number | null>(null);
+  const [imagesReady, setImagesReady] = useState(false);
   const [unlockedAchievements, setUnlockedAchievements] = useState<
     Achievement[]
   >([]);
@@ -91,6 +92,42 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
     setFinalScore(null);
     setUnlockedAchievements([]);
   };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function preloadAchievementImages() {
+      setImagesReady(false);
+
+      const imageUrls = achievements
+        .map((achievement) => achievement.icon_path)
+        .filter((path): path is string => Boolean(path));
+
+      await Promise.all(
+        imageUrls.map(async (src) => {
+          const img = new window.Image();
+
+          img.src = src;
+
+          try {
+            await img.decode();
+          } catch {
+            // Don't block the game if one image fails to decode.
+          }
+        }),
+      );
+
+      if (!cancelled) {
+        setImagesReady(true);
+      }
+    }
+
+    void preloadAchievementImages();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [achievements]);
 
   useEffect(() => {
     if (cards.length === 0) {
@@ -233,7 +270,7 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
         </GameButton>
       </div>
 
-      <div className="relative roundex-xl p-4 sm:p-6">
+      <div className="relative rounded-xl p-4 sm:p-6">
         {/* Board */}
         <div
           className="
@@ -255,7 +292,7 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
                 key={card.cardId}
                 type="button"
                 onClick={() => handleCardClick(card)}
-                disabled={card.isMatched || isComplete}
+                disabled={!imagesReady || card.isMatched || isComplete}
                 className="
                 group
                 relative
@@ -346,6 +383,14 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
             );
           })}
         </div>
+
+        {!imagesReady && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center rounded-xl bg-black/45 backdrop-blur-[2px]">
+            <div className="rounded-xl border border-amber-300/30 bg-black/70 px-5 py-3 text-sm font-bold text-amber-100 shadow-lg">
+              Loading achievements...
+            </div>
+          </div>
+        )}
 
         {/* Completed state */}
         {isComplete && (
