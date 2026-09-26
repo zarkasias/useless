@@ -86,7 +86,7 @@ export function Navbar({
         <div className="flex items-center gap-2">
           <Link href="/" className="flex items-center gap-1 group">
             <span
-              className="text-3xl transition-transform duration-500 ease-in-out group-hover:rotate-16 group-hover:scale-110"
+              className="text-3xl shrink-0 transition-transform duration-500 ease-in-out group-hover:rotate-16 group-hover:scale-110"
               role="img"
               aria-label="trophy"
             >
@@ -107,13 +107,14 @@ export function Navbar({
           </Link>
         </div>
 
-        <nav className="flex items-center gap-2">
+        <nav className="flex items-center gap-1">
           {user ? (
             <>
               <div className="hidden items-center gap-1 md:flex">
                 <Link href="/dashboard">
                   <Button
                     variant="ghost"
+                    size="sm"
                     className={getNavButtonClass("/dashboard")}
                   >
                     Dashboard
@@ -123,6 +124,7 @@ export function Navbar({
                 <Link href="/collection">
                   <Button
                     variant="ghost"
+                    size="sm"
                     className={getNavButtonClass("/collection")}
                   >
                     Collection
@@ -132,6 +134,7 @@ export function Navbar({
                 <Link href="/games">
                   <Button
                     variant="ghost"
+                    size="sm"
                     className={getNavButtonClass("/games")}
                   >
                     Games
@@ -141,6 +144,7 @@ export function Navbar({
                 <Link href="/leaderboard">
                   <Button
                     variant="ghost"
+                    size="sm"
                     className={getNavButtonClass("/leaderboard")}
                   >
                     Leaderboard
@@ -150,6 +154,7 @@ export function Navbar({
                 <Link href="/packs">
                   <Button
                     variant="ghost"
+                    size="sm"
                     className={getNavButtonClass("/packs")}
                   >
                     Packs
@@ -160,6 +165,7 @@ export function Navbar({
               <Link href="/pro">
                 <Button
                   variant="ghost"
+                  size="sm"
                   className={
                     hasBillingIssue
                       ? "flex gap-2 border border-amber-300 bg-amber-50 font-semibold text-amber-700 hover:bg-amber-100"

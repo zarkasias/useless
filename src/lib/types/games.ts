@@ -35,6 +35,8 @@ export interface RecordedGameResult {
 
 export type GameType = "memory" | "solitaire";
 
+export type SolitaireVariant = "klondike" | "spider";
+
 export type GameResult = "win" | "loss" | "abandoned";
 
 export interface CalculateMemoryScoreInput {
