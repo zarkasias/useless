@@ -7,9 +7,15 @@ interface GameResultProps {
   title: string;
   description?: string;
   stats?: ReactNode;
+  children?: ReactNode;
+
   actionLabel?: string;
   actionIcon?: ReactNode;
   onAction?: () => void;
+
+  secondaryActionLabel?: string;
+  secondaryActionIcon?: ReactNode;
+  onSecondaryAction?: () => void;
 }
 
 export default function GameResult({
@@ -17,8 +23,14 @@ export default function GameResult({
   title,
   description,
   stats,
+  children,
+
   actionLabel = "Play again",
   actionIcon,
+
+  secondaryActionLabel,
+  secondaryActionIcon,
+  onSecondaryAction,
   onAction,
 }: GameResultProps) {
   return (
@@ -81,11 +93,25 @@ export default function GameResult({
           </div>
         )}
 
-        {onAction && (
-          <div className="mt-5 flex justify-center">
-            <GameButton onClick={onAction} icon={actionIcon}>
-              {actionLabel}
-            </GameButton>
+        {children && <div className="mt-5">{children}</div>}
+
+        {(onAction || onSecondaryAction) && (
+          <div className="mt-5 flex flex-wrap justify-center gap-2">
+            {onAction && (
+              <GameButton onClick={onAction} icon={actionIcon}>
+                {actionLabel}
+              </GameButton>
+            )}
+
+            {onSecondaryAction && secondaryActionLabel && (
+              <GameButton
+                onClick={onSecondaryAction}
+                icon={secondaryActionIcon}
+                variant="secondary"
+              >
+                {secondaryActionLabel}
+              </GameButton>
+            )}
           </div>
         )}
       </div>

@@ -1,6 +1,8 @@
 // card-pile.tsx
 import type { GameCard } from "@/lib/types/gamecards";
 
+import { createCardDragPreview } from "./card-drag-preview";
+
 import { PlayingCard } from "./playing-card";
 
 interface CardPileProps {
@@ -11,6 +13,11 @@ interface CardPileProps {
   validTarget?: boolean;
   animateFlip?: boolean;
   onClick?: () => void;
+  onDragStart?: (event: React.DragEvent<HTMLButtonElement>) => void;
+  onDragEnd?: () => void;
+  onDragOver?: (event: React.DragEvent<HTMLButtonElement>) => void;
+
+  onDrop?: (event: React.DragEvent<HTMLButtonElement>) => void;
 }
 
 export function CardPile({
@@ -21,6 +28,10 @@ export function CardPile({
   validTarget = false,
   animateFlip = false,
   onClick,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDrop,
 }: CardPileProps) {
   return (
     <div className="space-y-1">
@@ -30,6 +41,16 @@ export function CardPile({
 
       <button
         type="button"
+        draggable={Boolean(card && onDragStart)}
+        onDragStart={(event) => {
+          onDragStart?.(event);
+          if (!event.defaultPrevented) {
+            createCardDragPreview(event, [event.currentTarget]);
+          }
+        }}
+        onDragEnd={onDragEnd}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
         onClick={onClick}
         disabled={!onClick}
         className={`
@@ -59,7 +80,7 @@ export function CardPile({
             animateFlip={animateFlip}
           />
         ) : (
-          <div className="h-[72px] w-[50px] sm:h-22 sm:w-16 rounded-lg border border-dashed border-white/30 bg-white/5" />
+          <div className="h-[72px] w-[50px] sm:h-24 sm:w-16 rounded-lg border border-dashed border-white/30 bg-white/5" />
         )}
       </button>
     </div>

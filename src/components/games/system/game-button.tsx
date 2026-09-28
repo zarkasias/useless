@@ -1,11 +1,14 @@
-import type { ReactNode } from "react";
+import type { ReactNode, ComponentProps } from "react";
 
 import { Button } from "@/components/ui/button";
+
+type ButtonVariant = ComponentProps<typeof Button>["variant"];
 
 interface GameButtonProps {
   children: ReactNode;
   onClick?: () => void;
   disabled?: boolean;
+  variant?: ButtonVariant;
   icon?: ReactNode;
 }
 
@@ -13,12 +16,13 @@ export default function GameButton({
   children,
   onClick,
   disabled = false,
+  variant = "ghost",
   icon,
 }: GameButtonProps) {
   return (
     <Button
       type="button"
-      variant="ghost"
+      variant={variant}
       size="sm"
       disabled={disabled}
       onClick={onClick}

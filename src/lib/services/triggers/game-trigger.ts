@@ -11,10 +11,14 @@ import type { Achievement } from "@/lib/supabase";
 import { supabaseAdmin } from "../utils/trigger-context";
 
 function compareMetric(
-  actual: number,
+  actual: number | boolean,
   operator: GameTriggerConfig["operator"],
-  expected: number,
+  expected: number | boolean,
 ): boolean {
+  if (typeof actual === "boolean" || typeof expected === "boolean") {
+    return operator === "=" && actual === expected;
+  }
+
   switch (operator) {
     case "=":
       return actual === expected;
@@ -39,7 +43,7 @@ function compareMetric(
 function getSessionMetric(
   session: GameSession,
   metric: GameTriggerConfig["metric"],
-): number | null {
+): number | boolean | null {
   switch (metric) {
     case "score":
       return session.score;
@@ -52,6 +56,12 @@ function getSessionMetric(
 
     case "duration_seconds":
       return session.duration_seconds;
+
+    case "auto_finished": {
+      const value = session.metadata?.auto_finished;
+
+      return typeof value === "boolean" ? value : null;
+    }
 
     default:
       return null;
@@ -156,7 +166,11 @@ export async function evaluateGameAchievements({
       continue;
     }
 
-    let actualValue: number | null = null;
+    if (config.result && config.result !== session.result) {
+      continue;
+    }
+
+    let actualValue: number | boolean | null = null;
 
     if (achievement.trigger_type === "game_session") {
       actualValue = getSessionMetric(session, config.metric);

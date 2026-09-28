@@ -2,6 +2,8 @@
 
 import type { GameCard } from "@/lib/types/gamecards";
 
+import { createCardDragPreview } from "./card-drag-preview";
+
 import { PlayingCard } from "./playing-card";
 
 interface CardColumnProps {
@@ -14,6 +16,15 @@ interface CardColumnProps {
   minHeight?: number;
   validTarget?: boolean;
   flippedCardId?: string | null;
+  onCardDragStart?: (
+    cardIndex: number,
+    event: React.DragEvent<HTMLButtonElement>,
+  ) => void;
+
+  onDragEnd?: () => void;
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+
+  onDrop?: (event: React.DragEvent<HTMLDivElement>) => void;
 }
 
 export function CardColumn({
@@ -21,6 +32,10 @@ export function CardColumn({
   selectedCardIndex = null,
   onCardClick,
   onColumnClick,
+  onCardDragStart,
+  onDragEnd,
+  onDragOver,
+  onDrop,
   cardOffset = 28,
   mobileCardOffset = 20,
   minHeight = 340,
@@ -28,7 +43,13 @@ export function CardColumn({
   flippedCardId = null,
 }: CardColumnProps) {
   return (
-    <div className="relative" style={{ minHeight }} onClick={onColumnClick}>
+    <div
+      className="relative"
+      style={{ minHeight }}
+      onClick={onColumnClick}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+    >
       {validTarget && (
         <div
           className="pointer-events-none absolute left-0 h-[72px] w-[50px] sm:h-22 sm:w-16 rounded-lg ring-2 ring-emerald-300/80 ring-offset-2 ring-offset-emerald-950"
@@ -48,7 +69,23 @@ export function CardColumn({
           <button
             key={card.id}
             type="button"
+            draggable={card.faceUp}
             disabled={!card.faceUp}
+            onDragStart={(event) => {
+              if (!card.faceUp) {
+                event.preventDefault();
+                return;
+              }
+
+              event.dataTransfer.effectAllowed = "move";
+
+              const column = event.currentTarget.parentElement!;
+              const cards = Array.from(column.querySelectorAll<HTMLButtonElement>("button"));
+              createCardDragPreview(event, cards.slice(cardIndex));
+
+              onCardDragStart?.(cardIndex, event);
+            }}
+            onDragEnd={onDragEnd}
             onClick={(event) => {
               event.stopPropagation();
               onCardClick?.(cardIndex);

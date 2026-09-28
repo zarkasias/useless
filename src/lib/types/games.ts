@@ -16,7 +16,8 @@ export type GameTriggerMetric =
   | "current_win_streak"
   | "best_win_streak"
   | "total_score"
-  | "total_duration_seconds";
+  | "total_duration_seconds"
+  | "auto_finished";
 
 export type GameTriggerOperator = "=" | ">=" | "<=" | ">" | "<";
 
@@ -24,7 +25,8 @@ export interface GameTriggerConfig {
   game: GameType | "all";
   metric: GameTriggerMetric;
   operator: GameTriggerOperator;
-  value: number;
+  value: number | boolean;
+  result?: GameResult;
 }
 
 export interface RecordedGameResult {
@@ -44,6 +46,12 @@ export interface CalculateMemoryScoreInput {
   moves: number;
   mistakes: number;
   durationSeconds: number;
+}
+export interface CalculateKlondikeScoreParams {
+  result: "win" | "loss";
+  moves: number;
+  durationSeconds: number;
+  autoFinished?: boolean;
 }
 
 export interface RecordGameSessionInput {
