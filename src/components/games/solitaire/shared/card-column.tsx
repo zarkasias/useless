@@ -14,6 +14,14 @@ interface CardColumnProps {
   minHeight?: number;
   validTarget?: boolean;
   flippedCardId?: string | null;
+  onCardDragStart?: (
+    cardIndex: number,
+    event: React.DragEvent<HTMLButtonElement>,
+  ) => void;
+
+  onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
+
+  onDrop?: (event: React.DragEvent<HTMLDivElement>) => void;
 }
 
 export function CardColumn({
@@ -21,6 +29,9 @@ export function CardColumn({
   selectedCardIndex = null,
   onCardClick,
   onColumnClick,
+  onCardDragStart,
+  onDragOver,
+  onDrop,
   cardOffset = 28,
   mobileCardOffset = 20,
   minHeight = 340,
@@ -28,7 +39,13 @@ export function CardColumn({
   flippedCardId = null,
 }: CardColumnProps) {
   return (
-    <div className="relative" style={{ minHeight }} onClick={onColumnClick}>
+    <div
+      className="relative"
+      style={{ minHeight }}
+      onClick={onColumnClick}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+    >
       {validTarget && (
         <div
           className="pointer-events-none absolute left-0 h-[72px] w-[50px] sm:h-22 sm:w-16 rounded-lg ring-2 ring-emerald-300/80 ring-offset-2 ring-offset-emerald-950"
@@ -44,11 +61,71 @@ export function CardColumn({
       {cards.map((card, cardIndex) => {
         const isSelected = selectedCardIndex === cardIndex;
 
+        const createDragPreview = (
+          event: React.DragEvent<HTMLButtonElement>,
+          cardIndex: number,
+        ) => {
+          const column = event.currentTarget.parentElement;
+
+          if (!column) {
+            return;
+          }
+
+          const cardElements = Array.from(
+            column.querySelectorAll<HTMLButtonElement>("button"),
+          );
+
+          const movingElements = cardElements.slice(cardIndex);
+
+          const preview = document.createElement("div");
+
+          preview.style.position = "fixed";
+          preview.style.top = "-1000px";
+          preview.style.left = "-1000px";
+          preview.style.width = "64px";
+          preview.style.height = `${
+            96 + Math.max(0, movingElements.length - 1) * cardOffset
+          }px`;
+          preview.style.pointerEvents = "none";
+
+          movingElements.forEach((element, index) => {
+            const clone = element.cloneNode(true) as HTMLElement;
+
+            clone.style.position = "absolute";
+            clone.style.left = "0";
+            clone.style.top = `${index * cardOffset}px`;
+            clone.style.margin = "0";
+
+            preview.appendChild(clone);
+          });
+
+          document.body.appendChild(preview);
+
+          event.dataTransfer.setDragImage(preview, 32, 20);
+
+          window.setTimeout(() => {
+            preview.remove();
+          }, 0);
+        };
+
         return (
           <button
             key={card.id}
             type="button"
+            draggable={card.faceUp}
             disabled={!card.faceUp}
+            onDragStart={(event) => {
+              if (!card.faceUp) {
+                event.preventDefault();
+                return;
+              }
+
+              event.dataTransfer.effectAllowed = "move";
+
+              createDragPreview(event, cardIndex);
+
+              onCardDragStart?.(cardIndex, event);
+            }}
             onClick={(event) => {
               event.stopPropagation();
               onCardClick?.(cardIndex);

@@ -11,6 +11,10 @@ interface CardPileProps {
   validTarget?: boolean;
   animateFlip?: boolean;
   onClick?: () => void;
+  onDragStart?: (event: React.DragEvent<HTMLButtonElement>) => void;
+  onDragOver?: (event: React.DragEvent<HTMLButtonElement>) => void;
+
+  onDrop?: (event: React.DragEvent<HTMLButtonElement>) => void;
 }
 
 export function CardPile({
@@ -21,6 +25,9 @@ export function CardPile({
   validTarget = false,
   animateFlip = false,
   onClick,
+  onDragStart,
+  onDragOver,
+  onDrop,
 }: CardPileProps) {
   return (
     <div className="space-y-1">
@@ -30,6 +37,10 @@ export function CardPile({
 
       <button
         type="button"
+        draggable={Boolean(card && onDragStart)}
+        onDragStart={onDragStart}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
         onClick={onClick}
         disabled={!onClick}
         className={`

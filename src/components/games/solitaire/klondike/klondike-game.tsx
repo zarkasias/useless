@@ -11,6 +11,7 @@ import { createStandardDeck } from "@/lib/games/solitaire/core/deck";
 import { shuffleDeck } from "@/lib/games/solitaire/core/shuffle";
 import { createKlondikeBoard } from "@/lib/games/solitaire/klondike/klondike-setup";
 import { isKlondikeComplete } from "@/lib/games/solitaire/klondike/klondike-state";
+import { useKlondikeInteractions } from "./use-klondike-interactions";
 import type { KlondikeBoardState } from "@/lib/games/solitaire/klondike/klondike-types";
 
 import { KlondikeBoard } from "./klondike-board";
@@ -29,10 +30,6 @@ export function KlondikeGame() {
     setBoard(createInitialBoard());
   }, []);
 
-  const resetGame = () => {
-    setBoard(createInitialBoard());
-  };
-
   if (!board) {
     return (
       <GameTable>
@@ -45,15 +42,41 @@ export function KlondikeGame() {
     );
   }
 
+  return <KlondikeGameContent board={board} setBoard={setBoard} />;
+}
+
+interface KlondikeGameContentProps {
+  board: KlondikeBoardState;
+  setBoard: React.Dispatch<React.SetStateAction<KlondikeBoardState | null>>;
+}
+
+function KlondikeGameContent({ board, setBoard }: KlondikeGameContentProps) {
   const isComplete = isKlondikeComplete(board);
+  const interactions = useKlondikeInteractions({
+    board,
+    setBoard,
+    isComplete,
+  });
+
+  const { moveCount, resetInteractions, elapsedSeconds } = interactions;
+
+  const minutes = Math.floor(elapsedSeconds / 60);
+  const seconds = elapsedSeconds % 60;
+
+  const formattedTime = `${minutes}:${seconds.toString().padStart(2, "0")}`;
+
+  const resetGame = () => {
+    resetInteractions();
+    setBoard(createInitialBoard());
+  };
 
   return (
     <GameTable className="space-y-5">
-      {/* Game controls */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-2">
+          <GameMetric label="Moves" value={moveCount} />
+          <GameMetric label="Time" value={formattedTime} />
           <GameMetric label="Stock" value={board.stock.length} />
-
           <GameMetric label="Waste" value={board.waste.length} />
         </div>
 
@@ -62,9 +85,8 @@ export function KlondikeGame() {
         </GameButton>
       </div>
 
-      {/* Board */}
       <div className="relative rounded-xl">
-        <KlondikeBoard board={board} setBoard={setBoard} />
+        <KlondikeBoard board={board} interactions={interactions} />
       </div>
 
       {isComplete && (
