@@ -150,30 +150,25 @@ export function hasAvailableKlondikeMove(board: KlondikeBoardState): boolean {
     }
   }
 
-  // Foundation → tableau
-  //   for (const foundation of board.foundations) {
-  //     const topFoundationCard = foundation.cards[foundation.cards.length - 1];
+  // Count every legal foundation move, even if it can be reversed.
+  // Moving a card back to the tableau may unlock another sequence.
+  for (const foundation of board.foundations) {
+    const topCard = foundation.cards[foundation.cards.length - 1];
 
-  //     if (!topFoundationCard) {
-  //       continue;
-  //     }
+    if (!topCard) {
+      continue;
+    }
 
-  //     for (const targetColumn of board.tableau) {
-  //       if (targetColumn.length === 0) {
-  //         if (canPlaceOnEmptyTableau(topFoundationCard)) {
-  //           return true;
-  //         }
+    for (const targetColumn of board.tableau) {
+      const canMove = targetColumn.length === 0
+        ? canPlaceOnEmptyTableau(topCard)
+        : canPlaceOnTableau(topCard, targetColumn[targetColumn.length - 1]);
 
-  //         continue;
-  //       }
-
-  //       const targetCard = targetColumn[targetColumn.length - 1];
-
-  //       if (canPlaceOnTableau(topFoundationCard, targetCard)) {
-  //         return true;
-  //       }
-  //     }
-  //   }
+      if (canMove) {
+        return true;
+      }
+    }
+  }
 
   return false;
 }

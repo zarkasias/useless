@@ -1,21 +1,27 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+
 import { Navbar } from "@/components/navbar";
 import { GameScreen } from "@/components/games/game-screen";
 import { KlondikeGame } from "@/components/games/solitaire/klondike/klondike-game";
 
 import type { UserProfile } from "@/lib/supabase";
 import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
+import type { UserGameStats } from "@/lib/types/games";
 
 interface SolitaireClientProps {
   initialProfile: UserProfile;
   initialEntitlements: UserEntitlements;
+  initialStats: UserGameStats | null;
 }
 
 export default function SolitaireClient({
   initialProfile,
   initialEntitlements,
+  initialStats,
 }: SolitaireClientProps) {
+  const router = useRouter();
   return (
     <div className="min-h-screen bg-transparent">
       <Navbar
@@ -29,8 +35,16 @@ export default function SolitaireClient({
           title="Useless Solitaire"
           description="A completely unnecessary game of Klondike powered by your questionable free time."
           icon="/game_icons/solitaire.webp"
+          gamesPlayed={initialStats?.games_played ?? 0}
+          wins={initialStats?.wins ?? 0}
+          bestScoreLabel="Best"
+          bestScore={initialStats?.best_score ?? null}
         >
-          <KlondikeGame />
+          <KlondikeGame
+            onGameRecorded={() => {
+              router.refresh();
+            }}
+          />
         </GameScreen>
       </main>
     </div>

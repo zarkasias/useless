@@ -118,3 +118,52 @@ export function canAutoFinishKlondike(board: KlondikeBoardState): boolean {
 
   return foundationCardCount === 52;
 }
+
+export function getNextAutoFinishMove(
+  board: KlondikeBoardState,
+): KlondikeBoardState | null {
+  const topWasteCard = board.waste[board.waste.length - 1];
+
+  if (topWasteCard) {
+    const foundationIndex = board.foundations.findIndex(
+      (foundation) => foundation.suit === topWasteCard.suit,
+    );
+
+    if (foundationIndex !== -1) {
+      const nextBoard = moveWasteCardToFoundation(board, foundationIndex);
+
+      if (nextBoard) {
+        return nextBoard;
+      }
+    }
+  }
+
+  for (let columnIndex = 0; columnIndex < board.tableau.length; columnIndex++) {
+    const column = board.tableau[columnIndex];
+    const topCard = column[column.length - 1];
+
+    if (!topCard) {
+      continue;
+    }
+
+    const foundationIndex = board.foundations.findIndex(
+      (foundation) => foundation.suit === topCard.suit,
+    );
+
+    if (foundationIndex === -1) {
+      continue;
+    }
+
+    const nextBoard = moveTableauCardToFoundation(
+      board,
+      columnIndex,
+      foundationIndex,
+    );
+
+    if (nextBoard) {
+      return nextBoard;
+    }
+  }
+
+  return null;
+}

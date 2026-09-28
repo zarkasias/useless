@@ -9,6 +9,7 @@ import { RotateCcw } from "lucide-react";
 import { GameTable } from "../system/game-table";
 import GameMetric from "../game-metric";
 import GameResult from "../system/game-result";
+import GameResultOverlay from "../system/game-result-overlay";
 import GameButton from "../system/game-button";
 import { AchievementCard } from "@/components/achievement-card-updated";
 
@@ -394,22 +395,7 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
 
         {/* Completed state */}
         {isComplete && (
-          <div
-            className="
-        absolute
-        inset-0
-        z-20
-        flex
-        items-center
-        justify-center
-        rounded-xl
-        bg-black/60
-        p-5
-        backdrop-blur-[2px]
-        animate-in fade-in-0 duration-300
-        sm:p-8
-      "
-          >
+          <GameResultOverlay>
             <div className="w-full max-w-xl animate-in zoom-in-95 duration-300">
               <GameResult
                 eyebrow="Completely unnecessary victory"
@@ -455,7 +441,7 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
                 </div>
               )}
             </div>
-          </div>
+          </GameResultOverlay>
         )}
       </div>
     </GameTable>

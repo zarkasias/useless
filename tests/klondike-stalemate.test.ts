@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { isKlondikeStalemate } from "../src/lib/games/solitaire/klondike/klondike-stalemate";
-import { moveTableauSequence } from "../src/lib/games/solitaire/klondike/klondike-moves";
+import { moveTableauSequence, moveFoundationCardToTableau } from "../src/lib/games/solitaire/klondike/klondike-moves";
 import type { KlondikeBoardState } from "../src/lib/games/solitaire/klondike/klondike-types";
 import type { GameCard } from "../src/lib/types/gamecards";
 
@@ -65,6 +65,41 @@ describe("Klondike stalemate detection", () => {
     const board = blockedBoard();
     board.tableau[1] = [card("A", "hearts")];
     expect(isKlondikeStalemate(board)).toBe(false);
+  });
+
+  it("allows a foundation move that unlocks a hidden card", () => {
+    const board = blockedBoard();
+    board.waste = [];
+    board.foundations[0].cards = (["A", "2", "3", "4", "5", "6"] as const)
+      .map((rank) => card(rank, "hearts"));
+    board.tableau = [
+      [card("A", "clubs", false), card("5", "spades")],
+      [card("8", "diamonds"), card("7", "clubs")],
+      [], [], [], [], [],
+    ];
+
+    expect(isKlondikeStalemate(board)).toBe(false);
+    const recovered = moveFoundationCardToTableau(board, 0, 1);
+    expect(recovered).not.toBeNull();
+    const revealed = moveTableauSequence(recovered!, 0, 1, 1);
+    expect(revealed?.tableau[0][0].faceUp).toBe(true);
+  });
+
+  it("counts a foundation King that can move into an empty column", () => {
+    const board = blockedBoard();
+    board.foundations[0].cards = (
+      ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"] as const
+    ).map((rank) => card(rank, "hearts"));
+    // Avoid duplicating the queen already in this foundation.
+    board.tableau[0] = [card("K", "spades")];
+    expect(isKlondikeStalemate(board)).toBe(false);
+    expect(moveFoundationCardToTableau(board, 0, 1)).not.toBeNull();
+  });
+
+  it("does not count a foundation card with no legal destination", () => {
+    const board = blockedBoard();
+    board.foundations[0].cards = [card("A", "hearts")];
+    expect(isKlondikeStalemate(board)).toBe(true);
   });
 
   it.each(["stock", "waste"] as const)(

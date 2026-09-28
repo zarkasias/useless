@@ -14,7 +14,15 @@ interface RecordMemoryGameResultInput {
   score: number;
 }
 
-interface RecordMemoryGameResultResponse {
+interface RecordKlondikeGameResultInput {
+  result: "win" | "loss";
+  moves: number;
+  durationSeconds: number;
+  score: number;
+  autoFinished: boolean;
+}
+
+interface RecordGameResultResponse {
   success: boolean;
   session?: GameSession;
   stats?: UserGameStats;
@@ -24,7 +32,7 @@ interface RecordMemoryGameResultResponse {
 
 export async function recordMemoryGameResultAction(
   input: RecordMemoryGameResultInput,
-): Promise<RecordMemoryGameResultResponse> {
+): Promise<RecordGameResultResponse> {
   try {
     const {
       result,
@@ -64,6 +72,48 @@ export async function recordMemoryGameResultAction(
     };
   } catch (error) {
     console.error("Failed to record Memory game result:", error);
+
+    return {
+      success: false,
+      error: "Unable to save game result",
+    };
+  }
+}
+
+export async function recordKlondikeGameResultAction(
+  input: RecordKlondikeGameResultInput,
+): Promise<RecordGameResultResponse> {
+  try {
+    const { result, moves, durationSeconds, score, autoFinished } = input;
+
+    if (moves < 0 || durationSeconds < 0 || score < 0) {
+      return {
+        success: false,
+        error: "Invalid game result",
+      };
+    }
+
+    const gameResult = await recordAuthenticatedGameSession({
+      gameType: "solitaire",
+      result,
+      score,
+      moves,
+      mistakes: 0,
+      durationSeconds,
+      metadata: {
+        variant: "klondike",
+        auto_finished: autoFinished,
+      },
+    });
+
+    return {
+      success: true,
+      session: gameResult.session,
+      stats: gameResult.stats,
+      unlockedAchievements: gameResult.unlockedAchievements,
+    };
+  } catch (error) {
+    console.error("Failed to record Klondike game result:", error);
 
     return {
       success: false,

@@ -9,7 +9,11 @@ import { createInitialBoard } from "./klondike-helper";
 
 import type { KlondikeBoardState } from "@/lib/games/solitaire/klondike/klondike-types";
 
-export function KlondikeGame() {
+interface KlondikeGameProps {
+  onGameRecorded?: () => void;
+}
+
+export function KlondikeGame({ onGameRecorded }: KlondikeGameProps) {
   const [board, setBoard] = useState<KlondikeBoardState | null>(null);
 
   useEffect(() => {
@@ -28,5 +32,11 @@ export function KlondikeGame() {
     );
   }
 
-  return <KlondikeGameContent board={board} setBoard={setBoard} />;
+  return (
+    <KlondikeGameContent
+      board={board}
+      setBoard={setBoard}
+      onGameRecorded={onGameRecorded}
+    />
+  );
 }
