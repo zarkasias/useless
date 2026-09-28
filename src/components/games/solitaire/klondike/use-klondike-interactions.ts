@@ -14,17 +14,15 @@ import {
   moveFoundationCardToTableau,
 } from "@/lib/games/solitaire/klondike/klondike-moves";
 
-import {
-  canMoveTableauSequence,
-  canPlaceOnEmptyTableau,
-  canPlaceOnTableau,
-  canPlaceOnFoundation,
-} from "@/lib/games/solitaire/klondike/klondike-rules";
-
 export interface SelectedTableauCard {
   columnIndex: number;
   cardIndex: number;
 }
+
+type CardSource =
+  | ({ type: "tableau" } & SelectedTableauCard)
+  | { type: "waste" }
+  | { type: "foundation"; foundationIndex: number };
 
 interface UseKlondikeInteractionsProps {
   board: KlondikeBoardState;
@@ -49,8 +47,7 @@ export function useKlondikeInteractions({
     number | null
   >(null);
 
-  const [draggedTableauCard, setDraggedTableauCard] =
-    useState<SelectedTableauCard | null>(null);
+  const [dragSource, setDragSource] = useState<CardSource | null>(null);
 
   const [flippedCardId, setFlippedCardId] = useState<string | null>(null);
 
@@ -185,6 +182,12 @@ export function useKlondikeInteractions({
   const handleFoundationClick = (foundationIndex: number) => {
     // Tableau → Foundation
     if (selectedTableauCard) {
+      const column = board.tableau[selectedTableauCard.columnIndex];
+      if (selectedTableauCard.cardIndex !== column.length - 1) {
+        setSelectedTableauCard(null);
+        return;
+      }
+
       const nextBoard = moveTableauCardToFoundation(
         board,
         selectedTableauCard.columnIndex,
@@ -274,162 +277,127 @@ export function useKlondikeInteractions({
     setSelectedFoundationIndex(null);
   };
 
-  const isValidTableauTarget = (columnIndex: number): boolean => {
-    const targetColumn = board.tableau[columnIndex];
-
+  const getSelectedSource = (): CardSource | null => {
+    if (selectedTableauCard) {
+      return { type: "tableau", ...selectedTableauCard };
+    }
     if (selectedFoundationIndex !== null) {
-      const foundation = board.foundations[selectedFoundationIndex];
-      const movingCard = foundation.cards[foundation.cards.length - 1];
-
-      if (!movingCard) {
-        return false;
-      }
-
-      if (targetColumn.length === 0) {
-        return canPlaceOnEmptyTableau(movingCard);
-      }
-
-      const targetCard = targetColumn[targetColumn.length - 1];
-
-      return canPlaceOnTableau(movingCard, targetCard);
+      return { type: "foundation", foundationIndex: selectedFoundationIndex };
     }
-
-    if (selectedTableauCard) {
-      const movingCards = board.tableau[selectedTableauCard.columnIndex].slice(
-        selectedTableauCard.cardIndex,
-      );
-
-      return canMoveTableauSequence(movingCards, targetColumn);
+    if (selectedCardId === board.waste[board.waste.length - 1]?.id) {
+      return { type: "waste" };
     }
-
-    const topWasteCard = board.waste[board.waste.length - 1];
-
-    if (selectedCardId && topWasteCard?.id === selectedCardId) {
-      if (targetColumn.length === 0) {
-        return canPlaceOnEmptyTableau(topWasteCard);
-      }
-
-      const targetCard = targetColumn[targetColumn.length - 1];
-
-      return canPlaceOnTableau(topWasteCard, targetCard);
-    }
-
-    return false;
+    return null;
   };
 
-  const isValidFoundationTarget = (foundationIndex: number): boolean => {
-    const foundation = board.foundations[foundationIndex];
-
-    if (selectedTableauCard) {
-      const column = board.tableau[selectedTableauCard.columnIndex];
-
-      const movingCard = column[column.length - 1];
-
-      if (!movingCard) {
-        return false;
-      }
-
-      // Only the top tableau card can move to foundation
-      if (selectedTableauCard.cardIndex !== column.length - 1) {
-        return false;
-      }
-
-      return canPlaceOnFoundation(movingCard, foundation);
-    }
-
-    const topWasteCard = board.waste[board.waste.length - 1];
-
-    if (selectedCardId && topWasteCard?.id === selectedCardId) {
-      return canPlaceOnFoundation(topWasteCard, foundation);
-    }
-
-    return false;
-  };
-
-  const handleTableauDragStart = (columnIndex: number, cardIndex: number) => {
-    setDraggedTableauCard({
-      columnIndex,
-      cardIndex,
-    });
-  };
-
-  const handleTableauDragOver = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-  };
-
-  const handleTableauDrop = (
-    targetColumnIndex: number,
-    event: React.DragEvent<HTMLDivElement>,
+  // Highlights and drops use the same move rules and the same source.
+  const boardAfterTableauMove = (
+    source: CardSource | null,
+    columnIndex: number,
   ) => {
-    event.preventDefault();
+    switch (source?.type) {
+      case "tableau":
+        return moveTableauSequence(
+          board, source.columnIndex, source.cardIndex, columnIndex,
+        );
+      case "waste":
+        return moveWasteCardToTableau(board, columnIndex);
+      case "foundation":
+        return moveFoundationCardToTableau(
+          board, source.foundationIndex, columnIndex,
+        );
+      default:
+        return null;
+    }
+  };
 
-    // Foundation → Tableau
-    if (selectedFoundationIndex !== null) {
-      const nextBoard = moveFoundationCardToTableau(
-        board,
-        selectedFoundationIndex,
-        targetColumnIndex,
-      );
+  const boardAfterFoundationMove = (
+    source: CardSource | null,
+    foundationIndex: number,
+  ) => {
+    if (source?.type === "waste") {
+      return moveWasteCardToFoundation(board, foundationIndex);
+    }
 
-      if (nextBoard) {
-        setBoard(nextBoard);
-        registerSuccessfulMove();
+    if (source?.type === "tableau") {
+      const column = board.tableau[source.columnIndex];
+      // A sequence cannot be placed on a foundation, even if its last card fits.
+      if (source.cardIndex === column.length - 1) {
+        return moveTableauCardToFoundation(
+          board, source.columnIndex, foundationIndex,
+        );
       }
-
-      setSelectedFoundationIndex(null);
-      return;
     }
 
-    // Waste → Tableau
-    if (selectedCardId) {
-      const nextBoard = moveWasteCardToTableau(board, targetColumnIndex);
+    return null;
+  };
 
-      if (nextBoard) {
-        setBoard(nextBoard);
-        registerSuccessfulMove();
-      }
+  const isValidTableauTarget = (columnIndex: number) =>
+    boardAfterTableauMove(dragSource ?? getSelectedSource(), columnIndex) !== null;
 
-      setSelectedCardId(null);
+  const isValidFoundationTarget = (foundationIndex: number) =>
+    boardAfterFoundationMove(dragSource ?? getSelectedSource(), foundationIndex) !== null;
+
+  const startDrag = (
+    source: CardSource,
+    event: React.DragEvent<HTMLButtonElement>,
+  ) => {
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", "klondike-card");
+    setSelectedCardId(null);
+    setSelectedTableauCard(null);
+    setSelectedFoundationIndex(null);
+    setDragSource(source);
+  };
+
+  const handleDragEnd = () => setDragSource(null);
+
+  const handleTableauDragStart = (
+    columnIndex: number,
+    cardIndex: number,
+    event: React.DragEvent<HTMLButtonElement>,
+  ) => startDrag({ type: "tableau", columnIndex, cardIndex }, event);
+
+  const handleWasteDragStart = (event: React.DragEvent<HTMLButtonElement>) => {
+    if (!board.waste.length) {
+      event.preventDefault();
       return;
     }
+    startDrag({ type: "waste" }, event);
+  };
 
-    // Tableau → Tableau
-    if (!draggedTableauCard) {
+  const handleFoundationDragStart = (
+    foundationIndex: number,
+    event: React.DragEvent<HTMLButtonElement>,
+  ) => {
+    if (!board.foundations[foundationIndex].cards.length) {
+      event.preventDefault();
       return;
     }
+    startDrag({ type: "foundation", foundationIndex }, event);
+  };
 
-    const nextBoard = moveTableauSequence(
-      board,
-      draggedTableauCard.columnIndex,
-      draggedTableauCard.cardIndex,
-      targetColumnIndex,
-    );
+  const handleDragOver = (event: React.DragEvent<HTMLElement>) => {
+    if (dragSource) {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+    }
+  };
 
+  const finishDrop = (nextBoard: KlondikeBoardState | null) => {
     if (nextBoard) {
       setBoard(nextBoard);
       registerSuccessfulMove();
     }
-
-    setDraggedTableauCard(null);
+    handleDragEnd();
   };
 
-  const handleWasteDragStart = (event: React.DragEvent<HTMLButtonElement>) => {
-    const topWasteCard = board.waste[board.waste.length - 1];
-
-    if (!topWasteCard) {
-      event.preventDefault();
-      return;
-    }
-
-    setSelectedCardId(topWasteCard.id);
-    setSelectedTableauCard(null);
-    setSelectedFoundationIndex(null);
-  };
-
-  const handleFoundationDragOver = (
-    event: React.DragEvent<HTMLButtonElement>,
+  const handleTableauDrop = (
+    columnIndex: number,
+    event: React.DragEvent<HTMLDivElement>,
   ) => {
     event.preventDefault();
+    finishDrop(boardAfterTableauMove(dragSource, columnIndex));
   };
 
   const handleFoundationDrop = (
@@ -437,52 +405,7 @@ export function useKlondikeInteractions({
     event: React.DragEvent<HTMLButtonElement>,
   ) => {
     event.preventDefault();
-
-    // Tableau → Foundation
-    if (draggedTableauCard) {
-      const nextBoard = moveTableauCardToFoundation(
-        board,
-        draggedTableauCard.columnIndex,
-        foundationIndex,
-      );
-
-      if (nextBoard) {
-        setBoard(nextBoard);
-        registerSuccessfulMove();
-      }
-
-      setDraggedTableauCard(null);
-      return;
-    }
-
-    // Waste → Foundation
-    if (selectedCardId) {
-      const nextBoard = moveWasteCardToFoundation(board, foundationIndex);
-
-      if (nextBoard) {
-        setBoard(nextBoard);
-        registerSuccessfulMove();
-      }
-
-      setSelectedCardId(null);
-    }
-  };
-
-  const handleFoundationDragStart = (
-    foundationIndex: number,
-    event: React.DragEvent<HTMLButtonElement>,
-  ) => {
-    const foundation = board.foundations[foundationIndex];
-    const topCard = foundation.cards[foundation.cards.length - 1];
-
-    if (!topCard) {
-      event.preventDefault();
-      return;
-    }
-
-    setSelectedFoundationIndex(foundationIndex);
-    setSelectedCardId(null);
-    setSelectedTableauCard(null);
+    finishDrop(boardAfterFoundationMove(dragSource, foundationIndex));
   };
 
   const resetInteractions = () => {
@@ -492,7 +415,7 @@ export function useKlondikeInteractions({
     setSelectedCardId(null);
     setSelectedTableauCard(null);
     setSelectedFoundationIndex(null);
-    setDraggedTableauCard(null);
+    setDragSource(null);
     setFlippedCardId(null);
 
     previousFaceUpState.current = null;
@@ -511,8 +434,8 @@ export function useKlondikeInteractions({
     selectedFoundationIndex,
     setSelectedFoundationIndex,
 
-    draggedTableauCard,
-    setDraggedTableauCard,
+    dragSource,
+    handleDragEnd,
 
     flippedCardId,
 
@@ -524,11 +447,11 @@ export function useKlondikeInteractions({
     isValidFoundationTarget,
 
     handleTableauDragStart,
-    handleTableauDragOver,
+    handleTableauDragOver: handleDragOver,
     handleTableauDrop,
 
     handleWasteDragStart,
-    handleFoundationDragOver,
+    handleFoundationDragOver: handleDragOver,
     handleFoundationDragStart,
     handleFoundationDrop,
     resetInteractions,

@@ -2,6 +2,8 @@
 
 import type { GameCard } from "@/lib/types/gamecards";
 
+import { createCardDragPreview } from "./card-drag-preview";
+
 import { PlayingCard } from "./playing-card";
 
 interface CardColumnProps {
@@ -19,6 +21,7 @@ interface CardColumnProps {
     event: React.DragEvent<HTMLButtonElement>,
   ) => void;
 
+  onDragEnd?: () => void;
   onDragOver?: (event: React.DragEvent<HTMLDivElement>) => void;
 
   onDrop?: (event: React.DragEvent<HTMLDivElement>) => void;
@@ -30,6 +33,7 @@ export function CardColumn({
   onCardClick,
   onColumnClick,
   onCardDragStart,
+  onDragEnd,
   onDragOver,
   onDrop,
   cardOffset = 28,
@@ -61,53 +65,6 @@ export function CardColumn({
       {cards.map((card, cardIndex) => {
         const isSelected = selectedCardIndex === cardIndex;
 
-        const createDragPreview = (
-          event: React.DragEvent<HTMLButtonElement>,
-          cardIndex: number,
-        ) => {
-          const column = event.currentTarget.parentElement;
-
-          if (!column) {
-            return;
-          }
-
-          const cardElements = Array.from(
-            column.querySelectorAll<HTMLButtonElement>("button"),
-          );
-
-          const movingElements = cardElements.slice(cardIndex);
-
-          const preview = document.createElement("div");
-
-          preview.style.position = "fixed";
-          preview.style.top = "-1000px";
-          preview.style.left = "-1000px";
-          preview.style.width = "64px";
-          preview.style.height = `${
-            96 + Math.max(0, movingElements.length - 1) * cardOffset
-          }px`;
-          preview.style.pointerEvents = "none";
-
-          movingElements.forEach((element, index) => {
-            const clone = element.cloneNode(true) as HTMLElement;
-
-            clone.style.position = "absolute";
-            clone.style.left = "0";
-            clone.style.top = `${index * cardOffset}px`;
-            clone.style.margin = "0";
-
-            preview.appendChild(clone);
-          });
-
-          document.body.appendChild(preview);
-
-          event.dataTransfer.setDragImage(preview, 32, 20);
-
-          window.setTimeout(() => {
-            preview.remove();
-          }, 0);
-        };
-
         return (
           <button
             key={card.id}
@@ -122,10 +79,13 @@ export function CardColumn({
 
               event.dataTransfer.effectAllowed = "move";
 
-              createDragPreview(event, cardIndex);
+              const column = event.currentTarget.parentElement!;
+              const cards = Array.from(column.querySelectorAll<HTMLButtonElement>("button"));
+              createCardDragPreview(event, cards.slice(cardIndex));
 
               onCardDragStart?.(cardIndex, event);
             }}
+            onDragEnd={onDragEnd}
             onClick={(event) => {
               event.stopPropagation();
               onCardClick?.(cardIndex);

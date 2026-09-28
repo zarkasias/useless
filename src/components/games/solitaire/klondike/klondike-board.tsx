@@ -24,6 +24,7 @@ export function KlondikeBoard({ board, interactions }: KlondikeBoardProps) {
     setSelectedFoundationIndex,
 
     flippedCardId,
+    handleDragEnd,
     handleStockClick,
     handleTableauClick,
     handleFoundationClick,
@@ -55,6 +56,7 @@ export function KlondikeBoard({ board, interactions }: KlondikeBoardProps) {
                 card={foundation.cards[foundation.cards.length - 1] ?? null}
                 selected={selectedFoundationIndex === foundationIndex}
                 validTarget={isValidFoundationTarget(foundationIndex)}
+                onDragEnd={handleDragEnd}
                 onDragStart={(event) =>
                   handleFoundationDragStart(foundationIndex, event)
                 }
@@ -94,6 +96,7 @@ export function KlondikeBoard({ board, interactions }: KlondikeBoardProps) {
                 board.waste[board.waste.length - 1]?.id === flippedCardId
               }
               onDragStart={handleWasteDragStart}
+              onDragEnd={handleDragEnd}
               onClick={() => {
                 const topWasteCard = board.waste[board.waste.length - 1];
 
@@ -104,6 +107,7 @@ export function KlondikeBoard({ board, interactions }: KlondikeBoardProps) {
                 );
 
                 setSelectedTableauCard(null);
+                setSelectedFoundationIndex(null);
               }}
             />
             <CardPile
@@ -132,8 +136,9 @@ export function KlondikeBoard({ board, interactions }: KlondikeBoardProps) {
               onCardClick={(cardIndex) =>
                 handleTableauCardClick(columnIndex, cardIndex)
               }
-              onCardDragStart={(cardIndex) =>
-                handleTableauDragStart(columnIndex, cardIndex)
+              onDragEnd={handleDragEnd}
+              onCardDragStart={(cardIndex, event) =>
+                handleTableauDragStart(columnIndex, cardIndex, event)
               }
               onDragOver={handleTableauDragOver}
               onDrop={(event) => handleTableauDrop(columnIndex, event)}
