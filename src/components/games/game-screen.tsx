@@ -14,6 +14,7 @@ interface GameScreenProps {
 
   gamesPlayed?: number;
   wins?: number;
+  winRate?: number;
   bestScoreLabel?: string;
   bestScore?: string | number | null;
 
@@ -26,6 +27,7 @@ export function GameScreen({
   icon,
   gamesPlayed = 0,
   wins = 0,
+  winRate,
   bestScoreLabel = "Best",
   bestScore = null,
   children,
@@ -74,10 +76,16 @@ export function GameScreen({
             </div>
 
             {/* Player stats */}
-            <div className="grid shrink-0 grid-cols-3 overflow-hidden rounded-xl border bg-muted/30">
+            <div
+              className={`grid shrink-0 ${winRate !== undefined ? "grid-cols-4" : "grid-cols-3"} overflow-hidden rounded-xl border bg-muted/30`}
+            >
               <GameStat label="Played" value={gamesPlayed} />
 
               <GameStat label="Wins" value={wins} />
+
+              {winRate !== undefined && (
+                <GameStat label="Win Rate" value={`${winRate}%`} />
+              )}
 
               <GameStat
                 label={bestScoreLabel}

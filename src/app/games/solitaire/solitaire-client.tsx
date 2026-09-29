@@ -22,6 +22,11 @@ export default function SolitaireClient({
   initialStats,
 }: SolitaireClientProps) {
   const router = useRouter();
+  const winRate =
+    initialStats && initialStats.games_played > 0
+      ? Math.round((initialStats.wins / initialStats.games_played) * 100)
+      : 0;
+
   return (
     <div className="min-h-screen bg-transparent">
       <Navbar
@@ -33,10 +38,11 @@ export default function SolitaireClient({
       <main className="mx-auto w-full max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8">
         <GameScreen
           title="Useless Solitaire"
-          description="A completely unnecessary game of Klondike powered by your questionable free time."
+          description="A completely unnecessary game of Solitaire powered by your questionable free time."
           icon="/game_icons/solitaire.webp"
           gamesPlayed={initialStats?.games_played ?? 0}
           wins={initialStats?.wins ?? 0}
+          winRate={winRate}
           bestScoreLabel="Best"
           bestScore={initialStats?.best_score ?? null}
         >

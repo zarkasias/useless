@@ -23,6 +23,10 @@ export default function MemoryClient({
   initialStats,
 }: MemoryClientProps) {
   const router = useRouter();
+  const winRate =
+    initialStats && initialStats.games_played > 0
+      ? Math.round((initialStats.wins / initialStats.games_played) * 100)
+      : 0;
   return (
     <div className="min-h-screen bg-transparent">
       <Navbar
@@ -38,6 +42,7 @@ export default function MemoryClient({
           icon="/game_icons/memory.webp"
           gamesPlayed={initialStats?.games_played ?? 0}
           wins={initialStats?.wins ?? 0}
+          winRate={winRate}
           bestScoreLabel="Best"
           bestScore={initialStats?.best_score ?? null}
         >
