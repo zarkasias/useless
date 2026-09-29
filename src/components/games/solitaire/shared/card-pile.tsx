@@ -8,6 +8,7 @@ import { PlayingCard } from "./playing-card";
 interface CardPileProps {
   label: string;
   card: GameCard | null;
+  autoFinishCardId?: string | null;
   faceDown?: boolean;
   selected?: boolean;
   validTarget?: boolean;
@@ -23,6 +24,7 @@ interface CardPileProps {
 export function CardPile({
   label,
   card,
+  autoFinishCardId,
   faceDown = false,
   selected = false,
   validTarget = false,
@@ -78,6 +80,7 @@ export function CardPile({
                 : card
             }
             animateFlip={animateFlip}
+            animateAutoFinish={card.id === autoFinishCardId}
           />
         ) : (
           <div className="h-[72px] w-[50px] sm:h-24 sm:w-16 rounded-lg border border-dashed border-white/30 bg-white/5" />

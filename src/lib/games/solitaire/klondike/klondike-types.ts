@@ -11,3 +11,17 @@ export interface KlondikeBoardState {
   foundations: KlondikeFoundation[];
   tableau: GameCard[][];
 }
+
+export interface KlondikeAutoFinishMove {
+  board: KlondikeBoardState;
+  cardId: string;
+  source:
+    | {
+        type: "waste";
+      }
+    | {
+        type: "tableau";
+        columnIndex: number;
+      };
+  foundationIndex: number;
+}

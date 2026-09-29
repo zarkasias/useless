@@ -1,4 +1,7 @@
-import type { KlondikeBoardState } from "./klondike-types";
+import type {
+  KlondikeBoardState,
+  KlondikeAutoFinishMove,
+} from "./klondike-types";
 import {
   moveTableauCardToFoundation,
   moveWasteCardToFoundation,
@@ -121,7 +124,7 @@ export function canAutoFinishKlondike(board: KlondikeBoardState): boolean {
 
 export function getNextAutoFinishMove(
   board: KlondikeBoardState,
-): KlondikeBoardState | null {
+): KlondikeAutoFinishMove | null {
   const topWasteCard = board.waste[board.waste.length - 1];
 
   if (topWasteCard) {
@@ -133,7 +136,14 @@ export function getNextAutoFinishMove(
       const nextBoard = moveWasteCardToFoundation(board, foundationIndex);
 
       if (nextBoard) {
-        return nextBoard;
+        return {
+          board: nextBoard,
+          cardId: topWasteCard.id,
+          source: {
+            type: "waste",
+          },
+          foundationIndex,
+        };
       }
     }
   }
@@ -161,7 +171,15 @@ export function getNextAutoFinishMove(
     );
 
     if (nextBoard) {
-      return nextBoard;
+      return {
+        board: nextBoard,
+        cardId: topCard.id,
+        source: {
+          type: "tableau",
+          columnIndex,
+        },
+        foundationIndex,
+      };
     }
   }
 

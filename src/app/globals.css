@@ -144,3 +144,23 @@
 .animate-card-flip-in {
   animation: card-flip-in 200ms ease-out;
 }
+
+@keyframes card-auto-finish {
+  0% {
+    transform: translateY(0) scale(1);
+  }
+
+  45% {
+    transform: translateY(-12px) scale(1.06);
+  }
+
+  100% {
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-card-auto-finish {
+  animation: card-auto-finish 160ms ease-out;
+  position: relative;
+  z-index: 50;
+}

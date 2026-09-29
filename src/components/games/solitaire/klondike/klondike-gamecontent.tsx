@@ -44,12 +44,11 @@ export function KlondikeGameContent({
     Achievement[]
   >([]);
   const [wasAutoFinished, setWasAutoFinished] = useState(false);
+  const [autoFinishCardId, setAutoFinishCardId] = useState<string | null>(null);
+  const [isAutoFinishing, setIsAutoFinishing] = useState(false);
+  const [autoFinishDismissed, setAutoFinishDismissed] = useState(false);
 
   const isComplete = isKlondikeComplete(board);
-
-  const [isAutoFinishing, setIsAutoFinishing] = useState(false);
-
-  const [autoFinishDismissed, setAutoFinishDismissed] = useState(false);
 
   const canAutoFinish = !isComplete && canAutoFinishKlondike(board);
   const isStalemate =
@@ -65,6 +64,8 @@ export function KlondikeGameContent({
     isComplete,
   });
 
+  const { hasStarted } = interactions;
+
   const { moveCount, resetInteractions, elapsedSeconds } = interactions;
 
   const minutes = Math.floor(elapsedSeconds / 60);
@@ -72,11 +73,33 @@ export function KlondikeGameContent({
 
   const formattedTime = `${minutes}:${seconds.toString().padStart(2, "0")}`;
 
-  const resetGame = () => {
+  const resetGame = async () => {
+    if (
+      hasStarted &&
+      !isComplete &&
+      !isStalemate &&
+      !hasRecordedResult.current
+    ) {
+      hasRecordedResult.current = true;
+
+      await recordKlondikeGameResultAction({
+        result: "abandoned",
+        moves: moveCount,
+        durationSeconds: elapsedSeconds,
+        score: 0,
+        autoFinished: false,
+      });
+
+      onGameRecorded?.();
+    }
+
     hasRecordedResult.current = false;
+
     setFinalScore(null);
     setUnlockedAchievements([]);
     setWasAutoFinished(false);
+    setAutoFinishCardId(null);
+
     resetInteractions();
     setBoard(createInitialBoard());
   };
@@ -87,19 +110,30 @@ export function KlondikeGameContent({
 
     let currentBoard = board;
 
-    while (!isKlondikeComplete(currentBoard)) {
-      const nextBoard = getNextAutoFinishMove(currentBoard);
+    let moveIndex = 0;
 
-      if (!nextBoard) {
+    while (!isKlondikeComplete(currentBoard)) {
+      const move = getNextAutoFinishMove(currentBoard);
+
+      if (!move) {
         break;
       }
 
-      currentBoard = nextBoard;
+      setAutoFinishCardId(move.cardId);
 
-      setBoard(nextBoard);
+      currentBoard = move.board;
+      setBoard(move.board);
 
-      await new Promise((resolve) => window.setTimeout(resolve, 180));
+      moveIndex += 1;
+
+      const delay = Math.max(90, 180 - moveIndex * 4);
+
+      await new Promise((resolve) => window.setTimeout(resolve, delay));
     }
+
+    setAutoFinishCardId(null);
+
+    await new Promise((resolve) => window.setTimeout(resolve, 250));
 
     setIsAutoFinishing(false);
   };
@@ -136,7 +170,14 @@ export function KlondikeGameContent({
         onGameRecorded?.();
       }
     })();
-  }, [isComplete, isStalemate, moveCount, elapsedSeconds, wasAutoFinished]);
+  }, [
+    isComplete,
+    isStalemate,
+    moveCount,
+    elapsedSeconds,
+    wasAutoFinished,
+    onGameRecorded,
+  ]);
 
   return (
     <GameTable className="space-y-5">
@@ -154,7 +195,11 @@ export function KlondikeGameContent({
       </div>
 
       <div className="relative rounded-xl">
-        <KlondikeBoard board={board} interactions={interactions} />
+        <KlondikeBoard
+          board={board}
+          interactions={interactions}
+          autoFinishCardId={autoFinishCardId}
+        />
       </div>
 
       {showStalemate && (
@@ -197,7 +242,7 @@ export function KlondikeGameContent({
       )}
 
       {isAutoFinishing && (
-        <GameResultOverlay>
+        <GameResultOverlay variant="transparent">
           <div className="w-full max-w-xl">
             <GameResult
               eyebrow="Finishing up"
