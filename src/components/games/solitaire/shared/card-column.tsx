@@ -9,6 +9,7 @@ import { PlayingCard } from "./playing-card";
 interface CardColumnProps {
   cards: GameCard[];
   selectedCardIndex?: number | null;
+  autoFinishCardId?: string | null;
   onCardClick?: (cardIndex: number) => void;
   onColumnClick?: () => void;
   cardOffset?: number;
@@ -37,7 +38,7 @@ export function CardColumn({
   onDragOver,
   onDrop,
   cardOffset = 28,
-  mobileCardOffset = 20,
+  autoFinishCardId,
   minHeight = 340,
   validTarget = false,
   flippedCardId = null,
@@ -80,7 +81,9 @@ export function CardColumn({
               event.dataTransfer.effectAllowed = "move";
 
               const column = event.currentTarget.parentElement!;
-              const cards = Array.from(column.querySelectorAll<HTMLButtonElement>("button"));
+              const cards = Array.from(
+                column.querySelectorAll<HTMLButtonElement>("button"),
+              );
               createCardDragPreview(event, cards.slice(cardIndex));
 
               onCardDragStart?.(cardIndex, event);
@@ -106,7 +109,11 @@ export function CardColumn({
               top: `${cardIndex * cardOffset}px`,
             }}
           >
-            <PlayingCard card={card} animateFlip={card.id === flippedCardId} />
+            <PlayingCard
+              card={card}
+              animateFlip={card.id === flippedCardId}
+              animateAutoFinish={card.id === autoFinishCardId}
+            />
           </button>
         );
       })}

@@ -15,7 +15,7 @@ interface RecordMemoryGameResultInput {
 }
 
 interface RecordKlondikeGameResultInput {
-  result: "win" | "loss";
+  result: "win" | "loss" | "abandoned";
   moves: number;
   durationSeconds: number;
   score: number;

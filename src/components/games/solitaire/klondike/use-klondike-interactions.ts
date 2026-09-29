@@ -298,13 +298,18 @@ export function useKlondikeInteractions({
     switch (source?.type) {
       case "tableau":
         return moveTableauSequence(
-          board, source.columnIndex, source.cardIndex, columnIndex,
+          board,
+          source.columnIndex,
+          source.cardIndex,
+          columnIndex,
         );
       case "waste":
         return moveWasteCardToTableau(board, columnIndex);
       case "foundation":
         return moveFoundationCardToTableau(
-          board, source.foundationIndex, columnIndex,
+          board,
+          source.foundationIndex,
+          columnIndex,
         );
       default:
         return null;
@@ -324,7 +329,9 @@ export function useKlondikeInteractions({
       // A sequence cannot be placed on a foundation, even if its last card fits.
       if (source.cardIndex === column.length - 1) {
         return moveTableauCardToFoundation(
-          board, source.columnIndex, foundationIndex,
+          board,
+          source.columnIndex,
+          foundationIndex,
         );
       }
     }
@@ -333,10 +340,14 @@ export function useKlondikeInteractions({
   };
 
   const isValidTableauTarget = (columnIndex: number) =>
-    boardAfterTableauMove(dragSource ?? getSelectedSource(), columnIndex) !== null;
+    boardAfterTableauMove(dragSource ?? getSelectedSource(), columnIndex) !==
+    null;
 
   const isValidFoundationTarget = (foundationIndex: number) =>
-    boardAfterFoundationMove(dragSource ?? getSelectedSource(), foundationIndex) !== null;
+    boardAfterFoundationMove(
+      dragSource ?? getSelectedSource(),
+      foundationIndex,
+    ) !== null;
 
   const startDrag = (
     source: CardSource,
@@ -424,6 +435,7 @@ export function useKlondikeInteractions({
   return {
     moveCount,
     elapsedSeconds,
+    hasStarted,
 
     selectedCardId,
     setSelectedCardId,

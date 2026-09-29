@@ -10,9 +10,14 @@ type KlondikeInteractions = ReturnType<typeof useKlondikeInteractions>;
 interface KlondikeBoardProps {
   board: KlondikeBoardState;
   interactions: KlondikeInteractions;
+  autoFinishCardId: string | null;
 }
 
-export function KlondikeBoard({ board, interactions }: KlondikeBoardProps) {
+export function KlondikeBoard({
+  board,
+  interactions,
+  autoFinishCardId,
+}: KlondikeBoardProps) {
   const {
     selectedCardId,
     setSelectedCardId,
@@ -53,6 +58,7 @@ export function KlondikeBoard({ board, interactions }: KlondikeBoardProps) {
               <CardPile
                 key={foundation.suit}
                 label={foundation.suit}
+                autoFinishCardId={autoFinishCardId}
                 card={foundation.cards[foundation.cards.length - 1] ?? null}
                 selected={selectedFoundationIndex === foundationIndex}
                 validTarget={isValidFoundationTarget(foundationIndex)}
@@ -88,6 +94,7 @@ export function KlondikeBoard({ board, interactions }: KlondikeBoardProps) {
           <div className="flex gap-2 sm:gap-3 sm:mr-14">
             <CardPile
               label="Waste"
+              autoFinishCardId={autoFinishCardId}
               card={board.waste[board.waste.length - 1] ?? null}
               selected={
                 board.waste[board.waste.length - 1]?.id === selectedCardId
@@ -125,6 +132,7 @@ export function KlondikeBoard({ board, interactions }: KlondikeBoardProps) {
             <CardColumn
               key={columnIndex}
               cards={column}
+              autoFinishCardId={autoFinishCardId}
               flippedCardId={flippedCardId}
               selectedCardIndex={
                 selectedTableauCard?.columnIndex === columnIndex

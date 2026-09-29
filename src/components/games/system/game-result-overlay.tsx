@@ -2,12 +2,14 @@ import type { ReactNode } from "react";
 
 interface GameResultOverlayProps {
   children: ReactNode;
+  variant?: "default" | "transparent";
   className?: string;
 }
 
 export default function GameResultOverlay({
   children,
   className = "",
+  variant = "default",
 }: GameResultOverlayProps) {
   return (
     <div
@@ -19,7 +21,11 @@ export default function GameResultOverlay({
         items-center
         justify-center
         p-5
-        bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.68)_0%,rgba(0,0,0,0.5)_58%,rgba(0,0,0,0.18)_80%,transparent_100%)]
+         ${
+           variant === "transparent"
+             ? "bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.28)_0%,rgba(0,0,0,0.12)_65%,transparent_100%)]"
+             : "bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.68)_0%,rgba(0,0,0,0.5)_58%,rgba(0,0,0,0.18)_80%,transparent_100%)]"
+         }
         animate-in
         fade-in-0
         duration-300
