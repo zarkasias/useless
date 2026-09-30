@@ -30,7 +30,10 @@ export function KlondikeMobileBoard({
   const waste = board.waste[board.waste.length - 1];
 
   return (
-    <div ref={boardRef} className="mx-auto w-full max-w-[560px] min-w-0 space-y-3">
+    <div
+      ref={boardRef}
+      className="mx-auto w-full max-w-[560px] min-h-[400px] min-w-0 space-y-3"
+    >
       <div className="grid grid-cols-7 items-end gap-1">
         {board.foundations.map((foundation, index) => {
           const card = foundation.cards[foundation.cards.length - 1];

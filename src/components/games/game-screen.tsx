@@ -40,29 +40,42 @@ export function GameScreen({
 
         <div className="p-4 sm:p-5">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
-              <div className="flex size-12 sm:size-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-100 via-fuchsia-50 to-orange-50 shadow-inner">
-                <Image
-                  src={icon}
-                  alt=""
-                  width={72}
-                  height={72}
-                  className="size-10 sm:size-16 object-contain drop-shadow-md"
-                />
+            <div className="flex min-w-0 items-start sm:items-center gap-3 sm:gap-4">
+              <div>
+                <div>
+                  <Link
+                    href="/games"
+                    className="mb-2 inline-flex sm:hidden items-center gap-1 text-xs font-bold text-muted-foreground transition-colors hover:text-primary"
+                  >
+                    <ArrowLeft className="size-3.5" />
+                    Back
+                  </Link>
+                </div>
+                <div className="flex size-12 sm:size-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-100 via-fuchsia-50 to-orange-50 shadow-inner">
+                  <Image
+                    src={icon}
+                    alt=""
+                    width={72}
+                    height={72}
+                    className="size-10 sm:size-16 object-contain drop-shadow-md"
+                  />
+                </div>
               </div>
 
               <div className="min-w-0">
-                <Link
-                  href="/games"
-                  className="mb-2 inline-flex items-center gap-1 text-xs font-bold text-muted-foreground transition-colors hover:text-primary"
-                >
-                  <ArrowLeft className="size-3.5" />
-                  Back
-                </Link>
+                <div className="flex sm:flex-col gap-2 sm:gap-0 items-center sm:items-start justify-end sm:justify-start">
+                  <Link
+                    href="/games"
+                    className="hidden mb-2 sm:inline-flex items-center gap-1 text-xs font-bold text-muted-foreground transition-colors hover:text-primary"
+                  >
+                    <ArrowLeft className="size-3.5" />
+                    Back
+                  </Link>
 
-                <div className="mb-1 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.15em] text-violet-600">
-                  <Gamepad2 className="size-3.5" />
-                  Useless Games
+                  <div className="mb-2 sm:mb-1 flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.15em] text-violet-600">
+                    <Gamepad2 className="size-3.5" />
+                    Useless Games
+                  </div>
                 </div>
 
                 <h1 className="text-xl font-black tracking-tight text-gray-700 sm:text-3xl">

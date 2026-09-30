@@ -702,25 +702,28 @@ function AchievementCardComponent({
           )} */}
           {showShareButton && (
             <CardFooter className="flex flex-col pt-0 gap-4 mb-1">
-              <div className="grid w-full grid-cols-2 gap-2 pb-1">
+              <div className="flex w-full justify-center gap-2 pb-1">
                 <Button
                   type="button"
                   onClick={shareAchievement}
                   className="
-            flex-1
-            bg-gradient-to-r
-            from-orange-500
-            to-rose-500
-            font-bold
-            text-white
-            shadow-md
-            shadow-orange-500/20
-            transition-all
-            duration-200
-            hover:-translate-y-0.5
-            hover:from-orange-400
-            hover:to-rose-400
-            hover:shadow-lg
+             w-full
+  max-w-[180px]
+  sm:max-w-none
+  sm:flex-1
+  bg-gradient-to-r
+  from-orange-500
+  to-rose-500
+  font-bold
+  text-white
+  shadow-md
+  shadow-orange-500/20
+  transition-all
+  duration-200
+  hover:-translate-y-0.5
+  hover:from-orange-400
+  hover:to-rose-400
+  hover:shadow-lg
     "
                   disabled={
                     isGeneratingImage ||
@@ -742,9 +745,11 @@ function AchievementCardComponent({
                   variant="outline"
                   onClick={downloadImage}
                   className="
-      w-full
+      sm:flex-1
       transition-all
       duration-200
+      hidden
+      sm:flex
       hover:-translate-y-0.5
     "
                   disabled={

@@ -13,7 +13,7 @@ export default function GameMetric({ label, value }: GameMetricProps) {
         border-amber-300/40
         bg-black/25
         px-1.5 sm:px-3
-        py-2
+        py-1 sm:py-2
         text-center
         shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_2px_8px_rgba(0,0,0,0.18)]
         backdrop-blur-sm
