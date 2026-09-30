@@ -7,12 +7,12 @@ export default function GameMetric({ label, value }: GameMetricProps) {
   return (
     <div
       className="
-        min-w-[82px]
+        min-w-0 sm:min-w-[82px]
         rounded-md
         border
         border-amber-300/40
         bg-black/25
-        px-3
+        px-1.5 sm:px-3
         py-2
         text-center
         shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_2px_8px_rgba(0,0,0,0.18)]
@@ -21,7 +21,7 @@ export default function GameMetric({ label, value }: GameMetricProps) {
     >
       <div
         className="
-          text-lg
+          text-base sm:text-lg
           font-black
           leading-none
           text-amber-100
@@ -37,7 +37,7 @@ export default function GameMetric({ label, value }: GameMetricProps) {
           text-[9px]
           font-black
           uppercase
-          tracking-[0.14em]
+          tracking-wide sm:tracking-[0.14em]
           text-amber-200/70
         "
       >

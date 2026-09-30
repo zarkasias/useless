@@ -3,37 +3,37 @@ import type { ReactNode } from "react";
 interface GameTableProps {
   children: ReactNode;
   className?: string;
+  compactMobile?: boolean;
 }
 
-export function GameTable({ children, className = "" }: GameTableProps) {
+export function GameTable({ children, className = "", compactMobile = false }: GameTableProps) {
   return (
     <div
       className={`
         relative
         overflow-hidden
         rounded-lg
-        border-[6px]
+        ${compactMobile ? "border-2 md:border-[6px]" : "border-[6px]"}
         border-amber-950
         bg-gradient-to-br
         from-emerald-700
         via-emerald-800
         to-green-950
-        p-5
+        ${compactMobile ? "p-2 md:p-7" : "p-5 sm:p-7"}
         shadow-[inset_0_0_35px_rgba(0,0,0,0.35),0_8px_24px_rgba(0,0,0,0.18)]
-        sm:p-7
         ${className}
       `}
     >
       {/* Felt texture */}
       <div
-        className="
+        className={`
           pointer-events-none
           absolute
           inset-0
           opacity-[0.07]
           [background-image:radial-gradient(circle_at_center,white_0.6px,transparent_0.7px)]
           [background-size:5px_5px]
-        "
+        `}
       />
 
       {/* Soft overhead table lighting */}
@@ -46,27 +46,29 @@ export function GameTable({ children, className = "" }: GameTableProps) {
 
       {/* Gold inset rail */}
       <div
-        className="
+        className={`
           pointer-events-none
           absolute
+          ${compactMobile ? "hidden md:block" : ""}
           inset-2
           rounded-md
           border-4
           border-amber-400/70
           shadow-[inset_0_0_0_1px_rgba(120,53,15,0.7),0_0_8px_rgba(251,191,36,0.18)]
-        "
+        `}
       />
 
       {/* Secondary fine gold line */}
       <div
-        className="
+        className={`
           pointer-events-none
           absolute
+          ${compactMobile ? "hidden md:block" : ""}
           inset-[11px]
           rounded-md
           border
           border-amber-200/30
-        "
+        `}
       />
 
       <div className="relative space-y-5 pb-5">{children}</div>

@@ -433,6 +433,7 @@ export function useKlondikeInteractions({
   };
 
   return {
+    registerSuccessfulMove,
     moveCount,
     elapsedSeconds,
     hasStarted,
