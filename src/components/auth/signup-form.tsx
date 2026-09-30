@@ -210,14 +210,15 @@ export function SignupForm() {
           </h2>
 
           <p className="text-sm leading-6 text-muted-foreground">
-            We sent a confirmation link to
+            If this email address is eligible for registration, you&apos;ll
+            receive a confirmation link at:
           </p>
 
           <p className="font-semibold text-gray-800">{confirmationEmail}</p>
 
           <p className="text-sm leading-6 text-muted-foreground">
-            Confirm your email address to finish creating your account and begin
-            collecting useless greatness.
+            Already registered? You can log in using your existing account or
+            reset your password.
           </p>
         </div>
 
