@@ -8,13 +8,13 @@ interface GameStatProps {
 
 export default function GameStat({ label, value, icon }: GameStatProps) {
   return (
-    <div className="min-w-[80px] border-r px-3 py-3 text-center last:border-r-0">
-      <div className="flex items-center justify-center gap-1 text-lg font-black text-gray-700">
+    <div className="min-w-0 sm:min-w-[80px] border-r px-1 py-2 sm:px-3 sm:py-3 text-center last:border-r-0">
+      <div className="flex items-center justify-center gap-1 text-sm sm:text-lg font-black text-gray-700">
         {icon}
-        {value}
+        <span className="min-w-0 break-all tabular-nums">{value}</span>
       </div>
 
-      <div className="mt-1 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
+      <div className="mt-1 text-[9px] sm:text-[10px] font-bold uppercase tracking-wide text-muted-foreground">
         {label}
       </div>
     </div>

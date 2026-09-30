@@ -35,7 +35,7 @@ export default function SolitaireClient({
         subscriptionStatus={initialEntitlements.subscriptionStatus}
       />
 
-      <main className="mx-auto w-full max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8">
+      <main className="mx-auto w-full max-w-[1440px] px-2 py-4 sm:px-6 sm:py-8 lg:px-8">
         <GameScreen
           title="Useless Solitaire"
           description="A completely unnecessary game of Solitaire powered by your questionable free time."

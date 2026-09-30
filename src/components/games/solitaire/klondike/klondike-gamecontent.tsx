@@ -22,6 +22,7 @@ import {
 import { isKlondikeStalemate } from "@/lib/games/solitaire/klondike/klondike-stalemate";
 
 import { KlondikeBoard } from "./klondike-board";
+import { KlondikeMobileBoard } from "./klondike-mobile-board";
 import { createInitialBoard } from "./klondike-helper";
 
 import type { KlondikeBoardState } from "@/lib/games/solitaire/klondike/klondike-types";
@@ -99,6 +100,7 @@ export function KlondikeGameContent({
     setUnlockedAchievements([]);
     setWasAutoFinished(false);
     setAutoFinishCardId(null);
+    setAutoFinishDismissed(false);
 
     resetInteractions();
     setBoard(createInitialBoard());
@@ -180,9 +182,9 @@ export function KlondikeGameContent({
   ]);
 
   return (
-    <GameTable className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap gap-2">
+    <GameTable compactMobile className="space-y-5">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <div className="grid grid-cols-4 gap-1.5 sm:flex sm:gap-2">
           <GameMetric label="Moves" value={moveCount} />
           <GameMetric label="Time" value={formattedTime} />
           <GameMetric label="Stock" value={board.stock.length} />
@@ -195,11 +197,25 @@ export function KlondikeGameContent({
       </div>
 
       <div className="relative rounded-xl">
-        <KlondikeBoard
-          board={board}
-          interactions={interactions}
-          autoFinishCardId={autoFinishCardId}
-        />
+        <div className="hidden md:block">
+          <KlondikeBoard
+            board={board}
+            interactions={interactions}
+            autoFinishCardId={autoFinishCardId}
+          />
+        </div>
+
+        <div className="md:hidden">
+          <KlondikeMobileBoard
+            board={board}
+            onStockTap={interactions.handleStockClick}
+            onMove={(nextBoard) => {
+              setBoard(nextBoard);
+              interactions.registerSuccessfulMove();
+            }}
+            autoFinishCardId={autoFinishCardId}
+          />
+        </div>
       </div>
 
       {showStalemate && (

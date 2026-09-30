@@ -26,6 +26,12 @@ export default function GamesClient({
     }
   };
 
+  const toSolitaire = () => {
+    if (initialEntitlements.isSubscribed) {
+      router.push("/games/solitaire");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-transparent">
       <Navbar
@@ -186,7 +192,9 @@ export default function GamesClient({
 
               {/* Solitaire */}
               <div
-                className="
+                onClick={toSolitaire}
+                className={`
+                  ${initialEntitlements.isSubscribed ? "cursor-pointer" : ""}
       group
       relative
       overflow-hidden
@@ -203,7 +211,7 @@ export default function GamesClient({
       hover:-translate-y-1
       hover:shadow-lg
       hover:shadow-orange-500/10
-    "
+    `}
               >
                 <div className="absolute -right-10 -top-10 size-36 rounded-full bg-orange-300/20 blur-3xl" />
 
@@ -237,8 +245,9 @@ export default function GamesClient({
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <div className="mb-2 inline-flex rounded-full bg-orange-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-orange-700">
-                      Coming soon
+                    <div className="mb-2 inline-flex rounded-full gap-1.5 bg-orange-100 px-2.5 py-1 text-[10px] font-black uppercase tracking-wide text-orange-700">
+                      <Sparkles className="size-3" />
+                      Ready to play
                     </div>
 
                     <h3 className="text-xl font-black tracking-tight text-gray-700">
@@ -254,13 +263,15 @@ export default function GamesClient({
 
                 <div className="relative flex items-center justify-between border-t border-orange-100 bg-white/60 px-5 py-3">
                   <span className="text-xs font-semibold text-muted-foreground">
-                    More pointless fun incoming
+                    Your next useless challenge is ready
                   </span>
 
-                  <div className="flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-muted-foreground">
-                    <LockKeyhole className="size-3.5" />
-                    Soon
-                  </div>
+                  {!initialEntitlements.isSubscribed && (
+                    <div className="flex items-center gap-1 rounded-full bg-orange-100 px-2.5 py-1 text-xs font-black text-orange-700">
+                      <LockKeyhole className="size-3.5" />
+                      Pro
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

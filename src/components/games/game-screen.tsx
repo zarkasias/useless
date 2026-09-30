@@ -40,14 +40,14 @@ export function GameScreen({
 
         <div className="p-4 sm:p-5">
           <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex min-w-0 items-center gap-4">
-              <div className="flex size-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-100 via-fuchsia-50 to-orange-50 shadow-inner">
+            <div className="flex min-w-0 items-center gap-3 sm:gap-4">
+              <div className="flex size-12 sm:size-20 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-100 via-fuchsia-50 to-orange-50 shadow-inner">
                 <Image
                   src={icon}
                   alt=""
                   width={72}
                   height={72}
-                  className="size-16 object-contain drop-shadow-md"
+                  className="size-10 sm:size-16 object-contain drop-shadow-md"
                 />
               </div>
 
@@ -65,11 +65,11 @@ export function GameScreen({
                   Useless Games
                 </div>
 
-                <h1 className="text-2xl font-black tracking-tight text-gray-700 sm:text-3xl">
+                <h1 className="text-xl font-black tracking-tight text-gray-700 sm:text-3xl">
                   {title}
                 </h1>
 
-                <p className="mt-1 max-w-xl text-sm text-muted-foreground">
+                <p className="mt-1 max-w-xl text-xs sm:text-sm text-muted-foreground">
                   {description}
                 </p>
               </div>

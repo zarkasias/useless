@@ -386,11 +386,11 @@ function AchievementCardComponent({
       // Make sure to dismiss the toast ID that was created earlier
       if (toastId) toast.dismiss(toastId);
 
-      if (!ingrid) {
-        toast.success("Achievement ready to share!", {
-          description: "Use the buttons below to share your achievement",
-        });
-      }
+      // if (!ingrid) {
+      //   toast.success("Achievement ready to share!", {
+      //     description: "Use the buttons below to share your achievement",
+      //   });
+      // }
     } catch (error) {
       console.error("Error generating image:", error);
 
