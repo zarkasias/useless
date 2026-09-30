@@ -38,7 +38,7 @@ export default function MemoryClient({
       <main className="mx-auto w-full max-w-[1440px] px-4 py-8 sm:px-6 lg:px-8">
         <GameScreen
           title="Achievement Memory"
-          description="Match pairs made from achievements you've already collected."
+          description="Put your memory to the test. Forget why you started."
           icon="/game_icons/memory.webp"
           gamesPlayed={initialStats?.games_played ?? 0}
           wins={initialStats?.wins ?? 0}

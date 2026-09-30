@@ -38,7 +38,7 @@ export default function SolitaireClient({
       <main className="mx-auto w-full max-w-[1440px] px-2 py-4 sm:px-6 sm:py-8 lg:px-8">
         <GameScreen
           title="Useless Solitaire"
-          description="A completely unnecessary game of Solitaire powered by your questionable free time."
+          description="All the satisfaction of winning Solitaire. None of the productivity."
           icon="/game_icons/solitaire.webp"
           gamesPlayed={initialStats?.games_played ?? 0}
           wins={initialStats?.wins ?? 0}
