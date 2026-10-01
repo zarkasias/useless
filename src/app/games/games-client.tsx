@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-import { Gamepad2, LockKeyhole, Sparkles } from "lucide-react";
+import { Gamepad2, Sparkles } from "lucide-react";
 import GameCabinetCard from "@/components/games/game-card";
 import { gameCardThemes } from "@/components/games/game-card-themes";
 
