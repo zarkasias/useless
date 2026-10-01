@@ -8,7 +8,8 @@ import type { KlondikeBoardState } from "../src/lib/games/solitaire/klondike/klo
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 it("executes automatic moves, asks for ambiguous destinations, and invalidates old selections", () => {
   let board: KlondikeBoardState = {
-    stock: [], waste: [{ id: "ah", rank: "A", suit: "hearts", faceUp: true }],
+    stock: [],
+    waste: [{ id: "ah", rank: "A", suit: "hearts", faceUp: true }],
     foundations: [{ suit: "hearts", cards: [] }],
     tableau: [[{ id: "ks", rank: "K", suit: "spades", faceUp: true }], [], []],
   };
@@ -26,6 +27,7 @@ it("executes automatic moves, asks for ambiguous destinations, and invalidates o
     expect(onMove.mock.calls[0][0].foundations[0].cards[0].id).toBe("ah");
     expect(onMove.mock.calls[0][0].waste).toEqual([]);
     onMove.mockClear();
+
     act(() => mobile.handleTableauCardTap(0, 0));
     expect(onMove).not.toHaveBeenCalled();
     expect(mobile.pendingDestinations).toHaveLength(2);

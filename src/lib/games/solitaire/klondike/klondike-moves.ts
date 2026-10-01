@@ -6,6 +6,8 @@ import {
   canPlaceOnTableau,
 } from "./klondike-rules";
 
+import { flipTopCardIfNeeded } from "../core/tableau-utils";
+
 export function moveTableauSequence(
   board: KlondikeBoardState,
   fromColumnIndex: number,
@@ -251,24 +253,4 @@ export function moveFoundationCardToTableau(
     foundations: nextFoundations,
     tableau: nextTableau,
   };
-}
-
-/* helper move functions */
-function flipTopCardIfNeeded(column: KlondikeBoardState["tableau"][number]) {
-  if (column.length === 0) {
-    return column;
-  }
-
-  const nextColumn = [...column];
-  const topCardIndex = nextColumn.length - 1;
-  const topCard = nextColumn[topCardIndex];
-
-  if (!topCard.faceUp) {
-    nextColumn[topCardIndex] = {
-      ...topCard,
-      faceUp: true,
-    };
-  }
-
-  return nextColumn;
 }
