@@ -9,6 +9,16 @@ export default function MobileCard({
   card: GameCard;
   active?: boolean;
 }) {
+  const isFaceCard = ["J", "Q", "K"].includes(card.rank);
+  const faceCardImage =
+    card.rank === "J"
+      ? "/game_icons/jack.webp"
+      : card.rank === "Q"
+        ? "/game_icons/queen.webp"
+        : card.rank === "K"
+          ? "/game_icons/king.webp"
+          : null;
+
   if (!card.faceUp) {
     return (
       <span className="block aspect-[5/7] w-full rounded-lg shadow-md">
@@ -30,8 +40,22 @@ export default function MobileCard({
         {card.rank}
         <span>{getSuitSymbol(card.suit)}</span>
       </span>
-      <span className="absolute inset-x-0 bottom-1 text-center text-xl leading-none">
-        {getSuitSymbol(card.suit)}
+      <span className="absolute inset-0 flex items-end mb-2 justify-center">
+        {isFaceCard && faceCardImage ? (
+          <span className="relative block h-[70%] w-[70%]">
+            <Image
+              src={faceCardImage}
+              alt=""
+              fill
+              sizes="48px"
+              className="object-contain"
+            />
+          </span>
+        ) : (
+          <span className="text-xl leading-none">
+            {getSuitSymbol(card.suit)}
+          </span>
+        )}
       </span>
     </span>
   );

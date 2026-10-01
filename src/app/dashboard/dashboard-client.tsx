@@ -209,13 +209,13 @@ export default function DashboardClient({
                       {streakData.claimedToday ? (
                         <>
                           <h2 className="text-2xl font-semibold tracking-tight text-gray-700">
-                            You&apos;re done for today
+                            Your daily nonsense is complete
                           </h2>
 
                           <p className="mt-2 max-w-lg text-muted-foreground">
                             Today&apos;s useless achievement is safely in your
-                            collection. Come back tomorrow to keep your streak
-                            going.
+                            collection. Keep the fun going with games, and more
+                            achievements to unlock.
                           </p>
 
                           <div className="mt-6 min-w-[260px] justify-center inline-flex w-fit items-center gap-2 rounded-lg bg-muted px-4 py-3 text-sm font-medium">
