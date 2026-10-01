@@ -35,9 +35,7 @@ export interface RecordedGameResult {
   unlockedAchievements: Achievement[];
 }
 
-export type GameType = "memory" | "solitaire";
-
-export type SolitaireVariant = "klondike" | "spider";
+export type GameType = "memory" | "solitaire" | "spider";
 
 export type GameResult = "win" | "loss" | "abandoned";
 

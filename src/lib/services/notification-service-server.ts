@@ -59,8 +59,6 @@ export async function getUnreadNotifications(
     return [];
   }
 
-  console.log("Unread notifications:", data);
-
   return (data ?? []) as UserNotification[];
 }
 
