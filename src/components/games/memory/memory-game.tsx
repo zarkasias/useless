@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 
 import Image from "next/image";
 
@@ -56,7 +56,7 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
 
   const isComplete = cards.length > 0 && matchedCount === cards.length;
 
-  const createDeck = () => {
+  const createDeck = useCallback(() => {
     const deck = achievements.flatMap((achievement) => [
       {
         cardId: `${achievement.id}-a`,
@@ -79,9 +79,9 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
     ]);
 
     return shuffleAchievements(deck);
-  };
+  }, [achievements]);
 
-  const resetGame = () => {
+  const resetGame = useCallback(() => {
     hasRecordedResult.current = false;
 
     setCards(createDeck());
@@ -92,7 +92,7 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
     setCompletedAt(null);
     setFinalScore(null);
     setUnlockedAchievements([]);
-  };
+  }, [createDeck]);
 
   useEffect(() => {
     let cancelled = false;
@@ -134,7 +134,7 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
     if (cards.length === 0) {
       resetGame();
     }
-  }, [achievements]);
+  }, [cards.length, resetGame]);
 
   useEffect(() => {
     if (!isComplete || completedAt || !startedAt || hasRecordedResult.current) {
