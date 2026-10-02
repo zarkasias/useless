@@ -277,16 +277,6 @@ export function Navbar({
 
                     <DropdownMenuItem asChild>
                       <Link
-                        href="/friends"
-                        className="flex cursor-pointer items-center gap-2"
-                      >
-                        <Users className="size-4" />
-                        Friends
-                      </Link>
-                    </DropdownMenuItem>
-
-                    <DropdownMenuItem asChild>
-                      <Link
                         href="/settings"
                         className="flex cursor-pointer items-center gap-2"
                       >
