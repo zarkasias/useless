@@ -1,5 +1,5 @@
 "use client";
-import { useRef, useEffect, useState, Dispatch, SetStateAction } from "react";
+import { useRef, useEffect, useState, useMemo, Dispatch, SetStateAction } from "react";
 import { RotateCcw } from "lucide-react";
 import GameButton from "../../system/game-button";
 import GameMetric from "../../game-metric";
@@ -52,8 +52,10 @@ export function KlondikeGameContent({
   const isComplete = isKlondikeComplete(board);
 
   const canAutoFinish = !isComplete && canAutoFinishKlondike(board);
-  const isStalemate =
-    !isComplete && !canAutoFinish && isKlondikeStalemate(board);
+  const isStalemate = useMemo(
+    () => !isComplete && !canAutoFinish && isKlondikeStalemate(board),
+    [board, isComplete, canAutoFinish],
+  );
 
   const showAutoFinishOffer =
     canAutoFinish && !isComplete && !isAutoFinishing && !autoFinishDismissed;
@@ -224,7 +226,7 @@ export function KlondikeGameContent({
             <GameResult
               eyebrow="Game over"
               title="No moves left"
-              description="There are no remaining moves that can advance this game."
+              description="No further progress is possible without moving cards back from foundations."
               actionLabel="New game"
               onAction={resetGame}
               stats={
@@ -263,7 +265,7 @@ export function KlondikeGameContent({
             <GameResult
               eyebrow="Finishing up"
               title="Putting everything away..."
-              description="The remaining cards are moving to their foundations."
+              description="We're taking care of cleaning up the mess."
             />
           </div>
         </GameResultOverlay>

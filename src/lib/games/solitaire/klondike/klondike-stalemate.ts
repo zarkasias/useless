@@ -1,178 +1,125 @@
 import type { KlondikeBoardState } from "./klondike-types";
+import { canMoveTableauSequence, canPlaceOnFoundation } from "./klondike-rules";
+import { isKlondikeComplete } from "./klondike-state";
 
-import {
-  canMoveTableauSequence,
-  canPlaceOnEmptyTableau,
-  canPlaceOnFoundation,
-  canPlaceOnTableau,
-  isValidTableauSequence,
-} from "./klondike-rules";
+export type KlondikeProgressStatus = "available" | "stalemate" | "unknown";
+
+// Column positions have no effect on legal plays. Sorting makes moving a
+// whole King stack between empty slots the same position, and breaks cycles.
+function positionKey(board: KlondikeBoardState): string {
+  return JSON.stringify(
+    board.tableau
+      .map((column) =>
+        column.map((card) => [card.suit, card.rank, card.faceUp]),
+      )
+      .map((column) => JSON.stringify(column))
+      .sort(),
+  );
+}
+
+/**
+ * Proves whether progress is reachable without foundation-to-tableau moves.
+ * Progress means a foundation advance, revealing a hidden card, or playing
+ * a stock/waste card. A playable card is conservative evidence to keep playing;
+ * it does not imply that the game is winnable.
+ *
+ * Only tableau rearrangements need searching: foundations and stock/waste
+ * stay fixed until progress. With draw-one and unlimited recycling, every
+ * stock/waste card can become the top waste card without other moves.
+ * Exhausting the budget is inconclusive and must never trigger a loss.
+ */
+export function getKlondikeProgressStatus(
+  board: KlondikeBoardState,
+  maxPositions = 2000,
+): KlondikeProgressStatus {
+  if (isKlondikeComplete(board)) return "available";
+
+  const playableDrawCards = [...board.stock, ...board.waste].map((card) => ({
+    ...card,
+    faceUp: true,
+  }));
+  const pending = [board];
+  const visited = new Set([positionKey(board)]);
+  let examined = 0;
+
+  while (pending.length > 0) {
+    if (examined >= maxPositions) return "unknown";
+    const current = pending.pop()!;
+    examined++;
+
+    for (const card of playableDrawCards) {
+      if (
+        current.foundations.some((foundation) =>
+          canPlaceOnFoundation(card, foundation),
+        ) ||
+        current.tableau.some((column) => canMoveTableauSequence([card], column))
+      ) {
+        return "available";
+      }
+    }
+
+    for (
+      let sourceIndex = 0;
+      sourceIndex < current.tableau.length;
+      sourceIndex++
+    ) {
+      const source = current.tableau[sourceIndex];
+      const top = source[source.length - 1];
+
+      if (
+        top &&
+        current.foundations.some((foundation) =>
+          canPlaceOnFoundation(top, foundation),
+        )
+      ) {
+        return "available";
+      }
+
+      for (let cardIndex = 0; cardIndex < source.length; cardIndex++) {
+        const moving = source.slice(cardIndex);
+        for (
+          let targetIndex = 0;
+          targetIndex < current.tableau.length;
+          targetIndex++
+        ) {
+          if (
+            sourceIndex === targetIndex ||
+            !canMoveTableauSequence(moving, current.tableau[targetIndex])
+          )
+            continue;
+
+          // The actual move automatically flips the newly exposed card.
+          if (cardIndex > 0 && !source[cardIndex - 1].faceUp)
+            return "available";
+
+          const next = {
+            ...current,
+            tableau: current.tableau.map((column, index) =>
+              index === sourceIndex
+                ? source.slice(0, cardIndex)
+                : index === targetIndex
+                  ? [...column, ...moving]
+                  : column,
+            ),
+          };
+          const key = positionKey(next);
+          if (visited.has(key)) continue;
+          // Bound both memory and work. Unknown keeps the game playable.
+          if (visited.size >= maxPositions) return "unknown";
+          visited.add(key);
+          pending.push(next);
+        }
+      }
+    }
+  }
+
+  return "stalemate";
+}
 
 export function hasAvailableKlondikeMove(board: KlondikeBoardState): boolean {
-  const stockAndWasteCards = [...board.stock, ...board.waste];
-
-  for (const card of stockAndWasteCards) {
-    // Stock cards become face-up when drawn
-    const playableCard = {
-      ...card,
-      faceUp: true,
-    };
-
-    // Can this card eventually move to a foundation?
-    for (const foundation of board.foundations) {
-      if (canPlaceOnFoundation(playableCard, foundation)) {
-        return true;
-      }
-    }
-
-    // Can this card eventually move to the tableau?
-    for (const targetColumn of board.tableau) {
-      if (targetColumn.length === 0) {
-        if (canPlaceOnEmptyTableau(playableCard)) {
-          return true;
-        }
-
-        continue;
-      }
-
-      const targetCard = targetColumn[targetColumn.length - 1];
-
-      if (canPlaceOnTableau(playableCard, targetCard)) {
-        return true;
-      }
-    }
-  }
-
-  const topWasteCard = board.waste[board.waste.length - 1];
-
-  // Waste → foundation / tableau
-  if (topWasteCard) {
-    for (const foundation of board.foundations) {
-      if (canPlaceOnFoundation(topWasteCard, foundation)) {
-        return true;
-      }
-    }
-
-    for (const targetColumn of board.tableau) {
-      if (targetColumn.length === 0) {
-        if (canPlaceOnEmptyTableau(topWasteCard)) {
-          return true;
-        }
-
-        continue;
-      }
-
-      const targetCard = targetColumn[targetColumn.length - 1];
-
-      if (canPlaceOnTableau(topWasteCard, targetCard)) {
-        return true;
-      }
-    }
-  }
-
-  // Tableau moves
-  for (
-    let sourceColumnIndex = 0;
-    sourceColumnIndex < board.tableau.length;
-    sourceColumnIndex++
-  ) {
-    const sourceColumn = board.tableau[sourceColumnIndex];
-
-    if (sourceColumn.length === 0) {
-      continue;
-    }
-
-    const topCard = sourceColumn[sourceColumn.length - 1];
-
-    // Tableau → foundation
-    for (const foundation of board.foundations) {
-      if (canPlaceOnFoundation(topCard, foundation)) {
-        return true;
-      }
-    }
-
-    // Tableau → tableau
-    for (let cardIndex = 0; cardIndex < sourceColumn.length; cardIndex++) {
-      const movingCards = sourceColumn.slice(cardIndex);
-
-      if (!isValidTableauSequence(movingCards)) {
-        continue;
-      }
-
-      for (
-        let targetColumnIndex = 0;
-        targetColumnIndex < board.tableau.length;
-        targetColumnIndex++
-      ) {
-        if (targetColumnIndex === sourceColumnIndex) {
-          continue;
-        }
-
-        const targetColumn = board.tableau[targetColumnIndex];
-
-        if (!canMoveTableauSequence(movingCards, targetColumn)) {
-          continue;
-        }
-
-        const cardUnderMovingSequence =
-          cardIndex > 0 ? sourceColumn[cardIndex - 1] : null;
-
-        // 1. Moving the sequence reveals a face-down card.
-        if (cardUnderMovingSequence && !cardUnderMovingSequence.faceUp) {
-          return true;
-        }
-
-        // 2. Moving the sequence exposes a card that can
-        // immediately advance to a foundation.
-        if (cardUnderMovingSequence?.faceUp) {
-          const canExposedCardReachFoundation = board.foundations.some(
-            (foundation) =>
-              canPlaceOnFoundation(cardUnderMovingSequence, foundation),
-          );
-
-          if (canExposedCardReachFoundation) {
-            return true;
-          }
-        }
-
-        // 3. Moving the entire column creates an empty tableau slot.
-        //
-        // Don't count simply moving a King-led column from one
-        // empty-space configuration to another.
-        if (cardIndex === 0 && sourceColumn.length > 0) {
-          const movingCard = movingCards[0];
-
-          if (movingCard.rank !== "K") {
-            return true;
-          }
-        }
-      }
-    }
-  }
-
-  // Count every legal foundation move, even if it can be reversed.
-  // Moving a card back to the tableau may unlock another sequence.
-  for (const foundation of board.foundations) {
-    const topCard = foundation.cards[foundation.cards.length - 1];
-
-    if (!topCard) {
-      continue;
-    }
-
-    for (const targetColumn of board.tableau) {
-      const canMove = targetColumn.length === 0
-        ? canPlaceOnEmptyTableau(topCard)
-        : canPlaceOnTableau(topCard, targetColumn[targetColumn.length - 1]);
-
-      if (canMove) {
-        return true;
-      }
-    }
-  }
-
-  return false;
+  return getKlondikeProgressStatus(board) !== "stalemate";
 }
 
 export function isKlondikeStalemate(board: KlondikeBoardState): boolean {
-  return !hasAvailableKlondikeMove(board);
+  return getKlondikeProgressStatus(board) === "stalemate";
 }
