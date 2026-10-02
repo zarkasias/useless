@@ -4,11 +4,21 @@ import { getSuitSymbol } from "../shared/card-display-utils";
 import { useMobileCardMotion } from "./use-mobile-card-motion";
 import MobileCard from "../shared/mobile-card";
 
+import type { KlondikeHint } from "@/lib/games/solitaire/klondike/klondike-hint";
+
+import {
+  isHintFoundationTarget,
+  isHintStock,
+  isHintTableauTarget,
+  isHintWasteSource,
+} from "@/lib/games/solitaire/klondike/klondike-hint-display";
+
 interface KlondikeMobileBoardProps {
   board: KlondikeBoardState;
   onMove: (board: KlondikeBoardState) => void;
   onStockTap: () => void;
   autoFinishCardId?: string | null;
+  hint: KlondikeHint | null;
 }
 
 export function KlondikeMobileBoard({
@@ -16,6 +26,7 @@ export function KlondikeMobileBoard({
   onMove,
   onStockTap,
   autoFinishCardId,
+  hint,
 }: KlondikeMobileBoardProps) {
   const boardRef = useMobileCardMotion(board);
   const mobile = useKlondikeMobileInteractions({ board, onMove });
@@ -26,7 +37,8 @@ export function KlondikeMobileBoard({
   const target = (columnIndex: number) =>
     mobile.pendingDestinations.some(
       (d) => d.type === "tableau" && d.columnIndex === columnIndex,
-    );
+    ) || isHintTableauTarget(hint, columnIndex);
+
   const waste = board.waste[board.waste.length - 1];
 
   return (
@@ -43,7 +55,19 @@ export function KlondikeMobileBoard({
                 type="button"
                 data-mobile-card-id={card?.id}
                 aria-label={`${foundation.suit} foundation${card ? `, ${card.rank}` : ", empty"}`}
-                className={`${button} ${mobile.pendingSource?.type === "foundation" && mobile.pendingSource.foundationIndex === index ? "ring-2 ring-amber-300" : ""}`}
+                className={`${button} 
+                ${
+                  mobile.pendingSource?.type === "foundation" &&
+                  mobile.pendingSource.foundationIndex === index
+                    ? "ring-2 ring-amber-300"
+                    : ""
+                }
+                 ${
+                   isHintFoundationTarget(hint, index)
+                     ? "ring-2 ring-emerald-300 ring-offset-2 ring-offset-emerald-900"
+                     : ""
+                 }
+                `}
                 onClick={() => mobile.handleFoundationTap(index)}
               >
                 {card ? (
@@ -73,7 +97,18 @@ export function KlondikeMobileBoard({
                 ? `Move ${waste.rank} of ${waste.suit} from waste`
                 : "Empty waste"
             }
-            className={`${button} ${mobile.pendingSource?.type === "waste" ? "ring-2 ring-amber-300" : ""}`}
+            className={`${button} 
+            ${
+              mobile.pendingSource?.type === "waste"
+                ? "ring-2 ring-amber-300"
+                : ""
+            }
+               ${
+                 isHintWasteSource(hint)
+                   ? "ring-2 ring-amber-300 ring-offset-2 ring-offset-emerald-900"
+                   : ""
+               }
+              `}
             onClick={mobile.handleWasteTap}
           >
             {waste ? <MobileCard card={waste} /> : <span className={slot} />}
@@ -88,7 +123,13 @@ export function KlondikeMobileBoard({
             type="button"
             data-mobile-card-id={board.stock[board.stock.length - 1]?.id}
             aria-label={board.stock.length ? "Draw a card" : "Recycle waste"}
-            className={button}
+            className={`${button}
+              ${
+                isHintStock(hint)
+                  ? "ring-2 ring-amber-300 ring-offset-2 ring-offset-emerald-900"
+                  : ""
+              }
+            `}
             onClick={() => {
               mobile.clearPendingMove();
               onStockTap();
@@ -105,62 +146,92 @@ export function KlondikeMobileBoard({
         </div>
       </div>
       <div className="mt-4 grid grid-cols-7 items-start gap-1 pb-2">
-        {board.tableau.map((column, columnIndex) => (
-          <div
-            key={columnIndex}
-            className={`min-w-0 rounded-md ${target(columnIndex) ? "ring-2 ring-emerald-300 ring-offset-2 ring-offset-emerald-900" : ""}`}
-          >
-            {column.length === 0 ? (
-              <button
-                type="button"
-                className={`${button} ${slot}`}
-                aria-label={`Empty column ${columnIndex + 1}`}
-                onClick={() =>
-                  mobile.handleDestinationTap({ type: "tableau", columnIndex })
-                }
-              >
-                {target(columnIndex) ? "↓" : ""}
-              </button>
-            ) : (
-              column.map((card, cardIndex) => {
-                const selected =
-                  mobile.pendingSource?.type === "tableau" &&
-                  mobile.pendingSource.columnIndex === columnIndex &&
-                  cardIndex >= mobile.pendingSource.cardIndex;
-                return (
-                  <div
-                    key={card.id}
-                    style={{
-                      height:
-                        cardIndex === column.length - 1
-                          ? "auto"
-                          : card.faceUp
-                            ? 28
-                            : 18,
-                    }}
-                  >
-                    <button
-                      type="button"
-                      data-mobile-card-id={card.id}
-                      disabled={!card.faceUp}
-                      aria-label={`${card.faceUp ? `${card.rank} of ${card.suit}` : "Face-down card"}, column ${columnIndex + 1}`}
-                      aria-pressed={selected}
-                      className={`${button} ${selected ? "ring-2 ring-amber-300" : ""}`}
-                      onClick={() =>
-                        mobile.handleTableauCardTap(columnIndex, cardIndex)
-                      }
+        {board.tableau.map((column, columnIndex) => {
+          const hintedTarget = target(columnIndex);
+
+          return (
+            <div
+              key={columnIndex}
+              className={`
+          min-w-0
+          rounded-md
+          ${
+            hintedTarget
+              ? "ring-2 ring-emerald-300 ring-offset-2 ring-offset-emerald-900"
+              : ""
+          }
+        `}
+            >
+              {column.length === 0 ? (
+                <button
+                  type="button"
+                  className={`${button} ${slot}`}
+                  aria-label={`Empty column ${columnIndex + 1}`}
+                  onClick={() =>
+                    mobile.handleDestinationTap({
+                      type: "tableau",
+                      columnIndex,
+                    })
+                  }
+                >
+                  {hintedTarget ? "↓" : ""}
+                </button>
+              ) : (
+                column.map((card, cardIndex) => {
+                  const selected =
+                    mobile.pendingSource?.type === "tableau" &&
+                    mobile.pendingSource.columnIndex === columnIndex &&
+                    cardIndex >= mobile.pendingSource.cardIndex;
+
+                  const hinted =
+                    (hint?.type === "tableau-to-tableau" ||
+                      hint?.type === "tableau-to-foundation") &&
+                    hint.sourceColumnIndex === columnIndex &&
+                    cardIndex >= hint.cardIndex;
+
+                  return (
+                    <div
+                      key={card.id}
+                      style={{
+                        height:
+                          cardIndex === column.length - 1
+                            ? "auto"
+                            : card.faceUp
+                              ? 28
+                              : 18,
+                      }}
                     >
-                      <MobileCard
-                        card={card}
-                        active={card.id === autoFinishCardId}
-                      />
-                    </button>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        ))}
+                      <button
+                        type="button"
+                        data-mobile-card-id={card.id}
+                        disabled={!card.faceUp}
+                        aria-label={`${
+                          card.faceUp
+                            ? `${card.rank} of ${card.suit}`
+                            : "Face-down card"
+                        }, column ${columnIndex + 1}`}
+                        aria-pressed={selected}
+                        className={`
+                    ${button}
+                    ${selected ? "ring-2 ring-amber-300" : ""}
+                    ${hinted ? "ring-2 ring-amber-300" : ""}
+                  `}
+                        onClick={() =>
+                          mobile.handleTableauCardTap(columnIndex, cardIndex)
+                        }
+                      >
+                        <MobileCard
+                          card={card}
+                          active={card.id === autoFinishCardId}
+                        />
+                      </button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

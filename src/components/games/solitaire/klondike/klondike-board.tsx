@@ -2,6 +2,15 @@
 import { useKlondikeInteractions } from "./use-klondike-interactions";
 
 import type { KlondikeBoardState } from "@/lib/games/solitaire/klondike/klondike-types";
+import type { KlondikeHint } from "@/lib/games/solitaire/klondike/klondike-hint";
+
+import {
+  isHintFoundationTarget,
+  isHintStock,
+  isHintTableauTarget,
+  isHintWasteSource,
+} from "@/lib/games/solitaire/klondike/klondike-hint-display";
+
 import { CardPile } from "../shared/card-pile";
 import { CardColumn } from "../shared/card-column";
 
@@ -11,12 +20,14 @@ interface KlondikeBoardProps {
   board: KlondikeBoardState;
   interactions: KlondikeInteractions;
   autoFinishCardId: string | null;
+  hint: KlondikeHint | null;
 }
 
 export function KlondikeBoard({
   board,
   interactions,
   autoFinishCardId,
+  hint,
 }: KlondikeBoardProps) {
   const {
     selectedCardId,
@@ -54,46 +65,68 @@ export function KlondikeBoard({
         {/* Stock / Waste / Foundations */}
         <div className="flex items-start justify-between gap-6">
           <div className="ml-2 flex gap-2 sm:gap-5">
-            {board.foundations.map((foundation, foundationIndex) => (
-              <CardPile
-                key={foundation.suit}
-                label={foundation.suit}
-                autoFinishCardId={autoFinishCardId}
-                card={foundation.cards[foundation.cards.length - 1] ?? null}
-                selected={selectedFoundationIndex === foundationIndex}
-                validTarget={isValidFoundationTarget(foundationIndex)}
-                onDragEnd={handleDragEnd}
-                onDragStart={(event) =>
-                  handleFoundationDragStart(foundationIndex, event)
-                }
-                onDragOver={handleFoundationDragOver}
-                onDrop={(event) => handleFoundationDrop(foundationIndex, event)}
-                onClick={() => {
-                  if (selectedCardId || selectedTableauCard) {
-                    handleFoundationClick(foundationIndex);
-                    return;
+            {board.foundations.map((foundation, foundationIndex) => {
+              const hinted = isHintFoundationTarget(hint, foundationIndex);
+
+              return (
+                <div
+                  key={foundation.suit}
+                  className={
+                    hinted
+                      ? `
+                        rounded-lg
+                        ring-2
+                        ring-emerald-300
+                        ring-offset-2
+                        ring-offset-emerald-900
+                      `
+                      : ""
                   }
+                >
+                  <CardPile
+                    key={foundation.suit}
+                    label={foundation.suit}
+                    autoFinishCardId={autoFinishCardId}
+                    card={foundation.cards[foundation.cards.length - 1] ?? null}
+                    selected={selectedFoundationIndex === foundationIndex}
+                    validTarget={isValidFoundationTarget(foundationIndex)}
+                    onDragEnd={handleDragEnd}
+                    onDragStart={(event) =>
+                      handleFoundationDragStart(foundationIndex, event)
+                    }
+                    onDragOver={handleFoundationDragOver}
+                    onDrop={(event) =>
+                      handleFoundationDrop(foundationIndex, event)
+                    }
+                    onClick={() => {
+                      if (selectedCardId || selectedTableauCard) {
+                        handleFoundationClick(foundationIndex);
+                        return;
+                      }
 
-                  if (foundation.cards.length === 0) {
-                    handleFoundationClick(foundationIndex);
-                    return;
-                  }
+                      if (foundation.cards.length === 0) {
+                        handleFoundationClick(foundationIndex);
+                        return;
+                      }
 
-                  setSelectedFoundationIndex(
-                    selectedFoundationIndex === foundationIndex
-                      ? null
-                      : foundationIndex,
-                  );
+                      setSelectedFoundationIndex(
+                        selectedFoundationIndex === foundationIndex
+                          ? null
+                          : foundationIndex,
+                      );
 
-                  setSelectedCardId(null);
-                  setSelectedTableauCard(null);
-                }}
-              />
-            ))}
+                      setSelectedCardId(null);
+                      setSelectedTableauCard(null);
+                    }}
+                  />
+                </div>
+              );
+            })}
           </div>
           <div className="flex gap-2 sm:gap-3 sm:mr-14">
             <CardPile
               label="Waste"
+              isHint={isHintWasteSource(hint)}
               autoFinishCardId={autoFinishCardId}
               card={board.waste[board.waste.length - 1] ?? null}
               selected={
@@ -117,8 +150,11 @@ export function KlondikeBoard({
                 setSelectedFoundationIndex(null);
               }}
             />
+
+            {/* Stock */}
             <CardPile
               label="Stock"
+              isHint={isHintStock(hint)}
               card={board.stock[board.stock.length - 1] ?? null}
               faceDown
               onClick={handleStockClick}
@@ -128,30 +164,43 @@ export function KlondikeBoard({
 
         {/* Tableau */}
         <div className="ml-2 grid grid-cols-7 gap-1 sm:gap-2">
-          {board.tableau.map((column, columnIndex) => (
-            <CardColumn
-              key={columnIndex}
-              cards={column}
-              autoFinishCardId={autoFinishCardId}
-              flippedCardId={flippedCardId}
-              selectedCardIndex={
-                selectedTableauCard?.columnIndex === columnIndex
-                  ? selectedTableauCard.cardIndex
-                  : null
-              }
-              validTarget={isValidTableauTarget(columnIndex)}
-              onColumnClick={() => handleTableauClick(columnIndex)}
-              onCardClick={(cardIndex) =>
-                handleTableauCardClick(columnIndex, cardIndex)
-              }
-              onDragEnd={handleDragEnd}
-              onCardDragStart={(cardIndex, event) =>
-                handleTableauDragStart(columnIndex, cardIndex, event)
-              }
-              onDragOver={handleTableauDragOver}
-              onDrop={(event) => handleTableauDrop(columnIndex, event)}
-            />
-          ))}
+          {board.tableau.map((column, columnIndex) => {
+            const hintCardIndex =
+              (hint?.type === "tableau-to-tableau" ||
+                hint?.type === "tableau-to-foundation") &&
+              hint.sourceColumnIndex === columnIndex
+                ? hint.cardIndex
+                : null;
+
+            const hintedTarget = isHintTableauTarget(hint, columnIndex);
+
+            return (
+              <CardColumn
+                key={columnIndex}
+                cards={column}
+                autoFinishCardId={autoFinishCardId}
+                flippedCardId={flippedCardId}
+                hintCardIndex={hintCardIndex}
+                hintTarget={hintedTarget}
+                selectedCardIndex={
+                  selectedTableauCard?.columnIndex === columnIndex
+                    ? selectedTableauCard.cardIndex
+                    : null
+                }
+                validTarget={isValidTableauTarget(columnIndex)}
+                onColumnClick={() => handleTableauClick(columnIndex)}
+                onCardClick={(cardIndex) =>
+                  handleTableauCardClick(columnIndex, cardIndex)
+                }
+                onDragEnd={handleDragEnd}
+                onCardDragStart={(cardIndex, event) =>
+                  handleTableauDragStart(columnIndex, cardIndex, event)
+                }
+                onDragOver={handleTableauDragOver}
+                onDrop={(event) => handleTableauDrop(columnIndex, event)}
+              />
+            );
+          })}
         </div>
       </div>
     </div>

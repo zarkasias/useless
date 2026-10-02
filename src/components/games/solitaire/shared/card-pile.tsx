@@ -12,6 +12,7 @@ interface CardPileProps {
   faceDown?: boolean;
   selected?: boolean;
   validTarget?: boolean;
+  isHint?: boolean;
   animateFlip?: boolean;
   onClick?: () => void;
   onDragStart?: (event: React.DragEvent<HTMLButtonElement>) => void;
@@ -29,6 +30,7 @@ export function CardPile({
   selected = false,
   validTarget = false,
   animateFlip = false,
+  isHint = false,
   onClick,
   onDragStart,
   onDragEnd,
@@ -66,6 +68,16 @@ export function CardPile({
       : validTarget
         ? "ring-2 ring-emerald-300/80 ring-offset-2 ring-offset-emerald-950"
         : ""
+  }
+  ${
+    isHint
+      ? `
+                    ring-2
+                    ring-amber-300
+                    ring-offset-2
+                    ring-offset-emerald-900
+                  `
+      : ""
   }
 `}
       >

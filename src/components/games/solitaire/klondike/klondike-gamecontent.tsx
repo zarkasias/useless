@@ -1,6 +1,13 @@
 "use client";
-import { useRef, useEffect, useState, useMemo, Dispatch, SetStateAction } from "react";
-import { RotateCcw } from "lucide-react";
+import {
+  useRef,
+  useEffect,
+  useState,
+  useMemo,
+  Dispatch,
+  SetStateAction,
+} from "react";
+import { RotateCcw, Lightbulb } from "lucide-react";
 import GameButton from "../../system/game-button";
 import GameMetric from "../../game-metric";
 import GameResult from "../../system/game-result";
@@ -19,11 +26,15 @@ import {
   canAutoFinishKlondike,
   getNextAutoFinishMove,
 } from "@/lib/games/solitaire/klondike/klondike-autofinish";
-import { isKlondikeStalemate } from "@/lib/games/solitaire/klondike/klondike-stalemate";
 
 import { KlondikeBoard } from "./klondike-board";
 import { KlondikeMobileBoard } from "./klondike-mobile-board";
 import { createInitialBoard } from "./klondike-helper";
+
+import {
+  getKlondikeHints,
+  type KlondikeHint,
+} from "@/lib/games/solitaire/klondike/klondike-hint";
 
 import type { KlondikeBoardState } from "@/lib/games/solitaire/klondike/klondike-types";
 
@@ -52,15 +63,14 @@ export function KlondikeGameContent({
   const isComplete = isKlondikeComplete(board);
 
   const canAutoFinish = !isComplete && canAutoFinishKlondike(board);
-  const isStalemate = useMemo(
-    () => !isComplete && !canAutoFinish && isKlondikeStalemate(board),
-    [board, isComplete, canAutoFinish],
-  );
+
+  const [hintIndex, setHintIndex] = useState(0);
+
+  const [hint, setHint] = useState<KlondikeHint | null>(null);
 
   const showAutoFinishOffer =
     canAutoFinish && !isComplete && !isAutoFinishing && !autoFinishDismissed;
 
-  const showStalemate = isStalemate && !isComplete && !isAutoFinishing;
   const interactions = useKlondikeInteractions({
     board,
     setBoard,
@@ -76,13 +86,15 @@ export function KlondikeGameContent({
 
   const formattedTime = `${minutes}:${seconds.toString().padStart(2, "0")}`;
 
+  const showNoHintMessage = hint?.type === "none";
+
+  useEffect(() => {
+    setHint(null);
+    setHintIndex(0);
+  }, [board]);
+
   const resetGame = async () => {
-    if (
-      hasStarted &&
-      !isComplete &&
-      !isStalemate &&
-      !hasRecordedResult.current
-    ) {
+    if (hasStarted && !isComplete && !hasRecordedResult.current) {
       hasRecordedResult.current = true;
 
       await recordKlondikeGameResultAction({
@@ -143,7 +155,7 @@ export function KlondikeGameContent({
   };
 
   useEffect(() => {
-    const result = isComplete ? "win" : isStalemate ? "loss" : null;
+    const result = isComplete ? "win" : null;
 
     if (!result || hasRecordedResult.current) {
       return;
@@ -174,14 +186,22 @@ export function KlondikeGameContent({
         onGameRecorded?.();
       }
     })();
-  }, [
-    isComplete,
-    isStalemate,
-    moveCount,
-    elapsedSeconds,
-    wasAutoFinished,
-    onGameRecorded,
-  ]);
+  }, [isComplete, moveCount, elapsedSeconds, wasAutoFinished, onGameRecorded]);
+
+  const handleHint = () => {
+    const hints = getKlondikeHints(board);
+
+    if (hints.length === 0) {
+      setHint({ type: "none" });
+      setHintIndex(0);
+      return;
+    }
+
+    const nextIndex = hintIndex % hints.length;
+
+    setHint(hints[nextIndex]);
+    setHintIndex((current) => current + 1);
+  };
 
   return (
     <GameTable compactMobile className="space-y-5">
@@ -193,10 +213,38 @@ export function KlondikeGameContent({
           <GameMetric label="Waste" value={board.waste.length} />
         </div>
 
-        <GameButton onClick={resetGame} icon={<RotateCcw className="size-4" />}>
-          New Game
-        </GameButton>
+        <div className="flex gap-2">
+          <GameButton
+            onClick={handleHint}
+            icon={<Lightbulb className="size-4" />}
+          >
+            Hint
+          </GameButton>
+
+          <GameButton
+            onClick={resetGame}
+            icon={<RotateCcw className="size-4" />}
+          >
+            New Game
+          </GameButton>
+        </div>
       </div>
+
+      {showNoHintMessage && (
+        <GameResultOverlay>
+          <div className="w-full max-w-xl animate-in zoom-in-95 duration-300">
+            <GameResult
+              eyebrow="No obvious moves"
+              title="No forward moves found"
+              description="Try moving a card back from a foundation, or start a new game."
+              actionLabel="Keep playing"
+              onAction={() => setHint(null)}
+              secondaryActionLabel="New game"
+              onSecondaryAction={resetGame}
+            />
+          </div>
+        </GameResultOverlay>
+      )}
 
       <div className="relative rounded-xl">
         <div className="hidden md:block">
@@ -204,6 +252,7 @@ export function KlondikeGameContent({
             board={board}
             interactions={interactions}
             autoFinishCardId={autoFinishCardId}
+            hint={hint}
           />
         </div>
 
@@ -216,32 +265,10 @@ export function KlondikeGameContent({
               interactions.registerSuccessfulMove();
             }}
             autoFinishCardId={autoFinishCardId}
+            hint={hint}
           />
         </div>
       </div>
-
-      {showStalemate && (
-        <GameResultOverlay>
-          <div className="w-full max-w-xl animate-in zoom-in-95 duration-300">
-            <GameResult
-              eyebrow="Game over"
-              title="No moves left"
-              description="No further progress is possible without moving cards back from foundations."
-              actionLabel="New game"
-              onAction={resetGame}
-              stats={
-                <>
-                  <GameMetric label="Score" value={finalScore ?? "—"} />
-
-                  <GameMetric label="Moves" value={moveCount} />
-
-                  <GameMetric label="Time" value={formattedTime} />
-                </>
-              }
-            />
-          </div>
-        </GameResultOverlay>
-      )}
 
       {showAutoFinishOffer && (
         <GameResultOverlay>
