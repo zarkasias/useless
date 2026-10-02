@@ -17,6 +17,8 @@ interface CardColumnProps {
   minHeight?: number;
   validTarget?: boolean;
   flippedCardId?: string | null;
+  hintCardIndex?: number | null;
+  hintTarget?: boolean;
   onCardDragStart?: (
     cardIndex: number,
     event: React.DragEvent<HTMLButtonElement>,
@@ -41,7 +43,9 @@ export function CardColumn({
   autoFinishCardId,
   minHeight = 340,
   validTarget = false,
+  hintTarget = false,
   flippedCardId = null,
+  hintCardIndex = null,
 }: CardColumnProps) {
   return (
     <div
@@ -60,11 +64,35 @@ export function CardColumn({
         />
       )}
       {cards.length === 0 && (
-        <div className="h-[72px] w-[50px] sm:h-22 sm:w-16 rounded-lg border border-dashed border-white/30 bg-white/5" />
+        <div
+          className={`
+      h-[72px]
+      w-[50px]
+      rounded-lg
+      border
+      border-dashed
+      border-white/30
+      bg-white/5
+      sm:h-22
+      sm:w-16
+      ${
+        hintTarget
+          ? "ring-2 ring-emerald-300 ring-offset-1 ring-offset-emerald-900"
+          : ""
+      }
+    `}
+        />
       )}
 
       {cards.map((card, cardIndex) => {
         const isSelected = selectedCardIndex === cardIndex;
+
+        const isTopCard = cardIndex === cards.length - 1;
+
+        const isHinted =
+          hintCardIndex !== null &&
+          hintCardIndex !== undefined &&
+          cardIndex >= hintCardIndex;
 
         return (
           <button
@@ -102,6 +130,12 @@ export function CardColumn({
               ${
                 isSelected
                   ? "ring-2 ring-amber-300 ring-offset-2 ring-offset-emerald-900"
+                  : ""
+              }
+              ${isHinted ? "rounded-lg ring-2 ring-amber-300" : ""}
+              ${
+                hintTarget && isTopCard
+                  ? "rounded-lg ring-2 ring-emerald-300 ring-offset-1 ring-offset-emerald-900"
                   : ""
               }
             `}
