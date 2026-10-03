@@ -14,7 +14,6 @@ import {
   Medal,
   Sparkles,
   Package,
-  Users,
   User,
   Shield,
   Gamepad2,
