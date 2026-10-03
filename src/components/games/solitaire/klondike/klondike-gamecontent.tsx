@@ -16,6 +16,7 @@ import { AchievementCard } from "@/components/achievement-card-updated";
 
 import { recordKlondikeGameResultAction } from "@/app/actions/game-actions";
 import { calculateKlondikeScore } from "@/lib/games/solitaire/klondike/klondike-scoring";
+import { isKlondikeStalemate } from "@/lib/games/solitaire/klondike/klondike-stalemate";
 import type { Achievement } from "@/lib/supabase";
 
 import { GameTable } from "../../system/game-table";
@@ -59,6 +60,7 @@ export function KlondikeGameContent({
   const [autoFinishCardId, setAutoFinishCardId] = useState<string | null>(null);
   const [isAutoFinishing, setIsAutoFinishing] = useState(false);
   const [autoFinishDismissed, setAutoFinishDismissed] = useState(false);
+  const [hasShownStalemateNotice, setHasShownStalemateNotice] = useState(false);
 
   const isComplete = isKlondikeComplete(board);
 
@@ -86,7 +88,13 @@ export function KlondikeGameContent({
 
   const formattedTime = `${minutes}:${seconds.toString().padStart(2, "0")}`;
 
-  const showNoHintMessage = hint?.type === "none";
+  const isStalemate = useMemo(
+    () => !isComplete && !canAutoFinish && isKlondikeStalemate(board),
+    [board, isComplete, canAutoFinish],
+  );
+
+  const showNoHintMessage =
+    hint?.type === "none" || (isStalemate && !hasShownStalemateNotice);
 
   useEffect(() => {
     setHint(null);
@@ -111,6 +119,7 @@ export function KlondikeGameContent({
     hasRecordedResult.current = false;
 
     setFinalScore(null);
+    setHasShownStalemateNotice(false);
     setUnlockedAchievements([]);
     setWasAutoFinished(false);
     setAutoFinishCardId(null);
@@ -235,10 +244,16 @@ export function KlondikeGameContent({
           <div className="w-full max-w-xl animate-in zoom-in-95 duration-300">
             <GameResult
               eyebrow="No obvious moves"
-              title="No forward moves found"
+              title="You're out of moves!!"
               description="Try moving a card back from a foundation, or start a new game."
               actionLabel="Keep playing"
-              onAction={() => setHint(null)}
+              onAction={() => {
+                setHint(null);
+
+                if (isStalemate) {
+                  setHasShownStalemateNotice(true);
+                }
+              }}
               secondaryActionLabel="New game"
               onSecondaryAction={resetGame}
             />

@@ -39,7 +39,7 @@ export function GameScreen({
         <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-orange-400" />
 
         <div className="p-4 sm:p-5">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex flex-col gap-2 sm:gap-5 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex min-w-0 items-start sm:items-center gap-3 sm:gap-4">
               <div>
                 <div>
@@ -62,7 +62,7 @@ export function GameScreen({
                 </div>
               </div>
 
-              <div className="min-w-0">
+              <div className="w-full">
                 <div className="flex sm:flex-col gap-2 sm:gap-0 items-center sm:items-start justify-end sm:justify-start">
                   <Link
                     href="/games"
@@ -82,7 +82,7 @@ export function GameScreen({
                   {title}
                 </h1>
 
-                <p className="mt-1 max-w-xl text-xs sm:text-sm text-muted-foreground">
+                <p className="hidden sm:block mt-1 max-w-xl text-xs sm:text-sm text-muted-foreground">
                   {description}
                 </p>
               </div>
