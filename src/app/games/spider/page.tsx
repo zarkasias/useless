@@ -13,7 +13,7 @@ export default async function SpiderPage() {
     redirect("/login?next=/games/solitaire");
   }
 
-  const [entitlements, solitaireStats] = await Promise.all([
+  const [entitlements, spiderStats] = await Promise.all([
     getUserEntitlements(profile.id),
     getAuthenticatedGameStats("spider"),
   ]);
@@ -26,7 +26,7 @@ export default async function SpiderPage() {
     <SpiderClient
       initialProfile={profile}
       initialEntitlements={entitlements}
-      initialStats={solitaireStats}
+      initialStats={spiderStats}
     />
   );
 }

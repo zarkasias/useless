@@ -23,6 +23,8 @@ import { GameTable } from "../../system/game-table";
 
 import { isKlondikeComplete } from "@/lib/games/solitaire/klondike/klondike-state";
 import { useKlondikeInteractions } from "./use-klondike-interactions";
+
+import GameAchievements from "../../system/game-achievements";
 import {
   canAutoFinishKlondike,
   getNextAutoFinishMove,
@@ -329,28 +331,7 @@ export function KlondikeGameContent({
                 </>
               }
             />
-            {unlockedAchievements.length > 0 && (
-              <div className="mt-5 space-y-3">
-                <div className="text-center text-xs font-black uppercase tracking-[0.2em] text-amber-200/70">
-                  Achievement Unlocked
-                </div>
-
-                <div className="flex justify-center">
-                  <div className="w-full max-w-xs">
-                    {unlockedAchievements.map((achievement) => (
-                      <AchievementCard
-                        key={achievement.id}
-                        achievement={achievement}
-                        ingrid={true}
-                        isCollected={true}
-                        showShareButton={false}
-                        variant="compact"
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            )}
+            <GameAchievements achievements={unlockedAchievements} />
           </div>
         </GameResultOverlay>
       )}

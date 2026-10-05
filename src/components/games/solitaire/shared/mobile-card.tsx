@@ -4,9 +4,11 @@ import { getSuitSymbol } from "../shared/card-display-utils";
 
 export default function MobileCard({
   card,
+  isSpider = false,
   active,
 }: {
   card: GameCard;
+  isSpider?: boolean;
   active?: boolean;
 }) {
   const isFaceCard = ["J", "Q", "K"].includes(card.rank);
@@ -40,7 +42,9 @@ export default function MobileCard({
         {card.rank}
         <span>{getSuitSymbol(card.suit)}</span>
       </span>
-      <span className="absolute inset-0 flex items-end mb-2 justify-center">
+      <span
+        className={`absolute inset-0 flex items-end ${isSpider ? "mt-2" : ""} mb-2 justify-center`}
+      >
         {isFaceCard && faceCardImage ? (
           <span className="relative block h-[70%] w-[70%]">
             <Image

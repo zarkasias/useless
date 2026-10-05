@@ -114,6 +114,8 @@ export default async function AdminAchievementPage({
                     <option value="RARE">Rare</option>
                     <option value="EPIC">Epic</option>
                     <option value="LEGENDARY">Legendary</option>
+                    <option value="SECRET">Secret</option>
+                    <option value="GAME">Game</option>
                   </select>
                 </div>
 

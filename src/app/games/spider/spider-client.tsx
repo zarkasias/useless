@@ -46,12 +46,11 @@ export default function SpiderClient({
           bestScoreLabel="Best"
           bestScore={initialStats?.best_score ?? null}
         >
-          <SpiderGame />
-          {/* <KlondikeGame
+          <SpiderGame
             onGameRecorded={() => {
               router.refresh();
             }}
-          /> */}
+          />
         </GameScreen>
       </main>
     </div>
