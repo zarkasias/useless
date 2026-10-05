@@ -289,70 +289,75 @@ export function SpiderGameContent({
 
         {showStalemate && (
           <GameResultOverlay>
-            <GameResult
-              eyebrow="No moves remaining"
-              title="This game is blocked"
-              description="No cards can be moved between columns, and no stock deal is available."
-              stats={
-                <>
-                  <GameMetric label="Moves" value={interactions.moveCount} />
-                  <GameMetric
-                    label="Completed runs"
-                    value={`${board.completedRuns.length} / 8`}
-                  />
-                </>
-              }
-              actionLabel="New Game"
-              actionIcon={<RotateCcw className="size-4" />}
-              onAction={() => startNewGame(board.difficulty)}
-              secondaryActionLabel="View Board"
-              onSecondaryAction={() => setDismissedStalemateBoard(board)}
-            >
-              <p role="status" className="text-sm text-amber-100/80">
-                {saveStatus === "saving"
-                  ? "Saving result..."
-                  : saveStatus === "saved"
-                    ? "Result saved."
-                    : saveStatus === "error"
-                      ? saveError
-                      : null}
-              </p>
-            </GameResult>
+            <div className="w-full max-w-xl animate-in zoom-in-95 duration-300">
+              <GameResult
+                eyebrow="No moves remaining"
+                title="This game is blocked"
+                description="No cards can be moved between columns, and no stock deal is available."
+                stats={
+                  <>
+                    <GameMetric label="Moves" value={interactions.moveCount} />
+                    <GameMetric
+                      label="Completed runs"
+                      value={`${board.completedRuns.length} / 8`}
+                    />
+                  </>
+                }
+                actionLabel="New Game"
+                actionIcon={<RotateCcw className="size-4" />}
+                onAction={() => startNewGame(board.difficulty)}
+                secondaryActionLabel="View Board"
+                onSecondaryAction={() => setDismissedStalemateBoard(board)}
+              >
+                <p role="status" className="text-sm text-amber-100/80">
+                  {saveStatus === "saving"
+                    ? "Saving result..."
+                    : saveStatus === "saved"
+                      ? "Result saved."
+                      : saveStatus === "error"
+                        ? saveError
+                        : null}
+                </p>
+              </GameResult>
+              <GameAchievements achievements={unlockedAchievements} />
+            </div>
           </GameResultOverlay>
         )}
 
         {isComplete && (
           <GameResultOverlay>
-            <GameResult
-              eyebrow="Completely unnecessary victory"
-              title="You won Useless Spider Solitaire!"
-              description="All eight runs completed."
-              stats={
-                <>
-                  <GameMetric label="Score" value={finalScore ?? "—"} />
-                  <GameMetric label="Moves" value={interactions.moveCount} />
-                  <GameMetric label="Suits" value={board.difficulty} />
-                  <GameMetric
-                    label="Completed runs"
-                    value={`${board.completedRuns.length} / 8`}
-                  />
-                </>
-              }
-              actionLabel="New Game"
-              actionIcon={<RotateCcw className="size-4" />}
-              onAction={() => startNewGame(board.difficulty)}
-            >
-              <p role="status" className="text-sm text-amber-100/80">
-                {saveStatus === "saving"
-                  ? "Saving result..."
-                  : saveStatus === "saved"
-                    ? "Result saved."
-                    : saveStatus === "error"
-                      ? saveError
-                      : null}
-              </p>
-            </GameResult>
-            <GameAchievements achievements={unlockedAchievements} />
+            <div className="w-full max-w-xl animate-in zoom-in-95 duration-300">
+              <GameResult
+                eyebrow="Completely unnecessary victory"
+                title="You won Useless Spider Solitaire!"
+                description="All eight runs completed."
+                stats={
+                  <>
+                    <GameMetric label="Score" value={finalScore ?? "—"} />
+                    <GameMetric label="Moves" value={interactions.moveCount} />
+                    <GameMetric label="Suits" value={board.difficulty} />
+                    <GameMetric
+                      label="Completed runs"
+                      value={`${board.completedRuns.length} / 8`}
+                    />
+                  </>
+                }
+                actionLabel="New Game"
+                actionIcon={<RotateCcw className="size-4" />}
+                onAction={() => startNewGame(board.difficulty)}
+              >
+                <p role="status" className="text-sm text-amber-100/80">
+                  {saveStatus === "saving"
+                    ? "Saving result..."
+                    : saveStatus === "saved"
+                      ? "Result saved."
+                      : saveStatus === "error"
+                        ? saveError
+                        : null}
+                </p>
+              </GameResult>
+              <GameAchievements achievements={unlockedAchievements} />
+            </div>
           </GameResultOverlay>
         )}
       </GameTable>

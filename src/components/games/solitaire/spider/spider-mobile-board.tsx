@@ -71,6 +71,11 @@ export function SpiderMobileBoard({
             visibleHint?.type === "deal-stock" ? "ring-2 ring-amber-300" : ""
           }`}
         >
+          {visibleHint?.type === "deal-stock" && (
+            <span className="pointer-events-none absolute -top-5 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-full bg-amber-300 px-2 py-0.5 text-[10px] font-bold text-black shadow">
+              Deal
+            </span>
+          )}
           <GameButton
             disabled={!canDeal}
             onClick={() => {
@@ -98,7 +103,12 @@ export function SpiderMobileBoard({
               visibleHint.targetColumnIndex === columnIndex;
 
             return (
-              <div key={columnIndex} className="min-w-0">
+              <div key={columnIndex} className="relative min-w-0">
+                {isHintTarget && (
+                  <span className="pointer-events-none absolute -top-2 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-full bg-emerald-300 px-2 py-0.5 text-[9px] font-bold text-emerald-950 shadow">
+                    Here
+                  </span>
+                )}
                 <button
                   type="button"
                   disabled={!isTarget}
@@ -142,9 +152,15 @@ export function SpiderMobileBoard({
                         visibleHint.sourceColumnIndex === columnIndex &&
                         cardIndex >= visibleHint.cardIndex;
 
+                      const isHintStartCard =
+                        visibleHint?.type === "tableau-to-tableau" &&
+                        visibleHint.sourceColumnIndex === columnIndex &&
+                        cardIndex === visibleHint.cardIndex;
+
                       return (
                         <div
                           key={card.id}
+                          className="relative"
                           style={{
                             height:
                               cardIndex === column.length - 1
@@ -154,6 +170,11 @@ export function SpiderMobileBoard({
                                   : 16,
                           }}
                         >
+                          {isHintStartCard && (
+                            <span className="pointer-events-none absolute -top-2 left-1/2 z-40 -translate-x-1/2 whitespace-nowrap rounded-full bg-amber-300 px-2 py-0.5 text-[9px] font-bold text-black shadow">
+                              Move
+                            </span>
+                          )}
                           <button
                             type="button"
                             disabled={!card.faceUp}

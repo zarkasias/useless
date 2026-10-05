@@ -258,6 +258,7 @@ export function KlondikeGameContent({
               secondaryActionLabel="New game"
               onSecondaryAction={resetGame}
             />
+            <GameAchievements achievements={unlockedAchievements} />
           </div>
         </GameResultOverlay>
       )}
