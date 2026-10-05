@@ -22,8 +22,6 @@ import {
   type SpiderHint,
 } from "@/lib/games/solitaire/spider/spider-hint";
 import { isSpiderComplete } from "@/lib/games/solitaire/spider/spider-state";
-
-import { AchievementCard } from "@/components/achievement-card-updated";
 import type { Achievement } from "@/lib/supabase";
 
 import { createInitialBoard } from "./spider-helper";
