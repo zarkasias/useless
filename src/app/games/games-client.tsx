@@ -34,6 +34,12 @@ export default function GamesClient({
     }
   };
 
+  const toSpider = () => {
+    if (initialEntitlements.isSubscribed) {
+      router.push("/games/spider");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-transparent">
       <Navbar
@@ -140,12 +146,17 @@ export default function GamesClient({
                 />
               </div>
 
-              <div>
+              <div
+                onClick={toSpider}
+                className={`
+                  ${initialEntitlements.isSubscribed ? "cursor-pointer" : ""}
+    `}
+              >
                 <GameCabinetCard
                   title="Useless Spider Solitaire"
                   description="Eight legs. Ten columns. Absolutely no reason to be productive."
                   icon="/game_icons/spider.webp"
-                  available={false}
+                  available={true}
                   footerText="Get tangled in pointless fun"
                   theme={gameCardThemes.spider}
                 />
