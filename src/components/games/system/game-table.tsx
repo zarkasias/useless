@@ -3,10 +3,16 @@ import type { ReactNode } from "react";
 interface GameTableProps {
   children: ReactNode;
   className?: string;
+  isSpider?: boolean;
   compactMobile?: boolean;
 }
 
-export function GameTable({ children, className = "", compactMobile = false }: GameTableProps) {
+export function GameTable({
+  children,
+  className = "",
+  compactMobile = false,
+  isSpider = false,
+}: GameTableProps) {
   return (
     <div
       className={`
@@ -71,7 +77,9 @@ export function GameTable({ children, className = "", compactMobile = false }: G
         `}
       />
 
-      <div className="relative space-y-5 pb-5">{children}</div>
+      <div className={`relative space-y-5 ${isSpider ? "" : "pb-5"}`}>
+        {children}
+      </div>
     </div>
   );
 }

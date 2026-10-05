@@ -43,7 +43,7 @@ export async function updateAdminAchievement(formData: FormData) {
     throw new Error("Achievement id, title, and description are required.");
   }
 
-  const validTypes = ["COMMON", "RARE", "EPIC", "LEGENDARY"];
+  const validTypes = ["COMMON", "RARE", "EPIC", "LEGENDARY", "SECRET", "GAME"];
 
   if (!validTypes.includes(type)) {
     throw new Error("Invalid achievement rarity.");

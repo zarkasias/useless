@@ -1,0 +1,192 @@
+"use client";
+
+import type { SpiderBoardState } from "@/lib/games/solitaire/spider/spider-types";
+import type { SpiderHint } from "@/lib/games/solitaire/spider/spider-hint";
+
+import GameButton from "../../system/game-button";
+import MobileCard from "../shared/mobile-card";
+import { getSuitSymbol } from "../shared/card-display-utils";
+import { useSpiderMobileInteractions } from "./use-spider-mobile-interactions";
+
+interface SpiderMobileBoardProps {
+  board: SpiderBoardState;
+  onMove: (board: SpiderBoardState) => boolean;
+  onStockTap: () => void;
+  canDeal: boolean;
+  hint: SpiderHint | null;
+}
+
+export function SpiderMobileBoard({
+  board,
+  onMove,
+  onStockTap,
+  canDeal,
+  hint,
+}: SpiderMobileBoardProps) {
+  const mobile = useSpiderMobileInteractions({ board, onMove });
+
+  const visibleHint = mobile.pendingSource ? null : hint;
+
+  const buttonClass =
+    "relative block w-full rounded-md touch-manipulation select-none " +
+    "focus-visible:outline-2 focus-visible:outline-amber-300";
+
+  return (
+    <div className="min-w-0 space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <div
+          className="grid grid-cols-8 gap-1"
+          role="group"
+          aria-label="Completed runs"
+        >
+          {Array.from({ length: 8 }, (_, index) => {
+            const run = board.completedRuns[index];
+
+            return (
+              <span
+                key={index}
+                aria-label={`Run ${index + 1}: ${
+                  run ? `${run.suit} complete` : "empty"
+                }`}
+                className={`flex h-9 w-7 items-center justify-center rounded border ${
+                  run
+                    ? "border-amber-300 bg-white"
+                    : "border-dashed border-white/30 text-white/40"
+                } ${
+                  run?.suit === "hearts" || run?.suit === "diamonds"
+                    ? "text-red-700"
+                    : run
+                      ? "text-slate-900"
+                      : ""
+                }`}
+              >
+                {run ? getSuitSymbol(run.suit) : index + 1}
+              </span>
+            );
+          })}
+        </div>
+
+        <div
+          className={`rounded-md ${
+            visibleHint?.type === "deal-stock" ? "ring-2 ring-amber-300" : ""
+          }`}
+        >
+          <GameButton
+            disabled={!canDeal}
+            onClick={() => {
+              mobile.clearPendingMove();
+              onStockTap();
+            }}
+          >
+            Deal ({board.stock.length / 10})
+          </GameButton>
+        </div>
+      </div>
+
+      {/* <p aria-live="polite" className="text-xs text-emerald-100">
+        {mobile.pendingSource
+          ? "Choose a highlighted column. Tap the selected card to cancel."
+          : "Tap a card to move it."}
+      </p> */}
+
+      <div className="w-full min-w-0 pb-3">
+        <div className="grid w-full min-w-0 grid-cols-10 items-start gap-px">
+          {board.tableau.map((column, columnIndex) => {
+            const isTarget = mobile.pendingDestinations.includes(columnIndex);
+            const isHintTarget =
+              visibleHint?.type === "tableau-to-tableau" &&
+              visibleHint.targetColumnIndex === columnIndex;
+
+            return (
+              <div key={columnIndex} className="min-w-0">
+                <button
+                  type="button"
+                  disabled={!isTarget}
+                  aria-label={`Move to column ${columnIndex + 1}`}
+                  onClick={() => mobile.handleDestinationTap(columnIndex)}
+                  className={`mb-1 min-h-10 w-full rounded text-xs font-bold ${
+                    isTarget
+                      ? "bg-emerald-300 text-emerald-950"
+                      : "text-emerald-100/60"
+                  }`}
+                >
+                  {columnIndex + 1}
+                  {isTarget ? " ↓" : ""}
+                </button>
+
+                <div
+                  className={`rounded-md ${
+                    isTarget || isHintTarget
+                      ? "ring-2 ring-inset ring-emerald-300"
+                      : ""
+                  }`}
+                >
+                  {column.length === 0 ? (
+                    <button
+                      type="button"
+                      disabled={!isTarget}
+                      aria-label={`Empty column ${columnIndex + 1}`}
+                      onClick={() => mobile.handleDestinationTap(columnIndex)}
+                      className={`${buttonClass} aspect-[5/7] border border-dashed border-white/30 bg-black/10 text-emerald-100`}
+                    >
+                      {isTarget ? "↓" : ""}
+                    </button>
+                  ) : (
+                    column.map((card, cardIndex) => {
+                      const selected =
+                        mobile.pendingSource?.columnIndex === columnIndex &&
+                        cardIndex >= mobile.pendingSource.cardIndex;
+
+                      const isHintSource =
+                        visibleHint?.type === "tableau-to-tableau" &&
+                        visibleHint.sourceColumnIndex === columnIndex &&
+                        cardIndex >= visibleHint.cardIndex;
+
+                      return (
+                        <div
+                          key={card.id}
+                          style={{
+                            height:
+                              cardIndex === column.length - 1
+                                ? "auto"
+                                : card.faceUp
+                                  ? 24
+                                  : 16,
+                          }}
+                        >
+                          <button
+                            type="button"
+                            disabled={!card.faceUp}
+                            aria-pressed={selected}
+                            aria-label={`${
+                              card.faceUp
+                                ? `${card.rank} of ${card.suit}`
+                                : "Face-down card"
+                            }, column ${columnIndex + 1}`}
+                            onClick={() =>
+                              mobile.handleTableauCardTap(
+                                columnIndex,
+                                cardIndex,
+                              )
+                            }
+                            className={`${buttonClass} ${
+                              selected || isHintSource
+                                ? "ring-2 ring-inset ring-amber-300"
+                                : ""
+                            }`}
+                          >
+                            <MobileCard card={card} isSpider={true} />
+                          </button>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}

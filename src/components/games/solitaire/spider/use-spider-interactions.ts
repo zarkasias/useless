@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import type { Dispatch, SetStateAction } from "react";
+import { useState, useEffect, useMemo } from "react";
+import type { Dispatch, DragEvent, SetStateAction } from "react";
 
 import {
   moveTableauSequence,
   dealFromStock,
 } from "@/lib/games/solitaire/spider/spider-moves";
+
+import { isSpiderStalemate } from "@/lib/games/solitaire/spider/spider-stalemate";
+
 import {
   canDealFromStock,
   canMoveTableauSequence,
@@ -30,23 +33,48 @@ export function useSpiderInteractions({
   const [selectedTableauCard, setSelectedTableauCard] =
     useState<SpiderMoveSource | null>(null);
   const [moveCount, setMoveCount] = useState(0);
+  const [dragSource, setDragSource] = useState<SpiderMoveSource | null>(null);
+  const [hasStarted, setHasStarted] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
   const isComplete = isSpiderComplete(board);
 
+  const isStalemate = useMemo(() => isSpiderStalemate(board), [board]);
+
+  useEffect(() => {
+    if (!hasStarted || isComplete || isStalemate) {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setElapsedSeconds((seconds) => seconds + 1);
+    }, 1000);
+
+    return () => window.clearInterval(interval);
+  }, [hasStarted, isComplete, isStalemate]);
+
   const canDeal = !isComplete && canDealFromStock(board);
+
+  const applyMove = (nextBoard: SpiderBoardState | null): boolean => {
+    if (isComplete || !nextBoard) {
+      return false;
+    }
+
+    setBoard(nextBoard);
+    setSelectedTableauCard(null);
+    setMoveCount((count) => count + 1);
+    setHasStarted(true);
+    setDragSource(null);
+
+    return true;
+  };
 
   const handleStockClick = () => {
     if (!canDeal) {
       return;
     }
 
-    const nextBoard = dealFromStock(board);
-
-    if (nextBoard) {
-      setBoard(nextBoard);
-      setSelectedTableauCard(null);
-      setMoveCount((count) => count + 1);
-    }
+    applyMove(dealFromStock(board));
   };
 
   const handleTableauClick = (columnIndex: number) => {
@@ -54,18 +82,14 @@ export function useSpiderInteractions({
       return;
     }
 
-    const nextBoard = moveTableauSequence(
-      board,
-      selectedTableauCard.columnIndex,
-      selectedTableauCard.cardIndex,
-      columnIndex,
+    applyMove(
+      moveTableauSequence(
+        board,
+        selectedTableauCard.columnIndex,
+        selectedTableauCard.cardIndex,
+        columnIndex,
+      ),
     );
-
-    if (nextBoard) {
-      setBoard(nextBoard);
-      setSelectedTableauCard(null);
-      setMoveCount((count) => count + 1);
-    }
   };
 
   const handleTableauCardClick = (columnIndex: number, cardIndex: number) => {
@@ -104,40 +128,113 @@ export function useSpiderInteractions({
   };
 
   const isValidTableauTarget = (columnIndex: number): boolean => {
+    const activeSource = dragSource ?? selectedTableauCard;
+
     if (
       isComplete ||
-      !selectedTableauCard ||
-      selectedTableauCard.columnIndex === columnIndex
+      !activeSource ||
+      activeSource.columnIndex === columnIndex
     ) {
       return false;
     }
 
-    const source = board.tableau[selectedTableauCard.columnIndex];
+    const source = board.tableau[activeSource.columnIndex];
     const target = board.tableau[columnIndex];
 
     return Boolean(
       source &&
       target &&
-      canMoveTableauSequence(
-        source.slice(selectedTableauCard.cardIndex),
-        target,
-      ),
+      canMoveTableauSequence(source.slice(activeSource.cardIndex), target),
     );
+  };
+
+  const handleTableauDragStart = (
+    columnIndex: number,
+    cardIndex: number,
+    event: DragEvent<HTMLButtonElement>,
+  ) => {
+    const column = board.tableau[columnIndex];
+
+    if (
+      isComplete ||
+      !column ||
+      !Number.isInteger(cardIndex) ||
+      cardIndex < 0 ||
+      !isValidTableauSequence(column.slice(cardIndex))
+    ) {
+      event.preventDefault();
+      return;
+    }
+
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", "spider-card");
+
+    setSelectedTableauCard(null);
+    setDragSource({ columnIndex, cardIndex });
+  };
+
+  const handleDragEnd = () => {
+    setDragSource(null);
+  };
+
+  const handleTableauDragOver = (
+    columnIndex: number,
+    event: DragEvent<HTMLDivElement>,
+  ) => {
+    if (!dragSource) {
+      return;
+    }
+
+    event.preventDefault();
+    event.dataTransfer.dropEffect = isValidTableauTarget(columnIndex)
+      ? "move"
+      : "none";
+  };
+
+  const handleTableauDrop = (
+    columnIndex: number,
+    event: DragEvent<HTMLDivElement>,
+  ) => {
+    event.preventDefault();
+
+    if (dragSource && !isComplete) {
+      applyMove(
+        moveTableauSequence(
+          board,
+          dragSource.columnIndex,
+          dragSource.cardIndex,
+          columnIndex,
+        ),
+      );
+    }
+
+    setDragSource(null);
   };
 
   const resetInteractions = () => {
     setSelectedTableauCard(null);
+    setDragSource(null);
+    setHasStarted(false);
+    setElapsedSeconds(0);
     setMoveCount(0);
   };
 
   return {
     moveCount,
     canDeal,
+    applyMove,
+    hasStarted,
+    elapsedSeconds,
+    isStalemate,
     handleStockClick,
     selectedTableauCard,
     handleTableauClick,
     handleTableauCardClick,
     isValidTableauTarget,
     resetInteractions,
+    handleTableauDragStart,
+    handleTableauDragOver,
+    handleTableauDrop,
+    handleDragEnd,
   };
 }

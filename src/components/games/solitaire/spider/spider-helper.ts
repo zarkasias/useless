@@ -9,7 +9,7 @@ import type {
 } from "@/lib/games/solitaire/spider/spider-types";
 
 export function createInitialBoard(
-  difficulty: SpiderDifficulty = 1,
+  difficulty: SpiderDifficulty = 2,
 ): SpiderBoardState {
   const deck = createSpiderDeck(difficulty);
   const shuffledDeck = shuffleDeck(deck);

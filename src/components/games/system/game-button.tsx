@@ -23,7 +23,7 @@ export default function GameButton({
     <Button
       type="button"
       variant={variant}
-      size="sm"
+      size="xs"
       disabled={disabled}
       onClick={onClick}
       className="

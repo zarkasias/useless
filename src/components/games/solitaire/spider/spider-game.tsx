@@ -8,7 +8,11 @@ import { createInitialBoard } from "./spider-helper";
 
 import type { SpiderBoardState } from "@/lib/games/solitaire/spider/spider-types";
 
-export function SpiderGame() {
+interface SpiderGameProps {
+  onGameRecorded?: () => void;
+}
+
+export function SpiderGame({ onGameRecorded }: SpiderGameProps) {
   const [board, setBoard] = useState<SpiderBoardState | null>(null);
 
   useEffect(() => {
@@ -27,5 +31,11 @@ export function SpiderGame() {
     );
   }
 
-  return <SpiderGameContent board={board} setBoard={setBoard} />;
+  return (
+    <SpiderGameContent
+      board={board}
+      setBoard={setBoard}
+      onGameRecorded={onGameRecorded}
+    />
+  );
 }

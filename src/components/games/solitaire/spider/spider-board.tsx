@@ -2,6 +2,7 @@
 
 import type { SpiderBoardState } from "@/lib/games/solitaire/spider/spider-types";
 import type { useSpiderInteractions } from "./use-spider-interactions";
+import type { SpiderHint } from "@/lib/games/solitaire/spider/spider-hint";
 
 import { CardColumn } from "../shared/card-column";
 import { CardPile } from "../shared/card-pile";
@@ -9,9 +10,10 @@ import { CardPile } from "../shared/card-pile";
 interface SpiderBoardProps {
   board: SpiderBoardState;
   interactions: ReturnType<typeof useSpiderInteractions>;
+  hint: SpiderHint | null;
 }
 
-export function SpiderBoard({ board, interactions }: SpiderBoardProps) {
+export function SpiderBoard({ board, interactions, hint }: SpiderBoardProps) {
   const {
     canDeal,
     handleStockClick,
@@ -19,6 +21,10 @@ export function SpiderBoard({ board, interactions }: SpiderBoardProps) {
     handleTableauClick,
     handleTableauCardClick,
     isValidTableauTarget,
+    handleTableauDragStart,
+    handleTableauDragOver,
+    handleTableauDrop,
+    handleDragEnd,
   } = interactions;
 
   return (
@@ -44,6 +50,7 @@ export function SpiderBoard({ board, interactions }: SpiderBoardProps) {
             card={board.stock[0] ?? null}
             faceDown
             onClick={canDeal ? handleStockClick : undefined}
+            isHint={hint?.type === "deal-stock"}
           />
         </div>
 
@@ -57,6 +64,16 @@ export function SpiderBoard({ board, interactions }: SpiderBoardProps) {
                 340,
                 Math.max(0, column.length - 1) * 28 + 96,
               )}
+              hintCardIndex={
+                hint?.type === "tableau-to-tableau" &&
+                hint.sourceColumnIndex === columnIndex
+                  ? hint.cardIndex
+                  : null
+              }
+              hintTarget={
+                hint?.type === "tableau-to-tableau" &&
+                hint.targetColumnIndex === columnIndex
+              }
               selectedCardIndex={
                 selectedTableauCard?.columnIndex === columnIndex
                   ? selectedTableauCard.cardIndex
@@ -67,7 +84,12 @@ export function SpiderBoard({ board, interactions }: SpiderBoardProps) {
               onCardClick={(cardIndex) =>
                 handleTableauCardClick(columnIndex, cardIndex)
               }
-              onCardDragStart={(_, event) => event.preventDefault()}
+              onCardDragStart={(cardIndex, event) =>
+                handleTableauDragStart(columnIndex, cardIndex, event)
+              }
+              onDragOver={(event) => handleTableauDragOver(columnIndex, event)}
+              onDrop={(event) => handleTableauDrop(columnIndex, event)}
+              onDragEnd={handleDragEnd}
             />
           ))}
         </div>
