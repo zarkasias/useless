@@ -12,7 +12,6 @@ import GameButton from "../../system/game-button";
 import GameMetric from "../../game-metric";
 import GameResult from "../../system/game-result";
 import GameResultOverlay from "../../system/game-result-overlay";
-import { AchievementCard } from "@/components/achievement-card-updated";
 
 import { recordKlondikeGameResultAction } from "@/app/actions/game-actions";
 import { calculateKlondikeScore } from "@/lib/games/solitaire/klondike/klondike-scoring";
@@ -259,6 +258,7 @@ export function KlondikeGameContent({
               secondaryActionLabel="New game"
               onSecondaryAction={resetGame}
             />
+            <GameAchievements achievements={unlockedAchievements} />
           </div>
         </GameResultOverlay>
       )}
