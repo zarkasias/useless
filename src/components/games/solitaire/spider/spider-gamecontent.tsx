@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 
-import { RotateCcw, Lightbulb } from "lucide-react";
+import { RotateCcw, Lightbulb, Undo2 } from "lucide-react";
 
 import GameButton from "../../system/game-button";
 import GameMetric from "../../game-metric";
@@ -68,6 +68,34 @@ export function SpiderGameContent({
     board: SpiderBoardState;
     hint: SpiderHint | null;
   } | null>(null);
+
+  const [hintFading, setHintFading] = useState(false);
+
+  useEffect(() => {
+    setHintFading(false);
+    const mobileViewport = window.matchMedia("(max-width: 767px)");
+
+    if (!hintRequest || !mobileViewport.matches) {
+      return;
+    }
+
+    const fadeTimeout = window.setTimeout(() => {
+      if (mobileViewport.matches) {
+        setHintFading(true);
+      }
+    }, 4500);
+
+    const timeout = window.setTimeout(() => {
+      if (mobileViewport.matches) {
+        setHintRequest(null);
+      }
+    }, 5000);
+
+    return () => {
+      window.clearTimeout(fadeTimeout);
+      window.clearTimeout(timeout);
+    };
+  }, [hintRequest]);
 
   const isComplete = isSpiderComplete(board);
 
@@ -236,18 +264,31 @@ export function SpiderGameContent({
             />
           </div>
 
-          <div className="col-span-3 flex justify-end gap-1.5">
+          <div className="col-span-3 flex justify-end gap-1 md:gap-1.5">
+            <GameButton
+              onClick={interactions.handleUndo}
+              disabled={!interactions.canUndo}
+              size={"mobile"}
+              icon={<Undo2 className="size-3 md:size-4" />}
+              aria-label="Undo last move"
+            >
+              <span className="hidden md:inline">Undo</span>
+            </GameButton>
+
             <GameButton
               onClick={handleHintClick}
               disabled={isComplete || isStalemate}
-              icon={<Lightbulb className="size-4" />}
+              size={"mobile"}
+              icon={<Lightbulb className="size-3 md:size-4" />}
+              aria-label="Get a Hint"
             >
-              <span>Hint</span>
+              <span className="hidden md:inline">Hint</span>
             </GameButton>
 
             <GameButton
               onClick={() => startNewGame(board.difficulty)}
-              icon={<RotateCcw className="size-4" />}
+              size={"mobile"}
+              icon={<RotateCcw className="size-3 md:size-4" />}
             >
               <span>New Game</span>
             </GameButton>
@@ -260,6 +301,7 @@ export function SpiderGameContent({
 
         <div className="md:hidden">
           <SpiderMobileBoard
+            hintFading={hintFading}
             board={board}
             onMove={interactions.applyMove}
             onStockTap={interactions.handleStockClick}

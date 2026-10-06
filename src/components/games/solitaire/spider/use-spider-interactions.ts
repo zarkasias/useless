@@ -36,6 +36,7 @@ export function useSpiderInteractions({
   const [dragSource, setDragSource] = useState<SpiderMoveSource | null>(null);
   const [hasStarted, setHasStarted] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [history, setHistory] = useState<SpiderBoardState[]>([]);
 
   const isComplete = isSpiderComplete(board);
 
@@ -60,6 +61,7 @@ export function useSpiderInteractions({
       return false;
     }
 
+    setHistory((previous) => [...previous, board]);
     setBoard(nextBoard);
     setSelectedTableauCard(null);
     setMoveCount((count) => count + 1);
@@ -211,8 +213,23 @@ export function useSpiderInteractions({
     setDragSource(null);
   };
 
+  const canUndo = history.length > 0 && !isComplete && !isStalemate;
+
+  const handleUndo = () => {
+    if (!canUndo) return;
+
+    const previousBoard = history[history.length - 1];
+
+    setBoard(previousBoard);
+    setHistory((previous) => previous.slice(0, -1));
+    setMoveCount((count) => Math.max(0, count - 1));
+    setSelectedTableauCard(null);
+    setDragSource(null);
+  };
+
   const resetInteractions = () => {
     setSelectedTableauCard(null);
+    setHistory([]);
     setDragSource(null);
     setHasStarted(false);
     setElapsedSeconds(0);
@@ -222,6 +239,8 @@ export function useSpiderInteractions({
   return {
     moveCount,
     canDeal,
+    canUndo,
+    handleUndo,
     applyMove,
     hasStarted,
     elapsedSeconds,

@@ -14,6 +14,7 @@ interface SpiderMobileBoardProps {
   onStockTap: () => void;
   canDeal: boolean;
   hint: SpiderHint | null;
+  hintFading?: boolean;
 }
 
 export function SpiderMobileBoard({
@@ -22,6 +23,7 @@ export function SpiderMobileBoard({
   onStockTap,
   canDeal,
   hint,
+  hintFading = false,
 }: SpiderMobileBoardProps) {
   const mobile = useSpiderMobileInteractions({ board, onMove });
 
@@ -67,8 +69,8 @@ export function SpiderMobileBoard({
         </div>
 
         <div
-          className={`rounded-md ${
-            visibleHint?.type === "deal-stock" ? "ring-2 ring-amber-300" : ""
+          className={`rounded-md transition-shadow duration-500 motion-reduce:transition-none ${
+            visibleHint?.type === "deal-stock" && !hintFading ? "ring-2 ring-amber-300" : ""
           }`}
         >
           {/* {visibleHint?.type === "deal-stock" && (
@@ -99,7 +101,7 @@ export function SpiderMobileBoard({
             return (
               <div key={columnIndex} className="relative min-w-0">
                 {isHintTarget && (
-                  <span className="pointer-events-none absolute -top-2 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-full bg-emerald-300 px-2 py-0.5 text-[9px] font-bold text-emerald-950 shadow">
+                  <span style={{ opacity: hintFading ? 0 : 1 }} className="transition-opacity duration-500 motion-reduce:transition-none pointer-events-none absolute -top-2 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-full bg-emerald-300 px-2 py-0.5 text-[9px] font-bold text-emerald-950 shadow">
                     Here
                   </span>
                 )}
@@ -119,8 +121,8 @@ export function SpiderMobileBoard({
                 </button>
 
                 <div
-                  className={`rounded-md ${
-                    isTarget || isHintTarget
+                  className={`rounded-md transition-shadow duration-500 motion-reduce:transition-none ${
+                    isTarget || (isHintTarget && !hintFading)
                       ? "ring-2 ring-inset ring-emerald-300"
                       : ""
                   }`}
@@ -165,7 +167,7 @@ export function SpiderMobileBoard({
                           }}
                         >
                           {isHintStartCard && (
-                            <span className="pointer-events-none absolute -top-2 left-1/2 z-40 -translate-x-1/2 whitespace-nowrap rounded-full bg-amber-300 px-2 py-0.5 text-[9px] font-bold text-black shadow">
+                            <span style={{ opacity: hintFading ? 0 : 1 }} className="transition-opacity duration-500 motion-reduce:transition-none pointer-events-none absolute -top-2 left-1/2 z-40 -translate-x-1/2 whitespace-nowrap rounded-full bg-amber-300 px-2 py-0.5 text-[9px] font-bold text-black shadow">
                               Move
                             </span>
                           )}
@@ -184,8 +186,8 @@ export function SpiderMobileBoard({
                                 cardIndex,
                               )
                             }
-                            className={`${buttonClass} ${
-                              selected || isHintSource
+                            className={`${buttonClass} transition-shadow duration-500 motion-reduce:transition-none ${
+                              selected || (isHintSource && !hintFading)
                                 ? "ring-2 ring-inset ring-amber-300"
                                 : ""
                             }`}
