@@ -126,6 +126,7 @@ export default function GamesClient({
                   available
                   footerText="Remember to accomplish nothing"
                   theme={gameCardThemes.memory}
+                  subscribed={initialEntitlements.isSubscribed}
                 />
               </div>
 
@@ -143,6 +144,7 @@ export default function GamesClient({
                   available
                   footerText="Because one pointless game wasn't enough"
                   theme={gameCardThemes.solitaire}
+                  subscribed={initialEntitlements.isSubscribed}
                 />
               </div>
 
@@ -159,6 +161,7 @@ export default function GamesClient({
                   available={true}
                   footerText="Get tangled in pointless fun"
                   theme={gameCardThemes.spider}
+                  subscribed={initialEntitlements.isSubscribed}
                 />
               </div>
             </div>
