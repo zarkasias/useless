@@ -88,6 +88,16 @@ function finishClaim(previous: string[] = [], available = [{ id: "new" }]) {
   db.enqueue("user_achievements", { data: previous.map(achievement_id => ({ achievement_id })) });
   return db.enqueue("achievements", { data: available });
 }
+function enqueuePostClaimMilestoneChecks() {
+  // A successful daily claim also evaluates streak, account-age, and collection milestones.
+  db.enqueue("user_achievements", { data: [{ achievement_date: "2026-09-08" }] });
+  db.enqueue("profiles", { data: { timezone: "UTC" } });
+  db.enqueue("profiles", { data: { created_at: "2026-09-01T12:00:00.000Z" } });
+  db.enqueue("achievements", { data: [] }); // Account-age catalog.
+  db.enqueue("achievements", { data: [] }); // Streak catalog.
+  db.enqueue("user_achievements", { data: [{ achievement_id: "new" }] });
+  db.enqueue("achievements", { data: [] }); // Collection-count catalog.
+}
 it("blocks a second daily claim", async () => {
   const today = beginClaim({ id: "existing" });
   expect((await claimDailyAchievementForAuthenticatedUser()).status).toBe("already_claimed");
@@ -107,6 +117,7 @@ it.each([
   beginClaim(null, { claim_timezone: timezone, created_at: new Date(Date.now() - hours * 3600000).toISOString() });
   if (expected === "claimed") {
     finishClaim(); db.enqueue("user_achievements", { data: { created_at: now } });
+    enqueuePostClaimMilestoneChecks();
   }
   expect((await claimDailyAchievementForAuthenticatedUser()).status).toBe(expected);
 });
@@ -114,8 +125,10 @@ it("awards an unused published daily achievement from eligible packs", async () 
   beginClaim();
   const pool = finishClaim(["old"], [{ id: "old" }, { id: "new" }]);
   const insert = db.enqueue("user_achievements", { data: { created_at: now } });
+  enqueuePostClaimMilestoneChecks();
   const result = await claimDailyAchievementForAuthenticatedUser();
   expect(result).toMatchObject({ status: "claimed", achievement: { id: "new", user_id: "user-1" } });
+  expect(result.triggeredAchievements).toEqual([]);
   expect(pool.or).toHaveBeenCalledWith(filter);
   expect(pool.eq).toHaveBeenCalledWith("status", "published");
   expect(pool.eq).toHaveBeenCalledWith("is_daily", true);

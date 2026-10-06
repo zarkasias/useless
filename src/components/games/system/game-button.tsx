@@ -3,6 +3,7 @@ import type { ReactNode, ComponentProps } from "react";
 import { Button } from "@/components/ui/button";
 
 type ButtonVariant = ComponentProps<typeof Button>["variant"];
+type ButtonSize = ComponentProps<typeof Button>["size"];
 
 interface GameButtonProps {
   children: ReactNode;
@@ -10,6 +11,7 @@ interface GameButtonProps {
   disabled?: boolean;
   variant?: ButtonVariant;
   icon?: ReactNode;
+  size?: ButtonSize;
 }
 
 export default function GameButton({
@@ -17,13 +19,14 @@ export default function GameButton({
   onClick,
   disabled = false,
   variant = "ghost",
+  size = "xs",
   icon,
 }: GameButtonProps) {
   return (
     <Button
       type="button"
       variant={variant}
-      size="xs"
+      size={size ? size : "xs"}
       disabled={disabled}
       onClick={onClick}
       className="
@@ -49,7 +52,7 @@ export default function GameButton({
       "
     >
       {icon && (
-        <span className="mr-2 flex size-4 items-center justify-center">
+        <span className="mr-1 md:mr-2 flex size-4 items-center justify-center">
           {icon}
         </span>
       )}
