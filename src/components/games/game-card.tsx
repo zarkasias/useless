@@ -8,6 +8,7 @@ interface GameCardProps {
   icon: string;
   iconAlt?: string;
   available?: boolean;
+  subscribed: boolean;
   footerText?: string;
   theme: GameCardTheme;
 }
@@ -17,10 +18,13 @@ export default function GameCabinetCard({
   description,
   icon,
   iconAlt,
+  subscribed,
   available = false,
   footerText = "More Pointless fun incoming",
   theme,
 }: GameCardProps) {
+  const showSoon = !available;
+  const showPro = available && !subscribed;
   return (
     <div
       className={`
@@ -133,10 +137,16 @@ export default function GameCabinetCard({
           {footerText}
         </span>
 
-        {!available && (
+        {showSoon && (
           <div className="flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-muted-foreground">
             <LockKeyhole className="size-3.5" />
             Soon
+          </div>
+        )}
+        {showPro && (
+          <div className="flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-black text-muted-foreground">
+            <LockKeyhole className="size-3.5" />
+            Pro
           </div>
         )}
       </div>

@@ -71,11 +71,11 @@ export function SpiderMobileBoard({
             visibleHint?.type === "deal-stock" ? "ring-2 ring-amber-300" : ""
           }`}
         >
-          {visibleHint?.type === "deal-stock" && (
+          {/* {visibleHint?.type === "deal-stock" && (
             <span className="pointer-events-none absolute -top-5 left-1/2 z-30 -translate-x-1/2 whitespace-nowrap rounded-full bg-amber-300 px-2 py-0.5 text-[10px] font-bold text-black shadow">
               Deal
             </span>
-          )}
+          )} */}
           <GameButton
             disabled={!canDeal}
             onClick={() => {
@@ -87,12 +87,6 @@ export function SpiderMobileBoard({
           </GameButton>
         </div>
       </div>
-
-      {/* <p aria-live="polite" className="text-xs text-emerald-100">
-        {mobile.pendingSource
-          ? "Choose a highlighted column. Tap the selected card to cancel."
-          : "Tap a card to move it."}
-      </p> */}
 
       <div className="w-full min-w-0 pb-3">
         <div className="grid w-full min-w-0 grid-cols-10 items-start gap-px">

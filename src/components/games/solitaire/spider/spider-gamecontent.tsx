@@ -289,7 +289,7 @@ export function SpiderGameContent({
 
         {showStalemate && (
           <GameResultOverlay>
-            <div className="w-full max-w-xl animate-in zoom-in-95 duration-300">
+            <div className="max-h-[calc(100dvh-2rem)] w-full max-w-xl overflow-y-auto px-1 animate-in zoom-in-95 duration-300">
               <GameResult
                 eyebrow="No moves remaining"
                 title="This game is blocked"
@@ -326,7 +326,7 @@ export function SpiderGameContent({
 
         {isComplete && (
           <GameResultOverlay>
-            <div className="w-full max-w-xl animate-in zoom-in-95 duration-300">
+            <div className="max-h-[calc(100dvh-2rem)] w-full max-w-xl overflow-y-auto px-1 animate-in zoom-in-95 duration-300">
               <GameResult
                 eyebrow="Completely unnecessary victory"
                 title="You won Useless Spider Solitaire!"
