@@ -62,9 +62,5 @@ export function canMoveTableauSequence(
 }
 
 export function canDealFromStock(board: SpiderBoardState): boolean {
-  return (
-    board.tableau.length === 10 &&
-    board.stock.length >= 10 &&
-    board.tableau.every((column) => column.length > 0)
-  );
+  return board.tableau.length === 10 && board.stock.length >= 10;
 }
