@@ -41,13 +41,32 @@ describe("Spider stock deals", () => {
   it("rejects a deal when a column is empty", () => {
     const board = makeBoard();
 
-    // Relocate the column's cards to preserve the full deck.
-    board.tableau[1] = [...board.tableau[0], ...board.tableau[1]];
+    // Preserve every card and keep face-down cards below face-up cards.
+    const movedCards = board.tableau[0].map((card) => ({
+      ...card,
+      faceUp: true,
+    }));
+
+    board.tableau[1] = [...board.tableau[1], ...movedCards];
     board.tableau[0] = [];
 
     const original = structuredClone(board);
+    const next = dealFromStock(board);
 
-    expect(dealFromStock(board)).toBeNull();
+    if (!next) {
+      throw new Error("Expected stock deal to succeed");
+    }
+
+    expect(next.stock).toEqual(original.stock.slice(10));
+
+    for (let i = 0; i < 10; i++) {
+      expect(next.tableau[i]).toEqual([
+        ...original.tableau[i],
+        { ...original.stock[i], faceUp: true },
+      ]);
+    }
+
+    expect(validateSpiderBoard(next)).toBe(true);
     expect(board).toEqual(original);
   });
 

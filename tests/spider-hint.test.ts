@@ -103,7 +103,9 @@ describe("Spider hints", () => {
       id: `stock-${i}`,
     }));
 
-    expect(getNextSpiderHint(board)).toBeNull();
+    expect(getNextSpiderHint(board)).toMatchObject({
+      type: "deal-stock",
+    });
   });
 
   it("can return no hint even though a legal relocation exists", () => {
