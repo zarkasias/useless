@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Settings } from "lucide-react";
+import { Info, Settings } from "lucide-react";
 
 import {
   Dialog,
@@ -42,23 +42,24 @@ export function SpiderSettings({
       <DialogTrigger asChild>
         <button
           type="button"
-          aria-label="Spider settings"
-          className="flex size-11 items-center justify-center text-amber-100"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md border border-amber-300/40 bg-black/25 px-3 text-sm font-semibold text-amber-100 transition-colors hover:border-amber-300/70 hover:bg-black/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-200"
         >
-          <Settings className="size-5" aria-hidden="true" />
+          <Settings className="size-4" aria-hidden="true" />
+          <span>Change difficulty</span>
         </button>
       </DialogTrigger>
 
       <DialogContent className="border-amber-300/30 bg-emerald-950 text-amber-100">
         <DialogHeader>
-          <DialogTitle>Spider settings</DialogTitle>
+          <DialogTitle>Change difficulty</DialogTitle>
           <DialogDescription className="text-emerald-100/80">
-            Choose a variant. Starting a new game replaces your current game.
+            More suits make the game harder. Starting a new game applies your
+            selection and replaces your current game.
           </DialogDescription>
         </DialogHeader>
 
         <label className="grid gap-2 text-sm font-semibold">
-          Game variant
+          Difficulty
           <select
             value={selectedDifficulty}
             onChange={(event) => {
@@ -85,6 +86,58 @@ export function SpiderSettings({
           >
             Start New Game
           </GameButton>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+export function SpiderInfo() {
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <button
+          type="button"
+          className="inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-3 text-sm font-semibold text-amber-100 transition-colors hover:bg-black/25 focus-visible:outline-none focus-visibe:ring-2 focus-visible:ring-amber-200"
+        >
+          <Info className="size-4" aria-hidden="true" />
+          <span>How to play</span>
+        </button>
+      </DialogTrigger>
+
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto border-amber-300/30 bg-emerald-950/90 text-amber-100">
+        <DialogHeader>
+          <DialogTitle>How to play Spider Solitaire</DialogTitle>
+          <DialogDescription className="text-emerald-100/80">
+            Complete eight runs of cards from King down to Ace, all in the same
+            suit.
+          </DialogDescription>
+        </DialogHeader>
+
+        <ul className="list-disc space-y-2 pl-5 text-xs md:text-sm leading-relaxed text-emerald-100">
+          <li>Place a card on a card one rank higher, regardless of suit.</li>
+          <li>
+            Move a group together when its cards descend in order and share the
+            same suit.
+          </li>
+          <li>Any face-up card or valid group can move to an empty column.</li>
+          <li>
+            Select the stock to deal another row. Use Hint for a suggested move
+            or Undo to take back a move.
+          </li>
+        </ul>
+
+        <div className="rounded-md border border-amber-300/25 bg-black/20 p-3 text-sm leading-relaxed">
+          <p className="font-semibold">Want an easier or harder game?</p>
+          <div className="text-xs md:text-sm mt-1 text-emerald-100">
+            Select Change difficulty above the cards:
+            <ul className="py-2 list-disc space-y-1 pl-3 leading-relaxed">
+              <li> 1 suit is Easy</li>
+              <li>2 suits is Medium</li>
+              <li>4 suits is Hard.</li>
+            </ul>
+            Your selection applies when you start a new game.
+          </div>
         </div>
       </DialogContent>
     </Dialog>

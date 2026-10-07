@@ -10,7 +10,7 @@ import GameMetric from "../../game-metric";
 
 import { GameTable } from "../../system/game-table";
 import { SpiderBoard } from "./spider-board";
-import { SpiderSettings } from "./spider-settings";
+import { SpiderInfo, SpiderSettings } from "./spider-settings";
 import { SpiderMobileBoard } from "./spider-mobile-board";
 
 import GameResult from "../../system/game-result";
@@ -322,11 +322,12 @@ export function SpiderGameContent({
           </div>
         )}
 
-        <div className="flex justify-start pt-2">
+        <div className="flex flex-wrap items-center justify-between pt-2 w-fit">
           <SpiderSettings
             difficulty={board.difficulty}
             onStartGame={startNewGame}
           />
+          <SpiderInfo />
         </div>
 
         {showStalemate && (
