@@ -6,6 +6,11 @@ on:
       - dev
       - main
 
+  push:
+    branches:
+      - dev
+      - main
+
 jobs:
   test:
     name: Unit tests and coverage
@@ -26,3 +31,31 @@ jobs:
 
       - name: Run tests with coverage
         run: npm run test:coverage
+
+      - name: Add coverage summary
+        if: always()
+        run: |
+          node -e "
+          const fs = require('fs');
+          const path = 'coverage/coverage-summary.json';
+
+          if (!fs.existsSync(path)) {
+            console.log('Coverage summary not found.');
+            process.exit(0);
+          }
+
+          const data = JSON.parse(fs.readFileSync(path, 'utf8')).total;
+
+          const summary = [
+            '## Unit Test Coverage',
+            '',
+            '| Metric | Coverage |',
+            '|---|---:|',
+            \`| Statements | \${data.statements.pct}% |\`,
+            \`| Branches | \${data.branches.pct}% |\`,
+            \`| Functions | \${data.functions.pct}% |\`,
+            \`| Lines | \${data.lines.pct}% |\`,
+          ].join('\n');
+
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
+          "
