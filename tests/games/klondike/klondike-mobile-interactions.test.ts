@@ -2,8 +2,8 @@
 import { act, createElement } from "react";
 import { createRoot } from "react-dom/client";
 import { expect, it, vi } from "vitest";
-import { useKlondikeMobileInteractions } from "../src/components/games/solitaire/klondike/use-klondike-mobile-interactions";
-import type { KlondikeBoardState } from "../src/lib/games/solitaire/klondike/klondike-types";
+import { useKlondikeMobileInteractions } from "../../../src/components/games/solitaire/klondike/use-klondike-mobile-interactions";
+import type { KlondikeBoardState } from "../../../src/lib/games/solitaire/klondike/klondike-types";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 it("executes automatic moves, asks for ambiguous destinations, and invalidates old selections", () => {

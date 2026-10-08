@@ -58,17 +58,21 @@ export async function getPublicProfileAchievements(
     return [];
   }
 
-  return (data ?? [])
-    .filter((row) => row.achievements)
-    .map((row) => {
-      const achievement = Array.isArray(row.achievements)
-        ? row.achievements[0]
-        : row.achievements;
+  return (data ?? []).flatMap((row) => {
+    const achievement = Array.isArray(row.achievements)
+      ? row.achievements[0]
+      : row.achievements;
 
-      return {
+    if (!achievement) {
+      return [];
+    }
+
+    return [
+      {
         ...achievement,
         user_id: userId,
         created_at: row.created_at,
-      } as Achievement;
-    });
+      } as Achievement,
+    ];
+  });
 }

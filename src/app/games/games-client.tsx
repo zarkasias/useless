@@ -164,6 +164,18 @@ export default function GamesClient({
                   subscribed={initialEntitlements.isSubscribed}
                 />
               </div>
+
+              <div>
+                <GameCabinetCard
+                  title="Useless Words"
+                  description="Five letters. Six guesses. With zero usefulness."
+                  icon="/game_icons/guess.webp"
+                  available={false}
+                  footerText="We're still finding the words"
+                  theme={gameCardThemes.words}
+                  subscribed={initialEntitlements.isSubscribed}
+                />
+              </div>
             </div>
           </section>
         </div>
