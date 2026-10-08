@@ -2,10 +2,10 @@
 import { act, createElement, type DragEvent } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { useKlondikeInteractions } from "../src/components/games/solitaire/klondike/use-klondike-interactions";
-import { createCardDragPreview } from "../src/components/games/solitaire/shared/card-drag-preview";
-import type { KlondikeBoardState } from "../src/lib/games/solitaire/klondike/klondike-types";
-import type { GameCard } from "../src/lib/types/gamecards";
+import { useKlondikeInteractions } from "../../../src/components/games/solitaire/klondike/use-klondike-interactions";
+import { createCardDragPreview } from "../../../src/components/games/solitaire/shared/card-drag-preview";
+import type { KlondikeBoardState } from "../../../src/lib/games/solitaire/klondike/klondike-types";
+import type { GameCard } from "../../../src/lib/types/gamecards";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
 let root: Root | undefined;

@@ -138,13 +138,13 @@ export default function GameCabinetCard({
         </span>
 
         {showSoon && (
-          <div className="flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-bold text-muted-foreground">
+          <div className="flex items-center gap-1 px-2.5 text-xs font-bold text-muted-foreground">
             <LockKeyhole className="size-3.5" />
             Soon
           </div>
         )}
         {showPro && (
-          <div className="flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-1 text-xs font-black text-muted-foreground">
+          <div className="flex items-center gap-1 px-2.5 text-xs font-black text-muted-foreground">
             <LockKeyhole className="size-3.5" />
             Pro
           </div>

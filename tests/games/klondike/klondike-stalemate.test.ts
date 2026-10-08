@@ -1,11 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { getKlondikeProgressStatus, isKlondikeStalemate } from "../src/lib/games/solitaire/klondike/klondike-stalemate";
+import {
+  getKlondikeProgressStatus,
+  isKlondikeStalemate,
+} from "../../../src/lib/games/solitaire/klondike/klondike-stalemate";
 import {
   moveTableauSequence,
   moveFoundationCardToTableau,
-} from "../src/lib/games/solitaire/klondike/klondike-moves";
-import type { KlondikeBoardState } from "../src/lib/games/solitaire/klondike/klondike-types";
-import type { GameCard } from "../src/lib/types/gamecards";
+} from "../../../src/lib/games/solitaire/klondike/klondike-moves";
+import type { KlondikeBoardState } from "../../../src/lib/games/solitaire/klondike/klondike-types";
+import type { GameCard } from "../../../src/lib/types/gamecards";
 
 function card(
   rank: GameCard["rank"],
@@ -26,15 +29,7 @@ function blockedBoard(): KlondikeBoardState {
       { suit: "clubs", cards: [] },
       { suit: "spades", cards: [] },
     ],
-    tableau: [
-      [card("8", "spades")],
-      [],
-      [],
-      [],
-      [],
-      [],
-      [],
-    ],
+    tableau: [[card("8", "spades")], [], [], [], [], [], []],
   };
 }
 
@@ -57,7 +52,11 @@ describe("Klondike stalemate detection", () => {
 
   it("counts a King stack move that uncovers a hidden card", () => {
     const board = blockedBoard();
-    board.tableau[0] = [card("4", "clubs", false), card("K", "spades"), card("Q", "hearts")];
+    board.tableau[0] = [
+      card("4", "clubs", false),
+      card("K", "spades"),
+      card("Q", "hearts"),
+    ];
     expect(isKlondikeStalemate(board)).toBe(false);
     const moved = moveTableauSequence(board, 0, 1, 1);
     expect(moved?.tableau[0][0].faceUp).toBe(true);
@@ -140,7 +139,12 @@ describe("Klondike stalemate detection", () => {
 
   it("detects four blocked waste cards with two empty columns despite King relocations", () => {
     const board = blockedBoard();
-    board.waste = [card("2", "clubs"), card("4", "clubs"), card("6", "clubs"), card("9", "clubs")];
+    board.waste = [
+      card("2", "clubs"),
+      card("4", "clubs"),
+      card("6", "clubs"),
+      card("9", "clubs"),
+    ];
     board.tableau = [
       [card("K", "spades"), card("Q", "hearts")],
       [card("8", "spades")],
@@ -164,7 +168,21 @@ describe("Klondike stalemate detection", () => {
     board.stock = [];
     board.waste = [];
     board.tableau = Array.from({ length: 7 }, () => []);
-    const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"] as const;
+    const ranks = [
+      "A",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "J",
+      "Q",
+      "K",
+    ] as const;
     board.foundations = board.foundations.map((foundation) => ({
       ...foundation,
       cards: ranks.map((rank) => card(rank, foundation.suit)),
@@ -174,7 +192,11 @@ describe("Klondike stalemate detection", () => {
 
   it("finds a hidden-card reveal requiring two tableau rearrangements", () => {
     const board = blockedBoard();
-    board.tableau[0] = [card("4", "clubs", false), card("8", "spades"), card("7", "hearts")];
+    board.tableau[0] = [
+      card("4", "clubs", false),
+      card("8", "spades"),
+      card("7", "hearts"),
+    ];
     board.tableau[1] = [card("8", "clubs")];
     board.tableau[2] = [card("9", "hearts")];
     expect(isKlondikeStalemate(board)).toBe(false);
@@ -207,7 +229,10 @@ describe("Klondike stalemate detection", () => {
     "finds a playable card buried in the %s after drawing/recycling",
     (pile) => {
       const board = blockedBoard();
-      board[pile] = [card("A", "hearts", pile === "waste"), card("9", "clubs", pile === "waste")];
+      board[pile] = [
+        card("A", "hearts", pile === "waste"),
+        card("9", "clubs", pile === "waste"),
+      ];
       expect(isKlondikeStalemate(board)).toBe(false);
     },
   );

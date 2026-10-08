@@ -79,4 +79,23 @@ export const gameCardThemes = {
     footerBackground: "bg-white/60",
     footerText: "text-muted-foreground",
   },
+
+  words: {
+    border: "border-sky-200",
+    gradient: "from-sky-50 via-white to-indigo-50",
+    glow: "bg-sky-300/20",
+    hoverShadow: "hover:shadow-sky-500/10",
+
+    iconGradient: "from-sky-100/50 via-blue-100/50 to-indigo-100/50",
+
+    badgeBackground: "bg-sky-100",
+    badgeText: "text-sky-700",
+
+    titleText: "text-gray-700",
+    descriptionText: "text-muted-foreground",
+
+    footerBorder: "border-sky-100",
+    footerBackground: "bg-white/60",
+    footerText: "text-muted-foreground",
+  },
 } satisfies Record<string, GameCardTheme>;

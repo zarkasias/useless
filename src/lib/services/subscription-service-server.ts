@@ -85,7 +85,7 @@ export async function markStripeSubscriptionCanceled(
     .update({
       status: "canceled",
       cancel_at_period_end: false,
-      current_period_end: subscriptionItem.current_period_end
+      current_period_end: subscriptionItem?.current_period_end
         ? new Date(subscriptionItem.current_period_end * 1000).toISOString()
         : null,
       updated_at: new Date().toISOString(),
