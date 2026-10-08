@@ -10,7 +10,7 @@ export default async function SpiderPage() {
   const profile = await getAuthenticatedUserProfile();
 
   if (!profile) {
-    redirect("/login?next=/games/solitaire");
+    redirect("/login?next=/games/spider");
   }
 
   const [entitlements, spiderStats] = await Promise.all([
