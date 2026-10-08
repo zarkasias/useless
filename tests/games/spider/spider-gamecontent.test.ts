@@ -469,4 +469,97 @@ describe("SpiderGameContent", () => {
       expect(mocks.recorded).toHaveBeenCalledTimes(1);
     },
   );
+  it.each(["success", "failure", "exception"] as const)(
+    "ignores an older game's %s response while a newer result is saving",
+    async (outcome) => {
+      type SaveResponse = {
+        success: boolean;
+        session?: { score: number };
+        error?: string;
+      };
+
+      let resolveOld!: (response: SaveResponse) => void;
+      let rejectOld!: (error: Error) => void;
+      let resolveCurrent!: (response: SaveResponse) => void;
+
+      const oldSave = new Promise<SaveResponse>((resolve, reject) => {
+        resolveOld = resolve;
+        rejectOld = reject;
+      });
+
+      const currentSave = new Promise<SaveResponse>((resolve) => {
+        resolveCurrent = resolve;
+      });
+
+      mocks.record
+        .mockReturnValueOnce(oldSave)
+        .mockReturnValueOnce(currentSave);
+      mocks.complete.mockReturnValue(true);
+
+      await render();
+
+      expect(container?.querySelector('[role="status"]')?.textContent).toBe(
+        "Saving result...",
+      );
+
+      await click("New Game");
+
+      // Render the replacement board as an active game first.
+      mocks.complete.mockReturnValue(false);
+      await render(nextBoard);
+
+      // Finish the replacement game while the old save remains pending.
+      mocks.complete.mockReturnValue(true);
+      await render(nextBoard);
+
+      expect(mocks.record).toHaveBeenCalledTimes(2);
+
+      await act(async () => {
+        if (outcome === "exception") {
+          rejectOld(new Error("Previous game network failure"));
+        } else if (outcome === "failure") {
+          resolveOld({
+            success: false,
+            error: "Previous game could not be saved.",
+          });
+        } else {
+          resolveOld({
+            success: true,
+            session: { score: 999999 },
+          });
+        }
+      });
+
+      expect(container?.querySelector('[role="status"]')?.textContent).toBe(
+        "Saving result...",
+      );
+      expect(container?.textContent).not.toContain("999999");
+      expect(container?.textContent).not.toContain(
+        "Previous game could not be saved.",
+      );
+      expect(container?.textContent).not.toContain(
+        "Unable to confirm that your result was saved.",
+      );
+
+      // A successfully saved older game still refreshes external game data.
+      expect(mocks.recorded).toHaveBeenCalledTimes(
+        outcome === "success" ? 1 : 0,
+      );
+
+      await act(async () => {
+        resolveCurrent({
+          success: true,
+          session: { score: 321 },
+        });
+      });
+
+      expect(container?.querySelector('[role="status"]')?.textContent).toBe(
+        "Result saved.",
+      );
+      expect(container?.textContent).toContain("321");
+      expect(mocks.recorded).toHaveBeenCalledTimes(
+        outcome === "success" ? 2 : 1,
+      );
+    },
+  );
 });

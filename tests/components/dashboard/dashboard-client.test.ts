@@ -52,7 +52,21 @@ vi.mock("@/components/dashboard/activity-feed", () => ({
 }));
 
 vi.mock("@/components/packs/featured-pack-promo", () => ({
-  FeaturedPackPromo: () => null,
+  FeaturedPackPromo: ({
+    pack,
+  }: {
+    pack: {
+      id: string;
+      collectedAchievements: number;
+      totalAchievements: number;
+    };
+  }) =>
+    createElement("div", {
+      "data-testid": "featured-pack",
+      "data-pack-id": pack.id,
+      "data-collected": String(pack.collectedAchievements),
+      "data-total": String(pack.totalAchievements),
+    }),
 }));
 
 vi.mock("@/components/achievement-card-updated", () => ({
@@ -371,4 +385,109 @@ describe("DashboardClient", () => {
 
     expect(button("Claim Today's Achievement").disabled).toBe(false);
   });
+  it.each([
+    {
+      name: "counts new daily and triggered achievements from the pack",
+      initialCollected: 1,
+      total: 5,
+      existingDaily: false,
+      expectedCollected: 3,
+    },
+    {
+      name: "caps collected progress at the pack total",
+      initialCollected: 4,
+      total: 5,
+      existingDaily: false,
+      expectedCollected: 5,
+    },
+    {
+      name: "excludes achievements already in the collection",
+      initialCollected: 1,
+      total: 5,
+      existingDaily: true,
+      expectedCollected: 2,
+    },
+    {
+      name: "preserves progress when new achievements belong to another pack",
+      initialCollected: 1,
+      total: 5,
+      existingDaily: false,
+      expectedCollected: 1,
+      differentPack: true,
+    },
+  ])(
+    "$name",
+    async ({
+      initialCollected,
+      total,
+      existingDaily,
+      expectedCollected,
+      differentPack,
+    }) => {
+      const pack: DashboardProps["initialPacks"][number] = {
+        id: "featured-pack",
+        name: "Featured Collection",
+        slug: "featured-collection",
+        description: null,
+        price_cents: null,
+        currency: null,
+        starts_at: null,
+        ends_at: null,
+        cover_image_path: null,
+        theme_key: null,
+        status: "published",
+        isUpcoming: false,
+        owned: true,
+        availableForPurchase: false,
+        hasEnded: false,
+        totalAchievements: total,
+        collectedAchievements: initialCollected,
+        completed: false,
+      };
+
+      const packId = differentPack ? "another-pack" : pack.id;
+
+      const daily: Achievement = {
+        ...achievement("daily"),
+        pack_id: packId,
+      };
+      const special: Achievement = {
+        ...achievement("special"),
+        pack_id: packId,
+      };
+
+      mocks.claim.mockResolvedValue({
+        status: "claimed",
+        achievement: daily,
+        triggeredAchievements: [special],
+      });
+
+      await render({
+        initialPacks: [pack],
+        initialAchievements: existingDaily ? [daily] : [],
+      });
+
+      expect(
+        container
+          .querySelector('[data-testid="featured-pack"]')
+          ?.getAttribute("data-collected"),
+      ).toBe(String(initialCollected));
+
+      await click();
+
+      const featured = container.querySelector('[data-testid="featured-pack"]');
+
+      expect(featured?.getAttribute("data-pack-id")).toBe(pack.id);
+      expect(featured?.getAttribute("data-collected")).toBe(
+        String(expectedCollected),
+      );
+      expect(featured?.getAttribute("data-total")).toBe(String(total));
+      expect(recentIds()).toEqual(
+        existingDaily ? ["special", "daily"] : ["daily", "special"],
+      );
+      expect(mocks.success).toHaveBeenCalledWith(
+        "Today's achievement unlocked!",
+      );
+    },
+  );
 });
