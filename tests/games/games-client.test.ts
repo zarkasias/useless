@@ -145,7 +145,7 @@ describe("GamesClient", () => {
     async ({ isSubscribed }) => {
       await render(isSubscribed);
 
-      const words = card("Useless Words");
+      const words = card("Useless Guess");
       expect(words.getAttribute("data-available")).toBe("false");
 
       await act(async () => {

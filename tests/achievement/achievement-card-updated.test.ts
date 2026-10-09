@@ -246,7 +246,6 @@ describe("AchievementCard", () => {
     );
     expect(mocks.dismiss).toHaveBeenCalledWith("preparing-toast");
     expect(button("Share").disabled).toBe(false);
-    expect(button("Download").disabled).toBe(false);
 
     await render({ showShareButton: true });
 
@@ -258,7 +257,6 @@ describe("AchievementCard", () => {
 
     expect(fetchImage).toHaveBeenCalledTimes(1);
     expect(button("Share").disabled).toBe(true);
-    expect(button("Download").disabled).toBe(true);
   });
 
   it("generates grid images without showing a preparation toast", async () => {
@@ -284,7 +282,6 @@ describe("AchievementCard", () => {
 
     expect(container?.textContent).toContain("Preparing your achievement...");
     expect(button("Share").disabled).toBe(true);
-    expect(button("Download").disabled).toBe(true);
 
     await act(async () => {
       resolveBlob(new Blob(["test-image"], { type: "image/png" }));
@@ -294,7 +291,6 @@ describe("AchievementCard", () => {
       "Preparing your achievement...",
     );
     expect(button("Share").disabled).toBe(false);
-    expect(button("Download").disabled).toBe(false);
   });
 
   it("offers a retry after canvas generation fails", async () => {
@@ -324,50 +320,6 @@ describe("AchievementCard", () => {
         (element) => element.textContent?.trim() === "Try Again",
       ),
     ).toBe(false);
-  });
-
-  it("downloads the PNG with a filename based on the achievement title", async () => {
-    await render({ showShareButton: true });
-
-    let downloadedHref = "";
-    let downloadedName = "";
-
-    vi.mocked(HTMLAnchorElement.prototype.click).mockImplementation(function (
-      this: HTMLAnchorElement,
-    ) {
-      downloadedHref = this.href;
-      downloadedName = this.download;
-    });
-
-    await click("Download");
-
-    expect(downloadedHref).toBe(imageUrl);
-    expect(downloadedName).toBe("achievement-successfully-did-nothing.png");
-    expect(container?.ownerDocument.querySelector("a[download]")).toBeNull();
-    expect(mocks.success).toHaveBeenCalledWith("Image downloaded!", {
-      description: "Achievement saved to your device",
-    });
-  });
-
-  it("reports a download exception", async () => {
-    await render({ showShareButton: true });
-
-    vi.mocked(HTMLAnchorElement.prototype.click).mockImplementation(() => {
-      throw new Error("Download blocked");
-    });
-
-    try {
-      await click("Download");
-
-      expect(mocks.error).toHaveBeenCalledWith("Failed to download", {
-        description: "Please try again later",
-      });
-      expect(mocks.success).not.toHaveBeenCalled();
-    } finally {
-      document.querySelectorAll("a[download]").forEach((link) => {
-        link.remove();
-      });
-    }
   });
 
   it("shares the generated PNG when file sharing is supported", async () => {
@@ -438,7 +390,6 @@ describe("AchievementCard", () => {
       description: "Try downloading the image instead.",
     });
     expect(button("Share").disabled).toBe(false);
-    expect(button("Download").disabled).toBe(false);
   });
 
   it.each(["loaded", "failed"] as const)(

@@ -8,13 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Download,
-  LoaderCircle,
-  RefreshCw,
-  Share2,
-  Sparkles,
-} from "lucide-react";
+import { LoaderCircle, RefreshCw, Share2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Achievement } from "@/lib/supabase";
 import { formatDistanceToNow } from "date-fns";
@@ -517,34 +511,6 @@ function AchievementCardComponent({
     `I just unlocked "${title}" on Useless Achievements!`;
   // const getShareUrl = () => window.location.origin;
 
-  // Function to download the generated image
-  const downloadImage = () => {
-    if (!imageUrl) {
-      toast.error("Image not ready yet", {
-        description: "Please wait for the image to generate",
-      });
-      return;
-    }
-
-    try {
-      const link = document.createElement("a");
-      link.href = imageUrl;
-      link.download = `achievement-${title.toLowerCase().replace(/\s+/g, "-")}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-      toast.success("Image downloaded!", {
-        description: "Achievement saved to your device",
-      });
-    } catch (error) {
-      console.error("Error downloading image:", error);
-      toast.error("Failed to download", {
-        description: "Please try again later",
-      });
-    }
-  };
-
   const shareAchievement = async () => {
     if (!imageFile) {
       toast.error("Image not ready yet", {
@@ -635,8 +601,8 @@ function AchievementCardComponent({
                   className={`${nunito.className}
                     ${
                       isCompact
-                        ? `min-h-10 line-clamp-2 text-xs leading-[0.875rem]`
-                        : `min-h-[68px] line-clamp-3 text-xs leading-4`
+                        ? `min-h-8 line-clamp-2 text-xs leading-[0.875rem]`
+                        : `min-h-[48px] line-clamp-3 text-xs leading-4`
                     }`}
                 >
                   {description}
@@ -689,8 +655,6 @@ function AchievementCardComponent({
                 </div>
               </div>
             </div>
-
-            <div className="space-y-1"></div>
           </CardHeader>
 
           {/* {unlockedAt && (
@@ -701,68 +665,49 @@ function AchievementCardComponent({
             </CardContent>
           )} */}
           {showShareButton && (
-            <CardFooter className="flex flex-col pt-0 gap-4 mb-1">
-              <div className="flex w-full justify-center gap-2 pb-1">
-                <Button
-                  type="button"
-                  onClick={shareAchievement}
-                  className="
-             w-full
-  max-w-[180px]
-  sm:max-w-none
-  sm:flex-1
-  bg-gradient-to-r
-  from-orange-500
-  to-rose-500
+            <CardFooter className="flex border-t [.border-t]:pt-2 border-gray-400 justify-end pt-0 pb-2 px-0 mx-2 md:mx-4">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={shareAchievement}
+                className="
+                group
+                h-auto
+  bg-transparent
+  px-0
+  py-0
   font-bold
-  text-white
-  shadow-md
-  shadow-orange-500/20
-  transition-all
-  duration-200
+  shadow-none
   hover:-translate-y-0.5
-  hover:from-orange-400
-  hover:to-rose-400
-  hover:shadow-lg
+  hover:bg-transparent
+        hover:shadow-none
     "
-                  disabled={
-                    isGeneratingImage ||
-                    !imageFile ||
-                    !!socialLoading ||
-                    !isCollected
-                  }
-                >
-                  {socialLoading === "Share" ? (
-                    <LoaderCircle className="mr-2 size-4 animate-spin" />
-                  ) : (
-                    <Share2 className="mr-2 size-4" />
-                  )}
-                  Share
-                </Button>
-
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={downloadImage}
+                disabled={
+                  isGeneratingImage ||
+                  !imageFile ||
+                  !!socialLoading ||
+                  !isCollected
+                }
+              >
+                {socialLoading === "Share" ? (
+                  <LoaderCircle className="mr-2 size-4 animate-spin text-orange-500" />
+                ) : (
+                  <Share2 className="mr-2 size-4 text-orange-500 transition-colors group-hover:text-orange-400" />
+                )}
+                <span
                   className="
-      sm:flex-1
-      transition-all
-      duration-200
-      hidden
-      sm:flex
-      hover:-translate-y-0.5
-    "
-                  disabled={
-                    isGeneratingImage ||
-                    !imageUrl ||
-                    !!socialLoading ||
-                    !isCollected
-                  }
+                bg-gradient-to-r 
+                from-orange-500 
+                to-rose-500 
+                bg-clip-text 
+                text-transparent 
+                transition-all 
+                group-hover:from-orange-400 
+                group-hover:to-rose-400"
                 >
-                  <Download className="mr-2 size-4" />
-                  Download
-                </Button>
-              </div>
+                  Share
+                </span>
+              </Button>
 
               {/* Regenerate button if image generation failed */}
               {!imageUrl &&

@@ -167,7 +167,7 @@ export default function GamesClient({
 
               <div>
                 <GameCabinetCard
-                  title="Useless Words"
+                  title="Useless Guess"
                   description="Five letters. Six guesses. With zero usefulness."
                   icon="/game_icons/guess.webp"
                   available={false}
