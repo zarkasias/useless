@@ -1,12 +1,5 @@
 import Link from "next/link";
-import {
-  Copy,
-  Download,
-  Send,
-  ArrowDown,
-  UserRound,
-  Share2,
-} from "lucide-react";
+import { Send, ArrowDown, Share2 } from "lucide-react";
 import { HeroAchievementCard } from "./hero-achievement-card";
 import type { ShowcaseAchievement } from "./home-data";
 import styles from "./home-styles";
