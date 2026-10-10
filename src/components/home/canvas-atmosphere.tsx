@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import styles from "./home.module.css";
+import styles from "./home-styles";
 
 interface CanvasAtmosphereProps {
   pulse: number;

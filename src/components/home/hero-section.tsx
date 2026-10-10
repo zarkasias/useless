@@ -8,7 +8,7 @@ import { useGSAP } from "@gsap/react";
 
 import { HeroAchievementScene } from "./hero-achievement-scene";
 import type { ShowcaseAchievement } from "./home-data";
-import styles from "./home.module.css";
+import styles from "./home-styles";
 
 gsap.registerPlugin(useGSAP);
 
@@ -55,7 +55,7 @@ export function HeroSection({
   return (
     <section ref={sectionRef} className={styles.hero}>
       <p className={cn(styles.eyebrow, "text-emerald-700")} data-hero-enter>
-        Small accomplishments. Unreasonable celebration.
+        Achievements nobody asked for.
       </p>
 
       <h1 className={cn(styles.heroTitle, "text-grey-800")} data-hero-enter>

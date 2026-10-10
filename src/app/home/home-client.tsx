@@ -22,7 +22,7 @@ import type { UserEntitlements } from "@/lib/services/entitlement-service-server
 import type { StoreAchievementPack } from "@/lib/services/pack-store-service-server";
 import { claimDailyAchievementAction } from "@/app/actions/achievement-actions";
 
-import styles from "@/components/home/home.module.css";
+import styles from "@/components/home/home-styles";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
@@ -51,6 +51,16 @@ export default function HomeClient({
 
   const achievements = useMemo(
     () => getShowcaseAchievements(featuredAchievements),
+    [featuredAchievements],
+  );
+
+  const collectionAchievements = useMemo(
+    () => getShowcaseAchievements(featuredAchievements, 4, 8),
+    [featuredAchievements],
+  );
+
+  const profileAchievements = useMemo(
+    () => getShowcaseAchievements(featuredAchievements, 8, 12),
     [featuredAchievements],
   );
 
@@ -145,15 +155,8 @@ export default function HomeClient({
         isSubscribed={initialEntitlements?.isSubscribed ?? false}
       />
 
-      {/* <div className={styles.storyNavigation}>
-        <a href="#collection">Collect &amp; share</a>
-        <a href="#games">Play</a>
-        <a href="#profile">Profiles</a>
-        <a href="#subscription">Go Pro ↗</a>
-      </div> */}
-
       <CollectionStory
-        achievements={achievements}
+        achievements={collectionAchievements}
         selectedIndex={safeSelectedIndex}
         onSelect={setSelectedIndex}
         isLoggedIn={!!initialProfile}
@@ -167,7 +170,10 @@ export default function HomeClient({
       </div>
 
       <div data-story-reveal>
-        <ProfileStory user={initialProfile} achievements={achievements} />
+        <ProfileStory
+          user={initialProfile}
+          achievements={profileAchievements}
+        />
       </div>
 
       <div data-story-reveal>

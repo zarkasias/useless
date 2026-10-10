@@ -5,6 +5,8 @@ export type ShowcaseAchievement = Achievement;
 
 export function getShowcaseAchievements(
   achievements: Achievement[] = [],
+  start = 0,
+  end = 4,
 ): ShowcaseAchievement[] {
   return achievements
     .filter(
@@ -14,7 +16,7 @@ export function getShowcaseAchievements(
         typeof achievement.icon_path === "string" &&
         achievement.icon_path.trim().length > 0,
     )
-    .slice(0, 4)
+    .slice(start, end)
     .map((achievement) => ({
       ...achievement,
       icon_path: achievement.icon_path!.trim(),

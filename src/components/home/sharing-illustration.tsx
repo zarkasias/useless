@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { HeroAchievementCard } from "./hero-achievement-card";
 import type { ShowcaseAchievement } from "./home-data";
-import styles from "./home.module.css";
+import styles from "./home-styles";
 
 interface SharingIllustrationProps {
   achievement?: ShowcaseAchievement;
@@ -35,7 +35,6 @@ export function SharingIllustration({
       {achievement && (
         <div className={styles.shareExample}>
           <HeroAchievementCard achievement={achievement} />
-          <p className={styles.finePrint}>Example achievement image</p>
         </div>
       )}
 

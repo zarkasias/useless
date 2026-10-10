@@ -164,3 +164,15 @@
   position: relative;
   z-index: 50;
 }
+
+@keyframes home-object-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(22px) rotate(6deg) scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(0) scale(1);
+  }
+}

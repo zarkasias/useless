@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Achievement } from "@/lib/supabase";
 
 const mocks = vi.hoisted(() => ({ card: vi.fn() }));
-vi.mock("@/components/home/home.module.css", () => ({ default: {} }));
+
 vi.mock("@/components/achievement-card-updated", () => ({
   AchievementCard: (props: {
     achievement: Achievement;

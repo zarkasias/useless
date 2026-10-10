@@ -9,8 +9,6 @@ const mocks = vi.hoisted(() => ({
   desktop: false,
 }));
 
-vi.mock("@/components/home/home.module.css", () => ({ default: {} }));
-
 vi.mock("gsap", () => ({
   default: { registerPlugin: vi.fn() },
 }));

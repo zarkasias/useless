@@ -2,7 +2,7 @@
 
 import { AchievementCard } from "@/components/achievement-card-updated";
 import type { ShowcaseAchievement } from "./home-data";
-import styles from "./home.module.css";
+import styles from "./home-styles";
 
 interface HeroAchievementCardProps {
   achievement: ShowcaseAchievement;

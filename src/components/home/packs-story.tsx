@@ -3,7 +3,7 @@ import Link from "next/link";
 import { FeaturedPackPromo } from "@/components/packs/featured-pack-promo";
 import type { StoreAchievementPack } from "@/lib/services/pack-store-service-server";
 
-import styles from "./home.module.css";
+import styles from "./home-styles";
 
 interface PacksStoryProps {
   packs: StoreAchievementPack[];

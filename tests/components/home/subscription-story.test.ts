@@ -4,8 +4,6 @@ import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/components/home/home.module.css", () => ({ default: {} }));
-
 import { SubscriptionStory } from "@/components/home/subscription-story";
 
 type Props = Parameters<typeof SubscriptionStory>[0];

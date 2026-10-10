@@ -31,7 +31,24 @@ export async function createNotification({
       actor_id: actorId,
       reference_id: referenceId,
     })
-    .select("*")
+    .select(
+      `
+    id,
+    user_id,
+    type,
+    title,
+    message,
+    actor_id,
+    reference_id,
+    read_at,
+    created_at,
+    actor:profiles!notifications_actor_id_fkey (
+      id,
+      username,
+      avatar_url
+    )
+  `,
+    )
     .single();
 
   if (error) {
@@ -39,7 +56,14 @@ export async function createNotification({
     throw new Error("Unable to create notification.");
   }
 
-  return data as UserNotification;
+  const actor = Array.isArray(data.actor)
+    ? (data.actor[0] ?? null)
+    : (data.actor ?? null);
+
+  return {
+    ...data,
+    actor,
+  } as UserNotification;
 }
 
 export async function getUnreadNotifications(
@@ -47,7 +71,24 @@ export async function getUnreadNotifications(
 ): Promise<UserNotification[]> {
   const { data, error } = await supabaseAdmin
     .from("notifications")
-    .select("*")
+    .select(
+      `
+      id,
+      user_id,
+      type,
+      title,
+      message,
+      actor_id,
+      reference_id,
+      read_at,
+      created_at,
+      actor:profiles!notifications_actor_id_fkey (
+        id,
+        username,
+        avatar_url
+      )
+      `,
+    )
     .eq("user_id", userId)
     .is("read_at", null)
     .order("created_at", {
@@ -59,7 +100,16 @@ export async function getUnreadNotifications(
     return [];
   }
 
-  return (data ?? []) as UserNotification[];
+  return (data ?? []).map((notification) => {
+    const actor = Array.isArray(notification.actor)
+      ? (notification.actor[0] ?? null)
+      : (notification.actor ?? null);
+
+    return {
+      ...notification,
+      actor,
+    } as UserNotification;
+  });
 }
 
 export async function markNotificationAsRead(

@@ -8,7 +8,7 @@ import { DashboardStats } from "@/components/dashboard/dashboard-stats";
 import type { UserProfile } from "@/lib/supabase";
 import { HeroAchievementCard } from "./hero-achievement-card";
 import type { ShowcaseAchievement } from "./home-data";
-import styles from "./home.module.css";
+import styles from "./home-styles";
 
 interface ProfileStoryProps {
   user: UserProfile | null;

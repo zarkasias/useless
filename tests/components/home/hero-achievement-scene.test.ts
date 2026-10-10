@@ -5,8 +5,6 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Achievement } from "@/lib/supabase";
 
-vi.mock("@/components/home/home.module.css", () => ({ default: {} }));
-
 vi.mock("@/components/home/canvas-atmosphere", () => ({
   CanvasAtmosphere: ({ pulse }: { pulse: number }) =>
     createElement("div", {

@@ -10,7 +10,7 @@ import { HeroAchievementCard } from "./hero-achievement-card";
 import { useIsDesktop } from "../utils/isDesktop";
 import { SharingIllustration } from "./sharing-illustration";
 import type { ShowcaseAchievement } from "./home-data";
-import styles from "./home.module.css";
+import styles from "./home-styles";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 

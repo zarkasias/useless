@@ -3,8 +3,6 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import type { Achievement, UserProfile } from "@/lib/supabase";
 
-vi.mock("@/components/home/home.module.css", () => ({ default: {} }));
-
 vi.mock("@/components/home/hero-achievement-card", () => ({
   HeroAchievementCard: ({ achievement }: { achievement: Achievement }) =>
     createElement("article", null, achievement.title),

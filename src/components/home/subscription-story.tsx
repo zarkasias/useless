@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 
-import styles from "./home.module.css";
+import styles from "./home-styles";
 
 interface SubscriptionStoryProps {
   isSubscribed: boolean;
@@ -35,8 +35,8 @@ export function SubscriptionStory({
 
       <p className={styles.subscriptionDescription}>
         Collect unlimited ridiculous achievements, play achievement-powered
-        games, protect your streak, and climb the leaderboard for absolutely
-        no good reason.
+        games, protect your streak, and climb the leaderboard for absolutely no
+        good reason.
       </p>
 
       <div className={styles.plan}>
@@ -64,7 +64,9 @@ export function SubscriptionStory({
         </div>
 
         {annual && (
-          <p className={styles.finePrint}>About $2.08/month, billed annually.</p>
+          <p className={styles.finePrint}>
+            About $2.08/month, billed annually.
+          </p>
         )}
 
         <p className={styles.finePrint}>
@@ -89,19 +91,25 @@ export function SubscriptionStory({
                 : `/pro?plan=${annual ? "year" : "month"}`
           }
         >
-          {isSubscribed ? "View subscription ↗" : !isLoggedIn ? "Create account to subscribe ↗" : "Explore Pro ↗"}
+          {isSubscribed
+            ? "View subscription ↗"
+            : !isLoggedIn
+              ? "Create account to subscribe ↗"
+              : "Explore Pro ↗"}
         </Link>
 
-        <p className={styles.finePrint}>Cancel anytime. Your dignity is already gone.</p>
+        <p className={styles.finePrint}>
+          Cancel anytime. Your dignity is already gone.
+        </p>
       </div>
 
       <p className={styles.subscriptionDescription}>
-        No complicated tiers. No mysterious enterprise pricing. Just ten
-        free achievements or unlimited pointless progress.
+        No complicated tiers. No mysterious enterprise pricing. Just ten free
+        achievements or unlimited pointless progress.
       </p>
 
       <div className={styles.finalClaim}>
-        <p>Today’s achievement isn’t going to claim itself.</p>
+        <p>Today&apos;s achievement isn&apos;t going to claim itself.</p>
 
         <button
           type="button"

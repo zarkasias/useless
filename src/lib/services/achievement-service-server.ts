@@ -892,10 +892,16 @@ export async function getLatestMetaAchievement(
   } as Achievement;
 }
 
-const HERO_ACHIEVEMENT_TYPES = ["COMMON", "RARE", "EPIC", "LEGENDARY"] as const;
+const HERO_ACHIEVEMENT_TYPES = [
+  "COMMON",
+  "RARE",
+  "EPIC",
+  "LEGENDARY",
+  "GAME",
+] as const;
 
 export async function getFeaturedHeroAchievements(
-  count: number = 6,
+  count: number = 12,
 ): Promise<Achievement[]> {
   const limit = Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 6;
 

@@ -67,7 +67,25 @@ describe("createNotification", () => {
       actor_id: null,
       reference_id: null,
     });
-    expect(query.select).toHaveBeenCalledWith("*");
+    expect(query.select).toHaveBeenCalledTimes(1);
+
+    const selectedColumns = query.select.mock.calls[0]?.[0];
+
+    expect(typeof selectedColumns).toBe("string");
+    expect(String(selectedColumns).replace(/\s+/g, "")).toBe(
+      [
+        "id",
+        "user_id",
+        "type",
+        "title",
+        "message",
+        "actor_id",
+        "reference_id",
+        "read_at",
+        "created_at",
+        "actor:profiles!notifications_actor_id_fkey(id,username,avatar_url)",
+      ].join(","),
+    );
     expect(query.single).toHaveBeenCalledOnce();
   });
 
