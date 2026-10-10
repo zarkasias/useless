@@ -60,6 +60,13 @@ vi.mock("next/image", () => ({
     createElement("img", { src, alt }),
 }));
 
+vi.mock("@/components/utils/title-fonts", () => ({
+  fredoka: { className: "font-fredoka" },
+  nunito: { className: "font-nunito" },
+  titan: { className: "font-titan" },
+  baloo: { className: "font-baloo" },
+}));
+
 import HomeClient from "@/app/home/home-client";
 
 let container: HTMLDivElement | undefined;
@@ -108,9 +115,14 @@ async function render() {
 
 function claimButtons(): HTMLButtonElement[] {
   return Array.from(container?.querySelectorAll("button") ?? []).filter(
-    (button) =>
-      button.textContent?.includes("Claim my useless achievement") ||
-      button.textContent === "Claiming…",
+    (button) => {
+      const text = button.textContent?.trim() ?? "";
+
+      return (
+        text.startsWith("Claim my useless achievement") ||
+        text.startsWith("Claiming…")
+      );
+    },
   );
 }
 

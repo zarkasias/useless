@@ -58,7 +58,7 @@ interface AchievementCardProps {
   unlockedAt?: string;
   ingrid?: boolean;
   showShareButton?: boolean;
-  variant?: "default" | "compact";
+  variant?: "default" | "compact" | "enlarged";
 }
 
 function AchievementCardComponent({
@@ -80,6 +80,7 @@ function AchievementCardComponent({
   const generateImageRef = useRef<() => Promise<void>>(async () => {});
 
   const isCompact = variant === "compact";
+  const isEnlarged = variant === "enlarged";
 
   const cardClass = `
   flex
@@ -98,6 +99,7 @@ function AchievementCardComponent({
   h-full
   rounded-2xl
   bg-gradient-to-br
+  ${isEnlarged && "md:scale-105"}
   ${typeBorderColors[type]}
   p-[1px]
   shadow-sm
@@ -113,6 +115,8 @@ function AchievementCardComponent({
   const loadImage = (src: string): Promise<HTMLImageElement> => {
     return new Promise((resolve, reject) => {
       const image = new window.Image();
+
+      image.crossOrigin = "anonymous";
 
       image.onload = () => resolve(image);
       image.onerror = reject;

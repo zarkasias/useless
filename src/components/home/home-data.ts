@@ -1,0 +1,22 @@
+import type { Achievement } from "@/lib/supabase";
+
+// Keep the full record so the homepage renders the shared site card.
+export type ShowcaseAchievement = Achievement;
+
+export function getShowcaseAchievements(
+  achievements: Achievement[] = [],
+): ShowcaseAchievement[] {
+  return achievements
+    .filter(
+      (achievement) =>
+        achievement.status === "published" &&
+        achievement.is_secret === false &&
+        typeof achievement.icon_path === "string" &&
+        achievement.icon_path.trim().length > 0,
+    )
+    .slice(0, 4)
+    .map((achievement) => ({
+      ...achievement,
+      icon_path: achievement.icon_path!.trim(),
+    }));
+}

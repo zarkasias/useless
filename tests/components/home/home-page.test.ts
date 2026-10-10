@@ -5,6 +5,9 @@ const mocks = vi.hoisted(() => ({
   getProfile: vi.fn(),
   getEntitlements: vi.fn(),
   getPacks: vi.fn(),
+  getFeatured: vi.fn(),
+  getProfileAchievements: vi.fn(),
+  getStreak: vi.fn(),
 }));
 
 vi.mock("@/lib/services/utils/achievement-utils", () => ({
@@ -13,6 +16,7 @@ vi.mock("@/lib/services/utils/achievement-utils", () => ({
 
 vi.mock("@/lib/services/achievement-service-server", () => ({
   getAuthenticatedUserProfile: mocks.getProfile,
+  getFeaturedHeroAchievements: mocks.getFeatured,
 }));
 
 vi.mock("@/lib/services/entitlement-service-server", () => ({
@@ -21,6 +25,14 @@ vi.mock("@/lib/services/entitlement-service-server", () => ({
 
 vi.mock("@/lib/services/pack-store-service-server", () => ({
   getStoreAchievementPacks: mocks.getPacks,
+}));
+
+vi.mock("@/lib/services/profile-service-server", () => ({
+  getPublicProfileAchievements: mocks.getProfileAchievements,
+}));
+
+vi.mock("@/lib/services/streak-service-server", () => ({
+  getUserStreakData: mocks.getStreak,
 }));
 
 vi.mock("@/app/home/home-client", () => ({
@@ -47,6 +59,9 @@ beforeEach(() => {
   mocks.getProfile.mockResolvedValue(profile);
   mocks.getEntitlements.mockResolvedValue(entitlements);
   mocks.getPacks.mockResolvedValue(packs);
+  mocks.getFeatured.mockResolvedValue([]);
+  mocks.getProfileAchievements.mockResolvedValue([]);
+  mocks.getStreak.mockResolvedValue({ currentStreak: 3, longestStreak: 8, achievementDates: [], claimedToday: false });
 });
 
 describe("HomePage", () => {
@@ -58,12 +73,15 @@ describe("HomePage", () => {
       initialProfile: profile,
       initialEntitlements: entitlements,
       initialPacks: [packs[0], packs[2]],
+      featuredAchievements: [],
     });
 
     expect(mocks.getUser).toHaveBeenCalledExactlyOnceWith();
     expect(mocks.getProfile).toHaveBeenCalledExactlyOnceWith();
     expect(mocks.getEntitlements).toHaveBeenCalledExactlyOnceWith("user-1");
     expect(mocks.getPacks).toHaveBeenCalledExactlyOnceWith();
+    expect(mocks.getProfileAchievements).not.toHaveBeenCalled();
+    expect(mocks.getStreak).not.toHaveBeenCalled();
   });
 
   it("loads packs for guests without requesting account data", async () => {
@@ -75,10 +93,13 @@ describe("HomePage", () => {
       initialProfile: null,
       initialEntitlements: null,
       initialPacks: [packs[0], packs[2]],
+      featuredAchievements: [],
     });
     expect(mocks.getPacks).toHaveBeenCalledExactlyOnceWith();
     expect(mocks.getProfile).not.toHaveBeenCalled();
     expect(mocks.getEntitlements).not.toHaveBeenCalled();
+    expect(mocks.getProfileAchievements).not.toHaveBeenCalled();
+    expect(mocks.getStreak).not.toHaveBeenCalled();
   });
 
   it("supports an empty pack list", async () => {

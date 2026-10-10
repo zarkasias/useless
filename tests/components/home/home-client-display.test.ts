@@ -48,6 +48,13 @@ vi.mock("next/image", () => ({
     createElement("img", { src, alt }),
 }));
 
+vi.mock("@/components/utils/title-fonts", () => ({
+  fredoka: { className: "font-fredoka" },
+  nunito: { className: "font-nunito" },
+  titan: { className: "font-titan" },
+  baloo: { className: "font-baloo" },
+}));
+
 import HomeClient from "@/app/home/home-client";
 
 type Props = Parameters<typeof HomeClient>[0];
@@ -118,13 +125,17 @@ describe("HomeClient display", () => {
     const container = render();
 
     expect(
-      container.querySelector('a[href="/signup?next=/games"]'),
+      container.querySelector('a[href="/login?next=/games"]'),
     ).not.toBeNull();
-    expect(container.querySelector('a[href="/signup"]')).not.toBeNull();
+    expect(
+      container.querySelector('a[href="/signup?next=/collection"]'),
+    ).not.toBeNull();
     expect(container.querySelector('a[href="/collection"]')).toBeNull();
-    expect(container.querySelector('a[href="/pro"]')?.textContent).toBe(
-      "View subscription plans",
-    );
+    expect(container.querySelector('a[href="/games"]')).toBeNull();
+    expect(
+      container.querySelector('a[href="/login?next=/leaderboard"]'),
+    ).not.toBeNull();
+
     expect(mocks.navbar).toHaveBeenCalledExactlyOnceWith({
       user: null,
       isSubscribed: false,
@@ -140,12 +151,13 @@ describe("HomeClient display", () => {
 
     expect(container.querySelector('a[href="/games"]')).not.toBeNull();
     expect(container.querySelector('a[href="/collection"]')?.textContent).toBe(
-      "See my ridiculous collection",
+      "Choose an achievement to share ↗",
     );
     expect(container.querySelector('a[href="/signup"]')).toBeNull();
     expect(container.querySelector('a[href="/pro"]')?.textContent).toBe(
-      "View subscription",
+      "View subscription ↗",
     );
+
     expect(mocks.navbar).toHaveBeenCalledExactlyOnceWith({
       user: profile,
       isSubscribed: true,
@@ -153,38 +165,44 @@ describe("HomeClient display", () => {
     });
   });
 
-  it("renders all five feature variants", () => {
-    render();
-
-    expect(mocks.feature.mock.calls.map(([props]) => props.variant)).toEqual([
-      "games",
-      "daily",
-      "streak",
-      "collection",
-      "leaderboard",
-    ]);
-  });
-
-  it("renders the hero artwork with descriptive alternative text", () => {
+  it("renders the homepage stories without a separate sharing section", () => {
     const container = render();
 
-    expect(container.querySelector("img")?.getAttribute("src")).toBe(
-      "/achievement_burst.webp",
-    );
-    expect(container.querySelector("img")?.getAttribute("alt")).toBe(
-      "A burst of colorful useless achievement awards",
-    );
+    for (const id of ["collection", "games", "profile", "subscription"]) {
+      expect(container.querySelector(`section[id="${id}"]`)).not.toBeNull();
+    }
+
+    expect(container.querySelector('section[id="sharing"]')).toBeNull();
   });
 
-  it("omits pack promotions when there is no active pack", () => {
-    const container = render({
-      initialPacks: [pack({ status: "scheduled", isUpcoming: true })],
+  it("renders game cabinet artwork with descriptive alternative text", () => {
+    const container = render();
+
+    const memoryImage = container.querySelector(
+      'img[src="/game_icons/memory.webp"]',
+    );
+
+    expect(memoryImage).not.toBeNull();
+    expect(memoryImage?.getAttribute("alt")).toBe("Achievement Memory");
+  });
+
+  it("promotes an upcoming pack even when no active pack exists", () => {
+    const upcoming = pack({
+      status: "scheduled",
+      isUpcoming: true,
     });
 
-    expect(mocks.promo).not.toHaveBeenCalled();
-    expect(container.textContent).not.toContain(
-      "Limited achievement packs have arrived.",
-    );
+    const container = render({
+      initialPacks: [upcoming],
+    });
+
+    expect(container.querySelector('section[id="packs"]')).not.toBeNull();
+    expect(mocks.promo).toHaveBeenCalledExactlyOnceWith({
+      pack: upcoming,
+      comingsoon: true,
+      variant: "homepage",
+      isLoggedIn: false,
+    });
   });
 
   it("promotes the first active pack", () => {

@@ -13,6 +13,7 @@ function makeAchievement(
     emoji: "🏆",
     created_at: "2026-01-01T00:00:00Z",
     is_daily: true,
+    is_secret: false,
     trigger_type: "daily_claim",
     trigger_config: triggerConfig,
     status: "published",
