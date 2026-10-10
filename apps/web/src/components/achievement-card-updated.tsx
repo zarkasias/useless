@@ -18,39 +18,12 @@ import {
   typeBadgeColors,
   typeNames,
   rarityTagClass,
+  rarityTokens,
 } from "@/components/achievement-styles";
 
 import Image from "next/image";
 import { fredoka, nunito } from "./utils/title-fonts";
 import { toast } from "sonner";
-
-// Social media configurations
-// const socialPlatforms = [
-//   {
-//     name: 'Facebook',
-//     icon: (
-//       <img src="/icons/facebook.png" alt="Facebook" width="28" height="28" />
-//     )
-//   },
-//   {
-//     name: 'X',
-//     icon: (
-//       <img src="/icons/x.webp" alt="X" width="28" height="28" />
-//     )
-//   },
-//   {
-//     name: 'LinkedIn',
-//     icon: (
-//       <img src="/icons/linkedin.webp" alt="LinkedIn" width="34" height="34" />
-//     )
-//   },
-//   {
-//     name: 'Instagram',
-//     icon: (
-//       <img src="/icons/instagram_icon.png" alt="Instagram" width="30" height="30" />
-//     )
-//   }
-// ];
 
 interface AchievementCardProps {
   achievement: Achievement;
@@ -166,64 +139,64 @@ function AchievementCardComponent({
       // gradient rarity badge, and decorated emoji medallion.
       const canvasTheme = {
         GAME: {
-          borderStart: "#bbf7d0",
-          borderEnd: "#4ade80",
-
-          tagStart: "#15803d",
-          tagEnd: "#84cc16",
-
-          sparkleA: "#22c55e",
-          sparkleB: "#bef264",
-
-          medallionMid: "rgba(74, 222, 128, 0.32)",
+          borderStart: rarityTokens.game.badgeStart,
+          borderEnd: rarityTokens.game.borderEnd,
+          tagStart: rarityTokens.game.badgeStart,
+          tagEnd: rarityTokens.game.badgeEnd,
+          sparkleA: rarityTokens.game.sparkleA,
+          sparkleB: rarityTokens.game.sparkleB,
+          medallionMid: rarityTokens.game.medallionMid,
         },
         COMMON: {
-          borderStart: "#f3f4f6",
-          borderEnd: "#d1d5db",
-          tagStart: "#6b7280",
-          tagEnd: "#9ca3af",
-          sparkleA: "#a78bfa",
-          sparkleB: "#d8b4fe",
-          medallionMid: "rgba(96, 165, 250, 0.30)",
+          borderStart: rarityTokens.common.badgeStart,
+          borderEnd: rarityTokens.common.borderEnd,
+          tagStart: rarityTokens.common.badgeStart,
+          tagEnd: rarityTokens.common.badgeEnd,
+          sparkleA: rarityTokens.common.sparkleA,
+          sparkleB: rarityTokens.common.sparkleB,
+          medallionMid: rarityTokens.common.medallionMid,
         },
         RARE: {
-          borderStart: "#f3f4f6",
-          borderEnd: "#3b82f6",
-          tagStart: "#3b82f6",
-          tagEnd: "#60a5fa",
-          sparkleA: "#a78bfa",
-          sparkleB: "#d8b4fe",
-          medallionMid: "rgba(96, 165, 250, 0.30)",
+          borderStart: rarityTokens.rare.badgeStart,
+          borderEnd: rarityTokens.rare.borderEnd,
+
+          tagStart: rarityTokens.rare.badgeStart,
+          tagEnd: rarityTokens.rare.badgeEnd,
+          sparkleA: rarityTokens.rare.sparkleA,
+          sparkleB: rarityTokens.rare.sparkleB,
+          medallionMid: rarityTokens.rare.medallionMid,
         },
         EPIC: {
-          borderStart: "#f3f4f6",
-          borderEnd: "#a855f7",
-          tagStart: "#a855f7",
-          tagEnd: "#c084fc",
-          sparkleA: "#a78bfa",
-          sparkleB: "#d8b4fe",
-          medallionMid: "rgba(168, 85, 247, 0.24)",
+          borderStart: rarityTokens.epic.badgeStart,
+          borderEnd: rarityTokens.epic.borderEnd,
+
+          tagStart: rarityTokens.epic.badgeStart,
+          tagEnd: rarityTokens.epic.badgeEnd,
+          sparkleA: rarityTokens.epic.sparkleA,
+          sparkleB: rarityTokens.epic.sparkleB,
+          medallionMid: rarityTokens.epic.medallionMid,
         },
         LEGENDARY: {
-          borderStart: "#f3f4f6",
-          borderEnd: "#f59e0b",
-          tagStart: "#f59e0b",
-          tagEnd: "#fbbf24",
-          sparkleA: "#a78bfa",
-          sparkleB: "#d8b4fe",
-          medallionMid: "rgba(251, 191, 36, 0.24)",
+          borderStart: rarityTokens.legendary.badgeStart,
+          borderEnd: rarityTokens.legendary.borderEnd,
+
+          tagStart: rarityTokens.legendary.badgeStart,
+          tagEnd: rarityTokens.legendary.badgeEnd,
+          sparkleA: rarityTokens.legendary.sparkleA,
+          sparkleB: rarityTokens.legendary.sparkleB,
+          medallionMid: rarityTokens.legendary.medallionMid,
         },
         SECRET: {
-          borderStart: "#fdf4ff",
-          borderEnd: "#d946ef",
+          borderStart: rarityTokens.secret.badgeStart,
+          borderEnd: rarityTokens.secret.borderEnd,
 
-          tagStart: "#d946ef",
-          tagEnd: "#e879f9",
+          tagStart: rarityTokens.secret.badgeStart,
+          tagEnd: rarityTokens.secret.badgeEnd,
 
-          sparkleA: "#e879f9",
-          sparkleB: "#f5d0fe",
+          sparkleA: rarityTokens.secret.sparkleA,
+          sparkleB: rarityTokens.secret.sparkleB,
 
-          medallionMid: "rgba(217, 70, 239, 0.24)",
+          medallionMid: rarityTokens.secret.medallionMid,
         },
       } as const;
 

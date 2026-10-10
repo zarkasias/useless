@@ -44,6 +44,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.112.3
         version: 2.117.3
+      '@useless/design-tokens':
+        specifier: workspace:*
+        version: link:../../packages/design-tokens
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1

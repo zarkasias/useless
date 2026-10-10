@@ -1,4 +1,7 @@
+import tokens from "@useless/design-tokens/tokens.json";
 import type { AchievementType } from "@/lib/supabase";
+
+const rarity = tokens.color.rarity;
 
 export const typeBorderColors: Record<AchievementType, string> = {
   COMMON: "from-gray-100 to-gray-500",
@@ -31,3 +34,5 @@ export const typeNames: Record<AchievementType, string> = {
 
 export const rarityTagClass =
   "inline-flex items-center rounded-full border px-2.5 py-1 text-xs uppercase font-semibold";
+
+export const rarityTokens = rarity;
