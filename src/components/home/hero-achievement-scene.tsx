@@ -106,7 +106,7 @@ export function HeroAchievementScene({
       ring-white/50
     "
         >
-          Click achievement for another
+          Click for another achievement
         </span>
       </button>
 

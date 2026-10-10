@@ -215,7 +215,7 @@ function Footer() {
                   reserved.
                 </p>
 
-                <p className="text-xs text-muted-foreground/70">v1.1.0</p>
+                <p className="text-xs text-muted-foreground/70">v2.0</p>
               </div>
 
               <nav
