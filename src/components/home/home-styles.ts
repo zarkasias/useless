@@ -2,7 +2,7 @@ const section =
   "relative scroll-mt-20 px-6 py-[66px] max-[700px]:px-5 max-[700px]:py-16";
 
 const actions =
-  "flex flex-wrap items-center justify-center gap-5 max-[700px]:gap-3";
+  "relative z-30 flex flex-wrap items-center justify-center gap-5 max-[700px]:gap-3";
 
 const button =
   "inline-flex min-h-[52px] items-center justify-center gap-4 rounded-full border border-transparent px-6 py-3.5 text-sm font-extrabold leading-[1.4] no-underline transition-[transform,background] duration-[180ms]";
