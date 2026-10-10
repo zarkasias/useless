@@ -1,0 +1,146 @@
+import { Gem, Trophy } from "lucide-react";
+
+import { Card, CardContent } from "@/components/ui/card";
+
+import { Achievement, AchievementType } from "@/lib/supabase";
+
+interface DashboardStatsProps {
+  userAchievements: Achievement[];
+  summary?: {
+    totalAchievements: number;
+    rareCount: number;
+    epicCount: number;
+    legendaryCount: number;
+    secretCount: number;
+  };
+}
+
+export function DashboardStats({ userAchievements, summary }: DashboardStatsProps) {
+  const totalAchievements = summary?.totalAchievements ?? userAchievements.length;
+
+  const achievementsByType = userAchievements.reduce(
+    (acc, achievement) => {
+      acc[achievement.type] = (acc[achievement.type] || 0) + 1;
+
+      return acc;
+    },
+    {} as Record<AchievementType, number>,
+  );
+
+  const rareCount = summary?.rareCount ?? achievementsByType.RARE ?? 0;
+  const epicCount = summary?.epicCount ?? achievementsByType.EPIC ?? 0;
+  const legendaryCount = summary?.legendaryCount ?? achievementsByType.LEGENDARY ?? 0;
+  const secretCount = summary?.secretCount ?? achievementsByType.SECRET ?? 0;
+
+  const highestRarity =
+    secretCount > 0
+      ? "Secret"
+      : legendaryCount > 0
+        ? "Legendary"
+        : epicCount > 0
+          ? "Epic"
+          : rareCount > 0
+            ? "Rare"
+            : totalAchievements > 0
+              ? "Common"
+              : "None";
+
+  return (
+    <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-2">
+      {/* Total achievements */}
+      <Card className="shadow-sm bg-gray-50 py-2">
+        <CardContent className="px-4 py-1">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                Total achievements
+              </p>
+
+              <p className="mt-2 text-3xl text-gray-700 font-semibold tracking-tight">
+                {totalAchievements}
+              </p>
+            </div>
+
+            <div className="flex size-10 items-center justify-center rounded-lg">
+              <Trophy className="size-8 text-yellow-500" />
+            </div>
+          </div>
+
+          <p className="mt-3 text-sm text-muted-foreground">
+            Useless accomplishments collected
+          </p>
+        </CardContent>
+      </Card>
+
+      {/* Highest rarity */}
+      <Card className="shadow-sm bg-gray-100 py-2">
+        <CardContent className="px-4 py-1">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-muted-foreground">
+                Highest rarity
+              </p>
+
+              <p className="mt-2 text-gray-700 text-2xl font-semibold tracking-tight">
+                {highestRarity}
+              </p>
+            </div>
+
+            <div className="flex size-10 items-center justify-center rounded-lg">
+              <Gem className="size-8 text-blue-500" />
+            </div>
+          </div>
+
+          <div className="mt-3 flex gap-2 text-sm text-muted-foreground">
+            <span>
+              <span className="text-lg font-semibold text-blue-600">
+                {rareCount}
+              </span>{" "}
+              rare
+            </span>
+            <span>·</span>
+            <span>
+              <span className="text-lg font-semibold text-purple-600">
+                {epicCount}
+              </span>{" "}
+              epic
+            </span>
+            <span>·</span>
+            <span>
+              <span className="text-lg font-semibold text-amber-600">
+                {legendaryCount}
+              </span>{" "}
+              legendary
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Latest achievement */}
+      {/* <Card className="shadow-sm bg-blue-50 py-4">
+        <CardContent className="px-4 py-1">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-muted-foreground">
+                Latest achievement
+              </p>
+
+              <p className="mt-2 text-gray-700 truncate text-xl font-semibold">
+                {mostRecentAchievement?.title ?? "None yet"}
+              </p>
+            </div>
+
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg">
+              <Sparkles className="size-8 text-purple-500" />
+            </div>
+          </div>
+
+          <p className="mt-3 line-clamp-2 text-sm text-muted-foreground">
+            {mostRecentAchievement?.description ??
+              "Claim your first achievement to get started."}
+          </p>
+        </CardContent>
+      </Card> */}
+    </div>
+  );
+}
