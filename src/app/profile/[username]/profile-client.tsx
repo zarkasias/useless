@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 
 import { Navbar } from "@/components/navbar";
 import {
-  Flame,
   Trophy,
   UserPlus,
   UserMinus,
@@ -15,7 +14,7 @@ import {
   X,
 } from "lucide-react";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ProfileHeader } from "@/components/profile/profile-header";
 import { Button } from "@/components/ui/button";
 import { AchievementCard } from "@/components/achievement-card-updated";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -61,8 +60,6 @@ export function ProfileClient({
   const [isPending, startTransition] = useTransition();
 
   const pageSize = 10;
-
-  const initials = profile.username.substring(0, 2).toUpperCase();
 
   const isOwnProfile = viewer?.id === profile.id;
 
@@ -167,37 +164,11 @@ export function ProfileClient({
               Back
             </button>
           )}
-          {/* Profile Header */}
-          <section className="overflow-hidden rounded-lg border bg-background shadow-sm">
-            <div className="flex flex-col">
-              {/* Profile Information */}
-              <div className="flex items-start justify-between">
-                <div className="px-4 sm:px-6 py-2">
-                  <div className="flex gap-3 flex-row items-center">
-                    <Avatar className="size-24 border-4 border-background shadow-md">
-                      <AvatarImage
-                        src={profile.avatar_url || ""}
-                        alt={profile.username}
-                      />
-
-                      <AvatarFallback className="text-2xl font-bold">
-                        {initials}
-                      </AvatarFallback>
-                    </Avatar>
-
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-muted-foreground">
-                        Useless Achiever
-                      </p>
-
-                      <h1 className="truncate text-2xl font-bold tracking-tight text-gray-700 sm:text-4xl dark:text-gray-200">
-                        {profile.username}
-                      </h1>
-                    </div>
-                  </div>
-                </div>
-
-                {viewer && (
+          <ProfileHeader
+            profile={profile}
+            streakData={streakData}
+            actions={
+              viewer && (
                   <div className="flex items-center gap-2 mt-2 mr-2">
                     {!isOwnProfile && (
                       <>
@@ -328,45 +299,9 @@ export function ProfileClient({
                       </Button>
                     )}
                   </div>
-                )}
-              </div>
-
-              {/* Streak footer */}
-              <div className="grid grid-cols-2 divide-x divide-white/10 bg-gray-600 text-white">
-                <div className="flex items-center gap-3 px-6 py-4">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-orange-400/80">
-                    <Flame className="size-4 text-white" />
-                  </div>
-
-                  <div className="min-w-0">
-                    <div className="text-lg font-semibold leading-none">
-                      {streakData.currentStreak}
-                    </div>
-
-                    <div className="mt-1 text-xs font-bold text-slate-300">
-                      Current streak
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3 px-6 py-4">
-                  <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-amber-400/80">
-                    <Trophy className="size-4 text-white" />
-                  </div>
-
-                  <div className="min-w-0">
-                    <div className="text-lg font-semibold leading-none">
-                      {streakData.longestStreak}
-                    </div>
-
-                    <div className="mt-1 text-xs font-bold text-slate-300">
-                      Best streak
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
+                )
+            }
+          />
 
           {/* Achievement Stats */}
           <section>

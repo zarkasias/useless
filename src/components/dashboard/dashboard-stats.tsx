@@ -6,10 +6,17 @@ import { Achievement, AchievementType } from "@/lib/supabase";
 
 interface DashboardStatsProps {
   userAchievements: Achievement[];
+  summary?: {
+    totalAchievements: number;
+    rareCount: number;
+    epicCount: number;
+    legendaryCount: number;
+    secretCount: number;
+  };
 }
 
-export function DashboardStats({ userAchievements }: DashboardStatsProps) {
-  const totalAchievements = userAchievements.length;
+export function DashboardStats({ userAchievements, summary }: DashboardStatsProps) {
+  const totalAchievements = summary?.totalAchievements ?? userAchievements.length;
 
   const achievementsByType = userAchievements.reduce(
     (acc, achievement) => {
@@ -20,10 +27,10 @@ export function DashboardStats({ userAchievements }: DashboardStatsProps) {
     {} as Record<AchievementType, number>,
   );
 
-  const rareCount = achievementsByType.RARE || 0;
-  const epicCount = achievementsByType.EPIC || 0;
-  const legendaryCount = achievementsByType.LEGENDARY || 0;
-  const secretCount = achievementsByType.SECRET || 0;
+  const rareCount = summary?.rareCount ?? achievementsByType.RARE ?? 0;
+  const epicCount = summary?.epicCount ?? achievementsByType.EPIC ?? 0;
+  const legendaryCount = summary?.legendaryCount ?? achievementsByType.LEGENDARY ?? 0;
+  const secretCount = summary?.secretCount ?? achievementsByType.SECRET ?? 0;
 
   const highestRarity =
     secretCount > 0

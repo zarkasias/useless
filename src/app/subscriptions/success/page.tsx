@@ -48,7 +48,7 @@ export default async function SubscriptionSuccessPage() {
 
           <p className="mx-auto mt-4 max-w-md text-base leading-7 text-muted-foreground">
             Your subscription is active. You can now keep collecting ridiculous
-            achievements without worrying about that pesky five-achievement
+            achievements without worrying about that pesky ten-achievement
             limit.
           </p>
 

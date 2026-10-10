@@ -5,19 +5,55 @@ import type { Achievement } from "@/lib/supabase";
 
 vi.mock("@/components/navbar", () => ({ Navbar: () => null }));
 vi.mock("@/components/achievement-card-updated", () => ({
-  AchievementCard: ({ achievement }: { achievement: Achievement }) => createElement("article", null, achievement.title),
+  AchievementCard: ({ achievement }: { achievement: Achievement }) =>
+    createElement("article", null, achievement.title),
 }));
 import AchievementsClient from "@/app/collection/achievements-client";
 
-function achievement(id: string, status: Achievement["status"] = "published"): Achievement {
-  return { id, title: id, description: id, type: "COMMON", emoji: "🏆", created_at: "2026-09-08", status };
+function achievement(
+  id: string,
+  status: Achievement["status"] = "published",
+): Achievement {
+  return {
+    id,
+    title: id,
+    description: id,
+    type: "COMMON",
+    emoji: "🏆",
+    created_at: "2026-09-08",
+    status,
+    is_secret: false,
+    trigger_type: null,
+    trigger_config: null,
+  };
 }
-function render(allAchievements: Achievement[], collectedAchievements: Achievement[]) {
-  return renderToStaticMarkup(createElement(AchievementsClient, {
-    initialProfile: { id: "user-1", username: "tester", role: "user", created_at: "2026-09-08", streak_count: 0 },
-    allAchievements, collectedAchievements,
-    initialEntitlements: { achievementCount: collectedAchievements.length, freeAchievementLimit: 5, remainingFreeAchievements: 0, isSubscribed: false, subscriptionStatus: null, billingInterval: null, hasReachedFreeLimit: false, canClaimAchievement: true },
-  }));
+function render(
+  allAchievements: Achievement[],
+  collectedAchievements: Achievement[],
+) {
+  return renderToStaticMarkup(
+    createElement(AchievementsClient, {
+      initialProfile: {
+        id: "user-1",
+        username: "tester",
+        role: "user",
+        created_at: "2026-09-08",
+        streak_count: 0,
+      },
+      allAchievements,
+      collectedAchievements,
+      initialEntitlements: {
+        achievementCount: collectedAchievements.length,
+        freeAchievementLimit: 5,
+        remainingFreeAchievements: 0,
+        isSubscribed: false,
+        subscriptionStatus: null,
+        billingInterval: null,
+        hasReachedFreeLimit: false,
+        canClaimAchievement: true,
+      },
+    }),
+  );
 }
 it("excludes inaccessible and archived collected achievements from cards and progress", () => {
   const core = achievement("Core reward");
