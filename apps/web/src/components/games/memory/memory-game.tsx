@@ -11,6 +11,7 @@ import GameMetric from "../game-metric";
 import GameResult from "../system/game-result";
 import GameResultOverlay from "../system/game-result-overlay";
 import GameButton from "../system/game-button";
+import { getAchievementIconUrl } from "@/lib/achievement-icon-url";
 import { AchievementCard } from "@/components/achievement-card-updated";
 
 import type { GameAchievement } from "@/lib/types/games";
@@ -30,7 +31,7 @@ interface MemoryCard {
   achievementId: string;
   title: string;
   emoji: string;
-  icon_path: string | null;
+  iconUrl: string | null;
   type: string;
   isMatched: boolean;
 }
@@ -57,26 +58,29 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
   const isComplete = cards.length > 0 && matchedCount === cards.length;
 
   const createDeck = useCallback(() => {
-    const deck = achievements.flatMap((achievement) => [
-      {
-        cardId: `${achievement.id}-a`,
-        achievementId: achievement.id,
-        title: achievement.title,
-        emoji: achievement.emoji,
-        icon_path: achievement.icon_path,
-        type: achievement.type,
-        isMatched: false,
-      },
-      {
-        cardId: `${achievement.id}-b`,
-        achievementId: achievement.id,
-        title: achievement.title,
-        emoji: achievement.emoji,
-        icon_path: achievement.icon_path,
-        type: achievement.type,
-        isMatched: false,
-      },
-    ]);
+    const deck = achievements.flatMap((achievement) => {
+      const iconUrl = getAchievementIconUrl(achievement.icon_path);
+      return [
+        {
+          cardId: `${achievement.id}-a`,
+          achievementId: achievement.id,
+          title: achievement.title,
+          emoji: achievement.emoji,
+          iconUrl,
+          type: achievement.type,
+          isMatched: false,
+        },
+        {
+          cardId: `${achievement.id}-b`,
+          achievementId: achievement.id,
+          title: achievement.title,
+          emoji: achievement.emoji,
+          iconUrl,
+          type: achievement.type,
+          isMatched: false,
+        },
+      ];
+    });
 
     return shuffleAchievements(deck);
   }, [achievements]);
@@ -101,7 +105,7 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
       setImagesReady(false);
 
       const imageUrls = achievements
-        .map((achievement) => achievement.icon_path)
+        .map((achievement) => getAchievementIconUrl(achievement.icon_path))
         .filter((path): path is string => Boolean(path));
 
       await Promise.all(
@@ -319,7 +323,7 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
                   ${
                     isFlipped
                       ? `
-                        bg-gradient-to-br
+                        bg-linear-to-br
                         from-white
                         via-violet-50
                         to-fuchsia-50
@@ -336,10 +340,10 @@ export function MemoryGame({ achievements, onGameRecorded }: MemoryGameProps) {
                 >
                   {isFlipped ? (
                     <div className="flex h-full w-full flex-col items-center justify-center p-2 text-center sm:p-3">
-                      {card.icon_path ? (
+                      {card.iconUrl ? (
                         <div className="relative size-12 sm:size-16">
                           <Image
-                            src={card.icon_path}
+                            src={card.iconUrl}
                             alt=""
                             fill
                             sizes="64px"

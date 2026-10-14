@@ -9,6 +9,7 @@ import { StreakCalendar } from "@/components/dashboard/streak-calendar";
 import { UnlockAchievement } from "@/components/unlock-achievement";
 import { StreakShareButton } from "@/components/dashboard/streak-share-button";
 import { Timezonesync } from "@/components/timezone-sync";
+import { getAchievementIconUrl } from "@/lib/achievement-icon-url";
 import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
@@ -70,6 +71,7 @@ export default function DashboardClient({
   const [latestMeta, setLatestMeta] = useState<Achievement | null>(
     latestMetaAchievement ?? initialTriggeredAchievements[0] ?? null,
   );
+  const latestMetaIconUrl = getAchievementIconUrl(latestMeta?.icon_path);
   const [packs, setPacks] = useState<StoreAchievementPack[]>(initialPacks);
 
   const featuredPack = packs[0];
@@ -317,9 +319,9 @@ export default function DashboardClient({
                                   backdrop-blur-sm
                                 "
                               >
-                                {latestMeta.icon_path ? (
+                                {latestMetaIconUrl ? (
                                   <Image
-                                    src={latestMeta.icon_path}
+                                    src={latestMetaIconUrl}
                                     alt={latestMeta.title}
                                     width={60}
                                     height={60}

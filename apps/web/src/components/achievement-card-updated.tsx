@@ -12,6 +12,7 @@ import { LoaderCircle, RefreshCw, Share2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Achievement } from "@/lib/supabase";
 import { formatDistanceToNow } from "date-fns";
+import { getAchievementIconUrl } from "@/lib/achievement-icon-url";
 
 import {
   typeBorderColors,
@@ -51,6 +52,8 @@ function AchievementCardComponent({
   const generationAttemptedRef = useRef(false);
 
   const generateImageRef = useRef<() => Promise<void>>(async () => {});
+
+  const iconUrl = getAchievementIconUrl(icon_path);
 
   const isCompact = variant === "compact";
   const isEnlarged = variant === "enlarged";
@@ -139,7 +142,7 @@ function AchievementCardComponent({
       // gradient rarity badge, and decorated emoji medallion.
       const canvasTheme = {
         GAME: {
-          borderStart: rarityTokens.game.badgeStart,
+          borderStart: rarityTokens.game.borderStart,
           borderEnd: rarityTokens.game.borderEnd,
           tagStart: rarityTokens.game.badgeStart,
           tagEnd: rarityTokens.game.badgeEnd,
@@ -148,7 +151,7 @@ function AchievementCardComponent({
           medallionMid: rarityTokens.game.medallionMid,
         },
         COMMON: {
-          borderStart: rarityTokens.common.badgeStart,
+          borderStart: rarityTokens.common.borderStart,
           borderEnd: rarityTokens.common.borderEnd,
           tagStart: rarityTokens.common.badgeStart,
           tagEnd: rarityTokens.common.badgeEnd,
@@ -157,7 +160,7 @@ function AchievementCardComponent({
           medallionMid: rarityTokens.common.medallionMid,
         },
         RARE: {
-          borderStart: rarityTokens.rare.badgeStart,
+          borderStart: rarityTokens.rare.borderStart,
           borderEnd: rarityTokens.rare.borderEnd,
 
           tagStart: rarityTokens.rare.badgeStart,
@@ -167,7 +170,7 @@ function AchievementCardComponent({
           medallionMid: rarityTokens.rare.medallionMid,
         },
         EPIC: {
-          borderStart: rarityTokens.epic.badgeStart,
+          borderStart: rarityTokens.epic.borderStart,
           borderEnd: rarityTokens.epic.borderEnd,
 
           tagStart: rarityTokens.epic.badgeStart,
@@ -177,7 +180,7 @@ function AchievementCardComponent({
           medallionMid: rarityTokens.epic.medallionMid,
         },
         LEGENDARY: {
-          borderStart: rarityTokens.legendary.badgeStart,
+          borderStart: rarityTokens.legendary.borderStart,
           borderEnd: rarityTokens.legendary.borderEnd,
 
           tagStart: rarityTokens.legendary.badgeStart,
@@ -187,7 +190,7 @@ function AchievementCardComponent({
           medallionMid: rarityTokens.legendary.medallionMid,
         },
         SECRET: {
-          borderStart: rarityTokens.secret.badgeStart,
+          borderStart: rarityTokens.secret.borderStart,
           borderEnd: rarityTokens.secret.borderEnd,
 
           tagStart: rarityTokens.secret.badgeStart,
@@ -270,9 +273,9 @@ function AchievementCardComponent({
         ctx.fillText(emoji, centerX, centerY + 1);
       };
 
-      if (icon_path) {
+      if (iconUrl) {
         try {
-          const iconImage = await loadImage(icon_path);
+          const iconImage = await loadImage(iconUrl);
           const iconSize = 88;
 
           ctx.drawImage(
@@ -295,7 +298,7 @@ function AchievementCardComponent({
       ctx.textBaseline = "alphabetic";
 
       // Leave room on the right for the larger achievement icon.
-      const textMaxWidth = icon_path ? width - 130 : width - 95;
+      const textMaxWidth = iconUrl ? width - 130 : width - 95;
 
       // Draw title
       ctx.fillStyle = isDarkMode ? "#f3f4f6" : "#374151";
@@ -578,8 +581,8 @@ function AchievementCardComponent({
                   className={`${nunito.className}
                     ${
                       isCompact
-                        ? `min-h-8 line-clamp-2 text-xs leading-[0.875rem]`
-                        : `min-h-[48px] line-clamp-3 text-xs leading-4`
+                        ? `min-h-8 line-clamp-2 text-xs leading-3.5`
+                        : `min-h-12 line-clamp-3 text-xs leading-4`
                     }`}
                 >
                   {description}
@@ -588,7 +591,7 @@ function AchievementCardComponent({
 
               <div className="relative -mr-2 -mt-2">
                 {/* Sparkles */}
-                {!icon_path && (
+                {!iconUrl && (
                   <>
                     <Sparkles className="absolute left-1 -top-1 size-4 text-violet-400" />
 
@@ -599,18 +602,18 @@ function AchievementCardComponent({
                 {/* Emoji circle */}
                 <div
                   className={`flex items-center justify-center ${
-                    icon_path ? "size-26" : "size-14"
+                    iconUrl ? "size-26" : "size-14"
                   }`}
                 >
                   <div
-                    className={`flex size-full items-center justify-center ${icon_path ? "" : "rounded-full bg-gradient-to-br from-transparent via-blue-400/20 to-transparent"}`}
+                    className={`flex size-full items-center justify-center ${iconUrl ? "" : "rounded-full bg-gradient-to-br from-transparent via-blue-400/20 to-transparent"}`}
                   >
                     <span
-                      className={`${icon_path ? "size-24" : "bg-white/50 size-10 rounded-full"} flex items-center justify-center`}
+                      className={`${iconUrl ? "size-24" : "bg-white/50 size-10 rounded-full"} flex items-center justify-center`}
                     >
-                      {icon_path ? (
+                      {iconUrl ? (
                         <Image
-                          src={icon_path}
+                          src={iconUrl}
                           alt={`${title} achievement`}
                           loading="lazy"
                           decoding="async"
