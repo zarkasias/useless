@@ -15,11 +15,10 @@ import { formatDistanceToNow } from "date-fns";
 import { getAchievementIconUrl } from "@/lib/achievement-icon-url";
 
 import {
-  typeBorderColors,
-  typeBadgeColors,
+  achievementCardTokens,
+  getRarityToken,
   typeNames,
   rarityTagClass,
-  rarityTokens,
 } from "@/components/achievement-styles";
 
 import Image from "next/image";
@@ -51,6 +50,9 @@ function AchievementCardComponent({
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const generationAttemptedRef = useRef(false);
 
+  const rarityTheme = getRarityToken(type);
+  const cardTheme = achievementCardTokens;
+
   const generateImageRef = useRef<() => Promise<void>>(async () => {});
 
   const iconUrl = getAchievementIconUrl(icon_path);
@@ -62,9 +64,7 @@ function AchievementCardComponent({
   flex
   h-full
   flex-col
-  rounded-[15px]
   border-0
-  bg-gray-50/80
   py-0
   shadow-sm
   transition-shadow
@@ -76,12 +76,11 @@ function AchievementCardComponent({
   rounded-2xl
   bg-gradient-to-br
   ${isEnlarged && "md:scale-105"}
-  ${typeBorderColors[type]}
   p-[1px]
   shadow-sm
 `;
 
-  const tagClass = `${rarityTagClass} ${typeBadgeColors[type]}`;
+  //const tagClass = `${rarityTagClass} ${typeBadgeColors[type]}`;
 
   // Format the unlocked time if available
   const timeAgo = unlockedAt
@@ -137,73 +136,15 @@ function AchievementCardComponent({
       // Detect dark mode
       const isDarkMode = document.documentElement.classList.contains("dark");
 
-      // Match the current on-screen card styling:
-      // soft gray interior, subtle rarity gradient border,
-      // gradient rarity badge, and decorated emoji medallion.
-      const canvasTheme = {
-        GAME: {
-          borderStart: rarityTokens.game.borderStart,
-          borderEnd: rarityTokens.game.borderEnd,
-          tagStart: rarityTokens.game.badgeStart,
-          tagEnd: rarityTokens.game.badgeEnd,
-          sparkleA: rarityTokens.game.sparkleA,
-          sparkleB: rarityTokens.game.sparkleB,
-          medallionMid: rarityTokens.game.medallionMid,
-        },
-        COMMON: {
-          borderStart: rarityTokens.common.borderStart,
-          borderEnd: rarityTokens.common.borderEnd,
-          tagStart: rarityTokens.common.badgeStart,
-          tagEnd: rarityTokens.common.badgeEnd,
-          sparkleA: rarityTokens.common.sparkleA,
-          sparkleB: rarityTokens.common.sparkleB,
-          medallionMid: rarityTokens.common.medallionMid,
-        },
-        RARE: {
-          borderStart: rarityTokens.rare.borderStart,
-          borderEnd: rarityTokens.rare.borderEnd,
-
-          tagStart: rarityTokens.rare.badgeStart,
-          tagEnd: rarityTokens.rare.badgeEnd,
-          sparkleA: rarityTokens.rare.sparkleA,
-          sparkleB: rarityTokens.rare.sparkleB,
-          medallionMid: rarityTokens.rare.medallionMid,
-        },
-        EPIC: {
-          borderStart: rarityTokens.epic.borderStart,
-          borderEnd: rarityTokens.epic.borderEnd,
-
-          tagStart: rarityTokens.epic.badgeStart,
-          tagEnd: rarityTokens.epic.badgeEnd,
-          sparkleA: rarityTokens.epic.sparkleA,
-          sparkleB: rarityTokens.epic.sparkleB,
-          medallionMid: rarityTokens.epic.medallionMid,
-        },
-        LEGENDARY: {
-          borderStart: rarityTokens.legendary.borderStart,
-          borderEnd: rarityTokens.legendary.borderEnd,
-
-          tagStart: rarityTokens.legendary.badgeStart,
-          tagEnd: rarityTokens.legendary.badgeEnd,
-          sparkleA: rarityTokens.legendary.sparkleA,
-          sparkleB: rarityTokens.legendary.sparkleB,
-          medallionMid: rarityTokens.legendary.medallionMid,
-        },
-        SECRET: {
-          borderStart: rarityTokens.secret.borderStart,
-          borderEnd: rarityTokens.secret.borderEnd,
-
-          tagStart: rarityTokens.secret.badgeStart,
-          tagEnd: rarityTokens.secret.badgeEnd,
-
-          sparkleA: rarityTokens.secret.sparkleA,
-          sparkleB: rarityTokens.secret.sparkleB,
-
-          medallionMid: rarityTokens.secret.medallionMid,
-        },
-      } as const;
-
-      const theme = canvasTheme[type];
+      const theme = {
+        borderStart: rarityTheme.borderStart,
+        borderEnd: rarityTheme.borderEnd,
+        tagStart: rarityTheme.badgeStart,
+        tagEnd: rarityTheme.badgeEnd,
+        sparkleA: rarityTheme.sparkleA,
+        sparkleB: rarityTheme.sparkleB,
+        medallionMid: rarityTheme.medallionMid,
+      };
 
       // Outer gradient border, matching typeBorderColors.
       const borderGradient = ctx.createLinearGradient(0, 0, width, height);
@@ -550,9 +491,26 @@ function AchievementCardComponent({
   return (
     <div className="relative w-full">
       {/* Gradient border wrapper */}
-      <div className={cardBorderClass}>
+      <div
+        className={cardBorderClass}
+        style={{
+          borderRadius: cardTheme.outerRadius,
+          backgroundImage: `linear-gradient(
+      to bottom right,
+      ${rarityTheme.borderStart},
+      ${rarityTheme.borderEnd}
+    )`,
+        }}
+      >
         {/* Main achievement card */}
-        <Card ref={cardRef} className={cardClass}>
+        <Card
+          ref={cardRef}
+          className={cardClass}
+          style={{
+            borderRadius: cardTheme.radius,
+            backgroundColor: cardTheme.surface.light,
+          }}
+        >
           <CardHeader
             className={
               isCompact ? "flex-1 px-3 pb-2 pt-3" : "flex-1 pb-2 px-3 pt-3"
@@ -561,9 +519,18 @@ function AchievementCardComponent({
             <div className="flex items-start justify-between gap-1">
               <div className="space-y-1">
                 <span
-                  className={`${tagClass} ${
+                  className={`${rarityTagClass} ${
                     isCompact ? "px-2 py-0.5 text-[10px]" : ""
                   }`}
+                  style={{
+                    backgroundImage: `linear-gradient(
+      to right,
+      ${rarityTheme.badgeStart},
+      ${rarityTheme.badgeEnd}
+    )`,
+                    color: cardTheme.badge.textColor,
+                    borderRadius: cardTheme.badge.radius,
+                  }}
                 >
                   {typeNames[type]}
                 </span>
@@ -571,9 +538,12 @@ function AchievementCardComponent({
                   className={`${fredoka.className}
                     ${
                       isCompact
-                        ? `text-base font-semibold tracking-tight text-gray-700 dark:text-gray-200 whitespace-nowrap`
-                        : `text-md font-semibold tracking-normal text-gray-700 dark:text-gray-200 whitespace-nowrap`
+                        ? "whitespace-nowrap text-base font-semibold tracking-tight"
+                        : "whitespace-nowrap text-md font-semibold tracking-normal"
                     }`}
+                  style={{
+                    color: cardTheme.title.colorLight,
+                  }}
                 >
                   {title}
                 </CardTitle>
@@ -581,9 +551,12 @@ function AchievementCardComponent({
                   className={`${nunito.className}
                     ${
                       isCompact
-                        ? `min-h-8 line-clamp-2 text-xs leading-3.5`
-                        : `min-h-12 line-clamp-3 text-xs leading-4`
+                        ? "min-h-8 line-clamp-2 text-xs leading-3.5"
+                        : "min-h-12 line-clamp-3 text-xs leading-4"
                     }`}
+                  style={{
+                    color: cardTheme.description.colorLight,
+                  }}
                 >
                   {description}
                 </CardDescription>
