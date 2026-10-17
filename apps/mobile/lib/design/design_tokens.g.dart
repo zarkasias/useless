@@ -110,6 +110,9 @@ abstract final class AchievementCardTokens {
   static const Color surfaceDark =
       Color(0xFF111827);
 
+      static const Color dashboardStats =
+      Color(0xFF4B5563);
+
   static const double titleFontSize = 16;
   static const int titleFontWeight = 600;
 

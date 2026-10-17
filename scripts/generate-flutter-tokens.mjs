@@ -114,6 +114,9 @@ abstract final class AchievementCardTokens {
   static const Color surfaceDark =
       ${dartColor(card.surface.dark)};
 
+      static const Color dashboardStats =
+      ${dartColor(card.surface.dashboardStats)};
+
   static const double titleFontSize = ${card.title.fontSize};
   static const int titleFontWeight = ${card.title.fontWeight};
 

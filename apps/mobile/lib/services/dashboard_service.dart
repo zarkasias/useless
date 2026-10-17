@@ -87,6 +87,7 @@ class DashboardService {
       longestStreak: longestStreak,
       totalAchievements: rows.length,
       claimedToday: claimedToday,
+      today: today,
       recentAchievements: recentAchievements,
     );
   }

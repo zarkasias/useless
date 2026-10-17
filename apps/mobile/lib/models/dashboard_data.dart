@@ -7,6 +7,7 @@ class DashboardData {
     required this.longestStreak,
     required this.totalAchievements,
     required this.claimedToday,
+    required this.today,
     required this.recentAchievements,
   });
 
@@ -15,5 +16,6 @@ class DashboardData {
   final int longestStreak;
   final int totalAchievements;
   final bool claimedToday;
+  final String today;
   final List<Achievement> recentAchievements;
 }

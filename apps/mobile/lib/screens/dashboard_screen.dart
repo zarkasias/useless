@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/widgets/stat_card.dart';
+import 'package:mobile/widgets/recent_achievements.dart';
+import 'package:mobile/design/design_tokens.g.dart';
+import 'package:mobile/widgets/stat_divider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:mobile/models/dashboard_data.dart';
 import 'package:mobile/services/dashboard_service.dart';
+import 'package:intl/intl.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -82,6 +86,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
             final data = snapshot.data!;
 
+            final formattedToday = DateFormat('MMM d')
+                .format(DateTime.parse(data.today));
+
             return RefreshIndicator(
               onRefresh: _refreshDashboard,
               child: ListView(
@@ -131,7 +138,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           colors.secondary.withValues(alpha: 0.05),
                         ],
                       ),
-                      borderRadius: BorderRadius.circular(18),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(18),
+                        topRight: Radius.circular(18),
+                      ),
                       border: Border.all(
                         color: colors.primary.withValues(alpha: 0.18),
                       ),
@@ -158,7 +168,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               ),
                               const SizedBox(width: 5),
                               Text(
-                                'TODAY',
+                                'Today - $formattedToday',
                                 style: theme.textTheme.labelSmall?.copyWith(
                                   color: colors.primary,
                                   fontWeight: FontWeight.w800,
@@ -228,8 +238,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 16),
-
                   // Stats
                   Container(
                     padding: const EdgeInsets.symmetric(
@@ -237,9 +245,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       vertical: 16,
                     ),
                     decoration: BoxDecoration(
-                      color: colors.surface,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: colors.outlineVariant),
+                      color: AchievementCardTokens.dashboardStats,
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(18),
+                        bottomRight: Radius.circular(18),
+                      ),
+                      border: Border.all(
+                        color: AchievementCardTokens.dashboardStats,
+                      ),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,26 +260,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Expanded(
                           child: StatCard(
                             icon: Icons.local_fire_department,
+                            iconColor: Colors.orange,
                             value: data.currentStreak.toString(),
                             label: 'Current Streak',
                           ),
                         ),
 
-                        _StatDivider(color: colors.outlineVariant),
+                        StatDivider(color: Colors.white),
 
                         Expanded(
                           child: StatCard(
                             icon: Icons.emoji_events_outlined,
+                            iconColor: Colors.amber,
                             value: data.longestStreak.toString(),
                             label: 'Best Streak',
                           ),
                         ),
 
-                        _StatDivider(color: colors.outlineVariant),
+                        StatDivider(color: Colors.white),
 
                         Expanded(
                           child: StatCard(
                             icon: Icons.workspace_premium_outlined,
+                            iconColor: Colors.lightBlue,
                             value: data.totalAchievements.toString(),
                             label: 'Total Achievements',
                           ),
@@ -275,34 +291,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
 
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 18),
 
-                  // Recent achievements
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Recent achievements',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.25,
-                              ),
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              'Your latest completely unnecessary accomplishments.',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: colors.onSurfaceVariant,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  RecentAchievements(
+                    achievements: data.recentAchievements,
+                    onViewCollection: () {
+                      // to be added
+                    },
                   ),
 
                   const SizedBox(height: 16),
@@ -314,22 +309,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
           },
         ),
       ),
-    );
-  }
-}
-
-class _StatDivider extends StatelessWidget {
-  const _StatDivider({required this.color});
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 1,
-      height: 74,
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      color: color,
     );
   }
 }
