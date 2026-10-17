@@ -8,7 +8,7 @@ const achievement: Achievement = {
   description: "An unnecessary accomplishment.",
   type: "COMMON",
   emoji: "🏆",
-  icon_path: " /icons/trophy.png ",
+  icon_path: "/icons/trophy.png ",
   created_at: "2026-10-09T00:00:00Z",
   status: "published",
   is_secret: false,

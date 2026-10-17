@@ -209,7 +209,9 @@ describe("AchievementCard", () => {
 
     const icon = container?.querySelector("img");
 
-    expect(icon?.getAttribute("src")).toBe("/icons/trophy.png");
+    expect(icon?.getAttribute("src")).toBe(
+      "https://example.supabase.co/storage/v1/object/public/achievement-assets/icons/trophy.png",
+    );
     expect(icon?.getAttribute("alt")).toBe(`${achievement.title} achievement`);
     expect(container?.querySelector('[role="img"]')).toBeNull();
   });
@@ -424,7 +426,9 @@ describe("AchievementCard", () => {
         },
       });
 
-      expect(requestedSource).toBe("/icons/trophy.png");
+      expect(requestedSource).toBe(
+        "https://example.supabase.co/storage/v1/object/public/achievement-assets/icons/trophy.png",
+      );
       expect(fetchImage).toHaveBeenCalledExactlyOnceWith(imageUrl);
       expect(button("Share").disabled).toBe(false);
 

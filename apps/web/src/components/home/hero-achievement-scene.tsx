@@ -89,7 +89,7 @@ export function HeroAchievementScene({
       items-center
       justify-center
       rounded-full
-      bg-gradient-to-br
+      bg-linear-to-br
       from-yellow-300
       via-orange-400
       to-orange-600

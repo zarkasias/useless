@@ -33,7 +33,7 @@ export default function GameCabinetCard({
         overflow-hidden
         rounded-2xl
         border
-        bg-gradient-to-br
+        bg-linear-to-br
         shadow-sm
         transition-all
         duration-300
@@ -61,7 +61,7 @@ export default function GameCabinetCard({
             items-center
             justify-center
             rounded-2xl
-            bg-gradient-to-br
+            bg-linear-to-br
             shadow-inner
             transition-transform
             duration-300

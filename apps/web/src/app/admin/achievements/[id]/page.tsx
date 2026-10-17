@@ -5,6 +5,8 @@ import { ArrowLeft } from "lucide-react";
 import { getAdminAchievementById } from "@/lib/services/admin-achievement-service-server";
 import { getAchievementPacks } from "@/lib/services/achievement-pack-service-server";
 
+import { getAchievementIconUrl } from "@/lib/achievement-icon-url";
+
 import {
   updateAdminAchievement,
   publishAdminAchievement,
@@ -37,6 +39,8 @@ export default async function AdminAchievementPage({
   if (!achievement) {
     notFound();
   }
+
+  const iconUrl = getAchievementIconUrl(achievement.icon_path);
 
   const pack = Array.isArray(achievement.achievement_packs)
     ? achievement.achievement_packs[0]
@@ -305,11 +309,11 @@ export default async function AdminAchievementPage({
             </CardHeader>
 
             <CardContent>
-              {achievement.icon_path ? (
+              {iconUrl ? (
                 <div className="space-y-3">
                   <div className="flex justify-center rounded-2xl border bg-muted/20 p-4">
                     <Image
-                      src={achievement.icon_path}
+                      src={iconUrl}
                       alt={`${achievement.title} icon`}
                       width={160}
                       height={160}

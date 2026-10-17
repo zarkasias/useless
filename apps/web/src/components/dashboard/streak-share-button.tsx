@@ -51,7 +51,7 @@ export function StreakShareButton(props: StreakShareProps) {
           max-h-[90dvh]
           overflow-y-auto
           border-violet-200
-          bg-gradient-to-b
+          bg-linear-to-b
           from-violet-50
           via-blue-50
           to-white

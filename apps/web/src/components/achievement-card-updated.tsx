@@ -12,10 +12,11 @@ import { LoaderCircle, RefreshCw, Share2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Achievement } from "@/lib/supabase";
 import { formatDistanceToNow } from "date-fns";
+import { getAchievementIconUrl } from "@/lib/achievement-icon-url";
 
 import {
-  typeBorderColors,
-  typeBadgeColors,
+  achievementCardTokens,
+  getRarityToken,
   typeNames,
   rarityTagClass,
 } from "@/components/achievement-styles";
@@ -23,34 +24,6 @@ import {
 import Image from "next/image";
 import { fredoka, nunito } from "./utils/title-fonts";
 import { toast } from "sonner";
-
-// Social media configurations
-// const socialPlatforms = [
-//   {
-//     name: 'Facebook',
-//     icon: (
-//       <img src="/icons/facebook.png" alt="Facebook" width="28" height="28" />
-//     )
-//   },
-//   {
-//     name: 'X',
-//     icon: (
-//       <img src="/icons/x.webp" alt="X" width="28" height="28" />
-//     )
-//   },
-//   {
-//     name: 'LinkedIn',
-//     icon: (
-//       <img src="/icons/linkedin.webp" alt="LinkedIn" width="34" height="34" />
-//     )
-//   },
-//   {
-//     name: 'Instagram',
-//     icon: (
-//       <img src="/icons/instagram_icon.png" alt="Instagram" width="30" height="30" />
-//     )
-//   }
-// ];
 
 interface AchievementCardProps {
   achievement: Achievement;
@@ -77,7 +50,12 @@ function AchievementCardComponent({
   const [socialLoading, setSocialLoading] = useState<string | null>(null);
   const generationAttemptedRef = useRef(false);
 
+  const rarityTheme = getRarityToken(type);
+  const cardTheme = achievementCardTokens;
+
   const generateImageRef = useRef<() => Promise<void>>(async () => {});
+
+  const iconUrl = getAchievementIconUrl(icon_path);
 
   const isCompact = variant === "compact";
   const isEnlarged = variant === "enlarged";
@@ -86,9 +64,7 @@ function AchievementCardComponent({
   flex
   h-full
   flex-col
-  rounded-[15px]
   border-0
-  bg-gray-50/80
   py-0
   shadow-sm
   transition-shadow
@@ -100,12 +76,11 @@ function AchievementCardComponent({
   rounded-2xl
   bg-gradient-to-br
   ${isEnlarged && "md:scale-105"}
-  ${typeBorderColors[type]}
   p-[1px]
   shadow-sm
 `;
 
-  const tagClass = `${rarityTagClass} ${typeBadgeColors[type]}`;
+  //const tagClass = `${rarityTagClass} ${typeBadgeColors[type]}`;
 
   // Format the unlocked time if available
   const timeAgo = unlockedAt
@@ -161,73 +136,15 @@ function AchievementCardComponent({
       // Detect dark mode
       const isDarkMode = document.documentElement.classList.contains("dark");
 
-      // Match the current on-screen card styling:
-      // soft gray interior, subtle rarity gradient border,
-      // gradient rarity badge, and decorated emoji medallion.
-      const canvasTheme = {
-        GAME: {
-          borderStart: "#bbf7d0",
-          borderEnd: "#4ade80",
-
-          tagStart: "#15803d",
-          tagEnd: "#84cc16",
-
-          sparkleA: "#22c55e",
-          sparkleB: "#bef264",
-
-          medallionMid: "rgba(74, 222, 128, 0.32)",
-        },
-        COMMON: {
-          borderStart: "#f3f4f6",
-          borderEnd: "#d1d5db",
-          tagStart: "#6b7280",
-          tagEnd: "#9ca3af",
-          sparkleA: "#a78bfa",
-          sparkleB: "#d8b4fe",
-          medallionMid: "rgba(96, 165, 250, 0.30)",
-        },
-        RARE: {
-          borderStart: "#f3f4f6",
-          borderEnd: "#3b82f6",
-          tagStart: "#3b82f6",
-          tagEnd: "#60a5fa",
-          sparkleA: "#a78bfa",
-          sparkleB: "#d8b4fe",
-          medallionMid: "rgba(96, 165, 250, 0.30)",
-        },
-        EPIC: {
-          borderStart: "#f3f4f6",
-          borderEnd: "#a855f7",
-          tagStart: "#a855f7",
-          tagEnd: "#c084fc",
-          sparkleA: "#a78bfa",
-          sparkleB: "#d8b4fe",
-          medallionMid: "rgba(168, 85, 247, 0.24)",
-        },
-        LEGENDARY: {
-          borderStart: "#f3f4f6",
-          borderEnd: "#f59e0b",
-          tagStart: "#f59e0b",
-          tagEnd: "#fbbf24",
-          sparkleA: "#a78bfa",
-          sparkleB: "#d8b4fe",
-          medallionMid: "rgba(251, 191, 36, 0.24)",
-        },
-        SECRET: {
-          borderStart: "#fdf4ff",
-          borderEnd: "#d946ef",
-
-          tagStart: "#d946ef",
-          tagEnd: "#e879f9",
-
-          sparkleA: "#e879f9",
-          sparkleB: "#f5d0fe",
-
-          medallionMid: "rgba(217, 70, 239, 0.24)",
-        },
-      } as const;
-
-      const theme = canvasTheme[type];
+      const theme = {
+        borderStart: rarityTheme.borderStart,
+        borderEnd: rarityTheme.borderEnd,
+        tagStart: rarityTheme.badgeStart,
+        tagEnd: rarityTheme.badgeEnd,
+        sparkleA: rarityTheme.sparkleA,
+        sparkleB: rarityTheme.sparkleB,
+        medallionMid: rarityTheme.medallionMid,
+      };
 
       // Outer gradient border, matching typeBorderColors.
       const borderGradient = ctx.createLinearGradient(0, 0, width, height);
@@ -297,9 +214,9 @@ function AchievementCardComponent({
         ctx.fillText(emoji, centerX, centerY + 1);
       };
 
-      if (icon_path) {
+      if (iconUrl) {
         try {
-          const iconImage = await loadImage(icon_path);
+          const iconImage = await loadImage(iconUrl);
           const iconSize = 88;
 
           ctx.drawImage(
@@ -322,7 +239,7 @@ function AchievementCardComponent({
       ctx.textBaseline = "alphabetic";
 
       // Leave room on the right for the larger achievement icon.
-      const textMaxWidth = icon_path ? width - 130 : width - 95;
+      const textMaxWidth = iconUrl ? width - 130 : width - 95;
 
       // Draw title
       ctx.fillStyle = isDarkMode ? "#f3f4f6" : "#374151";
@@ -574,9 +491,26 @@ function AchievementCardComponent({
   return (
     <div className="relative w-full">
       {/* Gradient border wrapper */}
-      <div className={cardBorderClass}>
+      <div
+        className={cardBorderClass}
+        style={{
+          borderRadius: cardTheme.outerRadius,
+          backgroundImage: `linear-gradient(
+      to bottom right,
+      ${rarityTheme.borderStart},
+      ${rarityTheme.borderEnd}
+    )`,
+        }}
+      >
         {/* Main achievement card */}
-        <Card ref={cardRef} className={cardClass}>
+        <Card
+          ref={cardRef}
+          className={cardClass}
+          style={{
+            borderRadius: cardTheme.radius,
+            backgroundColor: cardTheme.surface.light,
+          }}
+        >
           <CardHeader
             className={
               isCompact ? "flex-1 px-3 pb-2 pt-3" : "flex-1 pb-2 px-3 pt-3"
@@ -585,9 +519,18 @@ function AchievementCardComponent({
             <div className="flex items-start justify-between gap-1">
               <div className="space-y-1">
                 <span
-                  className={`${tagClass} ${
+                  className={`${rarityTagClass} ${
                     isCompact ? "px-2 py-0.5 text-[10px]" : ""
                   }`}
+                  style={{
+                    backgroundImage: `linear-gradient(
+      to right,
+      ${rarityTheme.badgeStart},
+      ${rarityTheme.badgeEnd}
+    )`,
+                    color: cardTheme.badge.textColor,
+                    borderRadius: cardTheme.badge.radius,
+                  }}
                 >
                   {typeNames[type]}
                 </span>
@@ -595,9 +538,12 @@ function AchievementCardComponent({
                   className={`${fredoka.className}
                     ${
                       isCompact
-                        ? `text-base font-semibold tracking-tight text-gray-700 dark:text-gray-200 whitespace-nowrap`
-                        : `text-md font-semibold tracking-normal text-gray-700 dark:text-gray-200 whitespace-nowrap`
+                        ? "whitespace-nowrap text-base font-semibold tracking-tight"
+                        : "whitespace-nowrap text-md font-semibold tracking-normal"
                     }`}
+                  style={{
+                    color: cardTheme.title.colorLight,
+                  }}
                 >
                   {title}
                 </CardTitle>
@@ -605,9 +551,12 @@ function AchievementCardComponent({
                   className={`${nunito.className}
                     ${
                       isCompact
-                        ? `min-h-8 line-clamp-2 text-xs leading-[0.875rem]`
-                        : `min-h-[48px] line-clamp-3 text-xs leading-4`
+                        ? "min-h-8 line-clamp-2 text-xs leading-3.5"
+                        : "min-h-12 line-clamp-3 text-xs leading-4"
                     }`}
+                  style={{
+                    color: cardTheme.description.colorLight,
+                  }}
                 >
                   {description}
                 </CardDescription>
@@ -615,7 +564,7 @@ function AchievementCardComponent({
 
               <div className="relative -mr-2 -mt-2">
                 {/* Sparkles */}
-                {!icon_path && (
+                {!iconUrl && (
                   <>
                     <Sparkles className="absolute left-1 -top-1 size-4 text-violet-400" />
 
@@ -626,18 +575,18 @@ function AchievementCardComponent({
                 {/* Emoji circle */}
                 <div
                   className={`flex items-center justify-center ${
-                    icon_path ? "size-26" : "size-14"
+                    iconUrl ? "size-26" : "size-14"
                   }`}
                 >
                   <div
-                    className={`flex size-full items-center justify-center ${icon_path ? "" : "rounded-full bg-gradient-to-br from-transparent via-blue-400/20 to-transparent"}`}
+                    className={`flex size-full items-center justify-center ${iconUrl ? "" : "rounded-full bg-gradient-to-br from-transparent via-blue-400/20 to-transparent"}`}
                   >
                     <span
-                      className={`${icon_path ? "size-24" : "bg-white/50 size-10 rounded-full"} flex items-center justify-center`}
+                      className={`${iconUrl ? "size-24" : "bg-white/50 size-10 rounded-full"} flex items-center justify-center`}
                     >
-                      {icon_path ? (
+                      {iconUrl ? (
                         <Image
-                          src={icon_path}
+                          src={iconUrl}
                           alt={`${title} achievement`}
                           loading="lazy"
                           decoding="async"
@@ -700,7 +649,7 @@ function AchievementCardComponent({
                 )}
                 <span
                   className="
-                bg-gradient-to-r 
+                bg-linear-to-r 
                 from-orange-500 
                 to-rose-500 
                 bg-clip-text 
