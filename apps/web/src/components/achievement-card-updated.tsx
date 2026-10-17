@@ -649,7 +649,7 @@ function AchievementCardComponent({
                 )}
                 <span
                   className="
-                bg-gradient-to-r 
+                bg-linear-to-r 
                 from-orange-500 
                 to-rose-500 
                 bg-clip-text 

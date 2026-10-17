@@ -18,6 +18,8 @@
 /database
 **/coverage
 
+/.vscode
+
 # next.js
 /.next/
 **/.next/
