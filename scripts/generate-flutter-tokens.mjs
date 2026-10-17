@@ -13,6 +13,7 @@ const outputPath = path.join(
 const tokens = JSON.parse(fs.readFileSync(tokensPath, "utf8"));
 
 const rarity = tokens.color.rarity;
+const brand = tokens.color.brand;
 const card = tokens.component.achievementCard;
 
 function hexToDartColor(hex) {
@@ -86,6 +87,20 @@ class AchievementRarityColors {
 
 abstract final class AchievementRarityTokens {
 ${rarityEntries}
+}
+
+abstract final class BrandTokens {
+  static const Color primary =
+      ${dartColor(brand.primaryGradient.start)};
+
+  static const Color secondary =
+      ${dartColor(brand.primaryGradient.end)};
+
+  static const Color titleAccent =
+      ${dartColor(brand.titleGradient.end)};
+
+  static const Color focus =
+      ${dartColor(brand.focus)};
 }
 
 abstract final class AchievementCardTokens {

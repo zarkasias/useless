@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:mobile/app/app_shell.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:mobile/auth/auth_screen.dart';
-import 'package:mobile/screens/home_screen.dart';
 
 class AuthGate extends StatefulWidget {
   const AuthGate({super.key});
@@ -54,6 +54,6 @@ class _AuthGateState extends State<AuthGate> {
       return const AuthScreen();
     }
 
-    return const HomeScreen();
+    return const AppShell();
   }
 }

@@ -85,6 +85,20 @@ abstract final class AchievementRarityTokens {
   );
 }
 
+abstract final class BrandTokens {
+  static const Color primary =
+      Color(0xFF7C3AED);
+
+  static const Color secondary =
+      Color(0xFF3B82F6);
+
+  static const Color titleAccent =
+      Color(0xFF0891B2);
+
+  static const Color focus =
+      Color(0xFF8062D6);
+}
+
 abstract final class AchievementCardTokens {
   static const double radius = 15;
   static const double outerRadius = 16;
