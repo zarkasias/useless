@@ -16,5 +16,9 @@ export function getShowcaseAchievements(
         typeof achievement.icon_path === "string" &&
         achievement.icon_path.trim().length > 0,
     )
-    .slice(start, end);
+    .slice(start, end)
+    .map((achievement) => ({
+      ...achievement,
+      icon_path: achievement.icon_path!.trim(),
+    }));
 }

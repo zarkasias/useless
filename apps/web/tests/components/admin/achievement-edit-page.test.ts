@@ -176,7 +176,7 @@ describe("AdminAchievementPage", () => {
     const container = await render();
 
     expect(container.querySelector("img")?.getAttribute("src")).toBe(
-      "/icons/tab.webp",
+      "https://example.supabase.co/storage/v1/object/public/achievement-assets/icons/tab.webp",
     );
     expect(container.querySelector("img")?.getAttribute("alt")).toBe(
       "Tab Collector icon",
