@@ -333,11 +333,8 @@ describe("AchievementCard", () => {
     const payload = share.mock.calls[0]![0] as ShareData;
     const file = payload.files?.[0];
 
-    expect(payload.title).toBe(
-      "Successfully Did Nothing - Useless Achievements",
-    );
     expect(payload.text).toBe(
-      'I just unlocked "Successfully Did Nothing" on Useless Achievements!',
+      'I just unlocked "Successfully Did Nothing" on Useless Achievements! https://www.uselessachievements.com',
     );
     expect(file).toBeInstanceOf(File);
     expect(file?.name).toBe("achievement-successfully-did-nothing.png");
@@ -353,8 +350,7 @@ describe("AchievementCard", () => {
     await click("Share");
 
     expect(share).toHaveBeenCalledExactlyOnceWith({
-      title: "Successfully Did Nothing - Useless Achievements",
-      text: 'I just unlocked "Successfully Did Nothing" on Useless Achievements!',
+      text: 'I just unlocked "Successfully Did Nothing" on Useless Achievements! https://www.uselessachievements.com',
     });
     expect(mocks.error).not.toHaveBeenCalled();
   });
@@ -538,8 +534,7 @@ describe("AchievementCard", () => {
     await click("Share");
 
     expect(share).toHaveBeenCalledExactlyOnceWith({
-      title: "Successfully Did Nothing - Useless Achievements",
-      text: 'I just unlocked "Successfully Did Nothing" on Useless Achievements!',
+      text: 'I just unlocked "Successfully Did Nothing" on Useless Achievements! https://www.uselessachievements.com',
     });
     expect(canShare).not.toHaveBeenCalled();
     expect(mocks.error).not.toHaveBeenCalled();
