@@ -429,7 +429,7 @@ function AchievementCardComponent({
 
   // Share text and basic information for social media
   const getShareText = () =>
-    `I just unlocked "${title}" on Useless Achievements!`;
+    `I just unlocked "${title}" on Useless Achievements! https://www.uselessachievements.com`;
   // const getShareUrl = () => window.location.origin;
 
   const shareAchievement = async () => {
@@ -445,7 +445,7 @@ function AchievementCardComponent({
       setSocialLoading("Share");
 
       const shareData: ShareData = {
-        title: `${title} - Useless Achievements`,
+        //title: `${title} - Useless Achievements`,
         text: getShareText(),
         files: [imageFile],
       };
@@ -463,7 +463,7 @@ function AchievementCardComponent({
 
       if (navigator.share) {
         await navigator.share({
-          title: `${title} - Useless Achievements`,
+          //title: `${title} - Useless Achievements`,
           text: getShareText(),
         });
 
