@@ -15,6 +15,7 @@ import { supabaseAdmin, isFreeLimitError } from "./utils/trigger-context";
 import { evaluateAccountAgeAchievements } from "./triggers/account-age-trigger";
 import { evaluateStreakAchievements } from "./triggers/streak-trigger";
 import { evaluateCollectionCountAchievements } from "./triggers/collection-count-trigger";
+import { getTriggerDefinitions } from "./triggers/trigger-definitions";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -93,12 +94,25 @@ export async function evaluateTriggeredAchievementsForAuthenticatedUser(): Promi
     return [];
   }
 
+  const { data: definitions, error: definitionsError } =
+    await getTriggerDefinitions(user.id);
+
+  if (definitionsError) {
+    console.error(
+      "Error loading triggered achievement definitions:",
+      definitionsError,
+    );
+
+    return [];
+  }
+
   const unlockedAchievements: Achievement[] = [];
 
   const streakData = await getUserStreakData(user.id);
 
   const accountAgeAchievements = await evaluateAccountAgeAchievements({
     userId: user.id,
+    definitions: definitions ?? [],
   });
 
   unlockedAchievements.push(...accountAgeAchievements);
@@ -106,6 +120,7 @@ export async function evaluateTriggeredAchievementsForAuthenticatedUser(): Promi
   const streakAchievements = await evaluateStreakAchievements({
     userId: user.id,
     currentStreak: streakData.currentStreak,
+    definitions: definitions ?? [],
   });
 
   unlockedAchievements.push(...streakAchievements);
@@ -113,6 +128,7 @@ export async function evaluateTriggeredAchievementsForAuthenticatedUser(): Promi
   const collectionCountAchievements = await evaluateCollectionCountAchievements(
     {
       userId: user.id,
+      definitions: definitions ?? [],
     },
   );
 

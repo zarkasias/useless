@@ -157,16 +157,30 @@ function finishClaim(previous: string[] = [], available = [{ id: "new" }]) {
   return db.enqueue("achievements", { data: available });
 }
 function enqueuePostClaimMilestoneChecks() {
-  // A successful daily claim also evaluates streak, account-age, and collection milestones.
+  // Shared definitions are loaded first.
+  db.enqueue("achievements", {
+    data: [],
+  });
+
+  // Streak data lookup.
   db.enqueue("user_achievements", {
     data: [{ achievement_date: "2026-09-08" }],
   });
-  db.enqueue("profiles", { data: { timezone: "UTC" } });
-  db.enqueue("profiles", { data: { created_at: "2026-09-01T12:00:00.000Z" } });
-  db.enqueue("achievements", { data: [] }); // Account-age catalog.
-  db.enqueue("achievements", { data: [] }); // Streak catalog.
-  db.enqueue("user_achievements", { data: [{ achievement_id: "new" }] });
-  db.enqueue("achievements", { data: [] }); // Collection-count catalog.
+
+  // Streak timezone lookup.
+  db.enqueue("profiles", {
+    data: { timezone: "UTC" },
+  });
+
+  // Account-age profile lookup.
+  db.enqueue("profiles", {
+    data: { created_at: "2026-09-01T12:00:00.000Z" },
+  });
+
+  // Collection-count ownership lookup.
+  db.enqueue("user_achievements", {
+    data: [{ achievement_id: "new" }],
+  });
 }
 it("blocks a second daily claim", async () => {
   const today = beginClaim({ id: "existing" });

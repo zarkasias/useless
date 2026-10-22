@@ -1,25 +1,35 @@
 import "server-only";
 
 import { Achievement } from "@/lib/supabase";
+import type { TriggerDefinition } from "@/lib/types/triggers";
 import { getAchievementPackFilter } from "../achievement-access-service-server";
 
 import { supabaseAdmin, isFreeLimitError } from "../utils/trigger-context";
 
 interface EvaluateCollectionCountAchievementsParams {
   userId: string;
+  definitions?: TriggerDefinition[];
 }
 
 export async function evaluateCollectionCountAchievements({
   userId,
+  definitions,
 }: EvaluateCollectionCountAchievementsParams): Promise<Achievement[]> {
   // ----------------------------------------
   // Get achievements the user already owns.
   // ----------------------------------------
 
-  const { data: ownedAchievements, error: ownedError } = await supabaseAdmin
-    .from("user_achievements")
-    .select("achievement_id")
-    .eq("user_id", userId);
+  const [{ data: ownedAchievements, error: ownedError }, packFilter] =
+    await Promise.all([
+      supabaseAdmin
+        .from("user_achievements")
+        .select("achievement_id")
+        .eq("user_id", userId),
+
+      definitions === undefined
+        ? getAchievementPackFilter(userId)
+        : Promise.resolve(null),
+    ]);
 
   if (ownedError) {
     console.error(
@@ -36,14 +46,18 @@ export async function evaluateCollectionCountAchievements({
 
   const collectionCount = ownedAchievementIds.size;
 
-  const packFilter = await getAchievementPackFilter(userId);
-
   // ----------------------------------------
   // Get collection-count achievements.
   // ----------------------------------------
 
-  const { data: collectionCountAchievements, error: achievementsError } =
-    await supabaseAdmin
+  let collectionCountAchievements: TriggerDefinition[];
+
+  if (definitions !== undefined) {
+    collectionCountAchievements = definitions.filter(
+      (achievement) => achievement.trigger_type === "collection_count",
+    );
+  } else {
+    const { data, error } = await supabaseAdmin
       .from("achievements")
       .select(
         `
@@ -59,27 +73,20 @@ export async function evaluateCollectionCountAchievements({
       status,
       trigger_type,
       trigger_config
-    `,
+      `,
       )
       .eq("status", "published")
-      .or(packFilter)
+      .or(packFilter!)
       .eq("trigger_type", "collection_count")
       .eq("is_daily", false);
 
-  if (achievementsError) {
-    console.error(
-      "Error loading collection count achievements:",
-      achievementsError,
-    );
+    if (error) {
+      console.error("Error loading collection count achievements:", error);
 
-    return [];
-  }
+      return [];
+    }
 
-  if (
-    !collectionCountAchievements ||
-    collectionCountAchievements.length === 0
-  ) {
-    return [];
+    collectionCountAchievements = data ?? [];
   }
 
   const unlockedAchievements: Achievement[] = [];

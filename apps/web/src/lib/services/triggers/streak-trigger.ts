@@ -1,6 +1,7 @@
 import "server-only";
 
 import { getAchievementPackFilter } from "../achievement-access-service-server";
+import type { TriggerDefinition } from "@/lib/types/triggers";
 import { Achievement } from "@/lib/supabase";
 
 import { supabaseAdmin, isFreeLimitError } from "../utils/trigger-context";
@@ -8,24 +9,30 @@ import { supabaseAdmin, isFreeLimitError } from "../utils/trigger-context";
 interface EvaluateStreakAchievementsParams {
   userId: string;
   currentStreak: number;
+  definitions?: TriggerDefinition[];
 }
 
 export async function evaluateStreakAchievements({
   userId,
   currentStreak,
+  definitions,
 }: EvaluateStreakAchievementsParams): Promise<Achievement[]> {
   if (currentStreak <= 0) {
     return [];
   }
 
-  const packFilter = await getAchievementPackFilter(userId);
+  let streakAchievements: TriggerDefinition[];
 
-  // ----------------------------------------
-  // Get published streak achievements.
-  // ----------------------------------------
+  if (definitions !== undefined) {
+    // Already loaded and access-filtered by the trusted server helper.
+    streakAchievements = definitions.filter(
+      (achievement) => achievement.trigger_type === "streak",
+    );
+  } else {
+    // Preserve the existing standalone lookup.
+    const packFilter = await getAchievementPackFilter(userId);
 
-  const { data: streakAchievements, error: achievementsError } =
-    await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from("achievements")
       .select(
         `
@@ -41,20 +48,22 @@ export async function evaluateStreakAchievements({
       status,
       trigger_type,
       trigger_config
-    `,
+      `,
       )
       .eq("status", "published")
       .or(packFilter)
       .eq("trigger_type", "streak")
       .eq("is_daily", false);
 
-  if (achievementsError) {
-    console.error("Error loading streak achievements:", achievementsError);
+    if (error) {
+      console.error("Error loading streak achievements:", error);
+      return [];
+    }
 
-    return [];
+    streakAchievements = data ?? [];
   }
 
-  if (!streakAchievements || streakAchievements.length === 0) {
+  if (streakAchievements.length === 0) {
     return [];
   }
 
