@@ -1,5 +1,7 @@
 import "server-only";
 
+import { unstable_cache } from "next/cache";
+
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 
 import { getAuthenticatedUserProfile } from "@/lib/services/achievement-service-server";
@@ -47,37 +49,76 @@ export interface StoreAchievementPack {
   completed: boolean;
 }
 
+const getCachedPackCatalog = unstable_cache(
+  async () => {
+    const { data: packs, error } = await supabaseAdmin
+      .from("achievement_packs")
+      .select(
+        `
+        id,
+        name,
+        slug,
+        description,
+        cover_image_path,
+        theme_key,
+        price_cents,
+        currency,
+        starts_at,
+        ends_at,
+        status
+      `,
+      )
+      .neq("pack_type", "core");
+
+    if (error) {
+      console.error("Error loading achievement packs:", error);
+      throw new Error("Unable to load achievement packs.");
+    }
+
+    return packs ?? [];
+  },
+  ["store-pack-catalog-v1"],
+  {
+    revalidate: 60,
+    tags: ["store-pack-catalog"],
+  },
+);
+
+const getCachedPackAchievements = unstable_cache(
+  async (packIds: string[]) => {
+    if (packIds.length === 0) {
+      return [];
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from("achievements")
+      .select("id, pack_id")
+      .in("pack_id", packIds)
+      .eq("status", "published");
+
+    if (error) {
+      console.error("Error loading pack achievements:", error);
+      throw new Error("Unable to load pack achievements.");
+    }
+
+    return data ?? [];
+  },
+  ["store-pack-achievements-v1"],
+  {
+    revalidate: 60,
+    tags: ["store-pack-achievements"],
+  },
+);
+
 export async function getStoreAchievementPacks(): Promise<
   StoreAchievementPack[]
 > {
-  const user = await getAuthenticatedUser();
+  const [user, profile] = await Promise.all([
+    getAuthenticatedUser(),
+    getAuthenticatedUserProfile(),
+  ]);
 
-  const profile = await getAuthenticatedUserProfile();
-
-  const { data: packs, error: packsError } = await supabaseAdmin
-    .from("achievement_packs")
-    .select(
-      `
-      id,
-      name,
-      slug,
-      description,
-      cover_image_path,
-      theme_key,
-      price_cents,
-      currency,
-      starts_at,
-      ends_at,
-      status
-    `,
-    )
-    .neq("pack_type", "core");
-
-  if (packsError) {
-    console.error("Error loading achievement packs:", packsError);
-
-    throw new Error("Unable to load achievement packs.");
-  }
+  const packs = await getCachedPackCatalog();
 
   if (!packs?.length) {
     return [];
@@ -85,47 +126,40 @@ export async function getStoreAchievementPacks(): Promise<
 
   const packIds = packs.map((pack) => pack.id);
 
-  const { data: achievements, error: achievementsError } = await supabaseAdmin
-    .from("achievements")
-    .select("id, pack_id")
-    .in("pack_id", packIds)
-    .eq("status", "published");
-
-  if (achievementsError) {
-    console.error("Error loading pack achievements:", achievementsError);
-
-    throw new Error("Unable to load pack achievements.");
-  }
+  const achievements = await getCachedPackAchievements([...packIds].sort());
 
   const ownedPackIds = new Set<string>();
   const collectedAchievementIds = new Set<string>();
 
   if (user) {
-    const { data: ownedPacks, error: ownedError } = await supabaseAdmin
-      .from("user_achievement_packs")
-      .select("pack_id")
-      .eq("user_id", user.id)
-      .eq("purchase_status", "owned");
+    const [
+      { data: ownedPacks, error: ownedError },
+      { data: collected, error: collectedError },
+    ] = await Promise.all([
+      supabaseAdmin
+        .from("user_achievement_packs")
+        .select("pack_id")
+        .eq("user_id", user.id)
+        .eq("purchase_status", "owned"),
+
+      supabaseAdmin
+        .from("user_achievements")
+        .select("achievement_id")
+        .eq("user_id", user.id),
+    ]);
 
     if (ownedError) {
       console.error("Error loading owned achievement packs:", ownedError);
-
       throw new Error("Unable to load pack ownership.");
+    }
+
+    if (collectedError) {
+      console.error("Error loading collected achievements:", collectedError);
+      throw new Error("Unable to load pack progress.");
     }
 
     for (const ownedPack of ownedPacks ?? []) {
       ownedPackIds.add(ownedPack.pack_id);
-    }
-
-    const { data: collected, error: collectedError } = await supabaseAdmin
-      .from("user_achievements")
-      .select("achievement_id")
-      .eq("user_id", user.id);
-
-    if (collectedError) {
-      console.error("Error loading collected achievements:", collectedError);
-
-      throw new Error("Unable to load pack progress.");
     }
 
     for (const item of collected ?? []) {

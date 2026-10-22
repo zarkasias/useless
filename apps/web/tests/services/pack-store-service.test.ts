@@ -7,6 +7,10 @@ const mocks = vi.hoisted(() => ({
   getProfile: vi.fn(),
 }));
 
+vi.mock("next/cache", () => ({
+  unstable_cache: (fn: unknown) => fn,
+}));
+
 vi.mock("@supabase/supabase-js", () => ({
   createClient: () => ({ from: mocks.from }),
 }));
@@ -317,7 +321,9 @@ describe("store lookup failures", () => {
       { data: [] },
     ];
 
-    for (let index = 0; index <= stage; index += 1) {
+    const lastQueryIndex = stage >= 2 ? 3 : stage;
+
+    for (let index = 0; index <= lastQueryIndex; index += 1) {
       db.enqueue(
         tables[index],
         index === stage
@@ -327,7 +333,7 @@ describe("store lookup failures", () => {
     }
 
     await expect(getStoreAchievementPacks()).rejects.toThrow(message);
-    expect(db.from).toHaveBeenCalledTimes(stage + 1);
+    expect(db.from).toHaveBeenCalledTimes(stage >= 2 ? 4 : stage + 1);
   });
 });
 

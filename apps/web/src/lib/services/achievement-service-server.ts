@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import { getUserEntitlements } from "./entitlement-service-server";
 import { getAnonymousUser } from "@/lib/anonymous-user";
 import { getAchievementPackFilter } from "./achievement-access-service-server";
@@ -53,27 +55,29 @@ export type DailyClaimResult =
 /**
  * Get the profile belonging to the authenticated user.
  */
-export async function getAuthenticatedUserProfile(): Promise<UserProfile | null> {
-  const user = await getAuthenticatedUser();
+export const getAuthenticatedUserProfile = cache(
+  async (): Promise<UserProfile | null> => {
+    const user = await getAuthenticatedUser();
 
-  if (!user) {
-    return null;
-  }
+    if (!user) {
+      return null;
+    }
 
-  const { data: profile, error } = await supabaseAdmin
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
+    const { data: profile, error } = await supabaseAdmin
+      .from("profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
 
-  if (error) {
-    console.error("Error fetching authenticated user profile:", error);
+    if (error) {
+      console.error("Error fetching authenticated user profile:", error);
 
-    return null;
-  }
+      return null;
+    }
 
-  return profile as UserProfile;
-}
+    return profile as UserProfile;
+  },
+);
 
 // --------------------------------------------------
 // TRIGGERED ACHIEVEMENT SYSTEM
