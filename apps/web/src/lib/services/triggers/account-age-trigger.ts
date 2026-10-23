@@ -1,16 +1,19 @@
 import "server-only";
 
 import { Achievement } from "@/lib/supabase";
+import type { TriggerDefinition } from "@/lib/types/triggers";
 import { getAchievementPackFilter } from "../achievement-access-service-server";
 
 import { supabaseAdmin, isFreeLimitError } from "../utils/trigger-context";
 
 interface EvaluateAccountAgeAchievementsParams {
   userId: string;
+  definitions?: TriggerDefinition[];
 }
 
 export async function evaluateAccountAgeAchievements({
   userId,
+  definitions,
 }: EvaluateAccountAgeAchievementsParams): Promise<Achievement[]> {
   // ----------------------------------------
   // Get the user's profile creation date.
@@ -42,14 +45,18 @@ export async function evaluateAccountAgeAchievements({
 
   const accountAgeDays = Math.floor(accountAgeMs / (1000 * 60 * 60 * 24));
 
-  const packFilter = await getAchievementPackFilter(userId);
+  let accountAgeAchievements: TriggerDefinition[];
 
-  // ----------------------------------------
-  // Get published account-age achievements.
-  // ----------------------------------------
+  if (definitions !== undefined) {
+    // Definitions already loaded and access-filtered by our server helper.
+    accountAgeAchievements = definitions.filter(
+      (achievement) => achievement.trigger_type === "account_age",
+    );
+  } else {
+    // Preserve the existing standalone lookup.
+    const packFilter = await getAchievementPackFilter(userId);
 
-  const { data: accountAgeAchievements, error: achievementsError } =
-    await supabaseAdmin
+    const { data, error } = await supabaseAdmin
       .from("achievements")
       .select(
         `
@@ -65,20 +72,22 @@ export async function evaluateAccountAgeAchievements({
       status,
       trigger_type,
       trigger_config
-    `,
+      `,
       )
       .eq("status", "published")
       .or(packFilter)
       .eq("trigger_type", "account_age")
       .eq("is_daily", false);
 
-  if (achievementsError) {
-    console.error("Error loading account age achievements:", achievementsError);
+    if (error) {
+      console.error("Error loading account age achievements:", error);
+      return [];
+    }
 
-    return [];
+    accountAgeAchievements = data ?? [];
   }
 
-  if (!accountAgeAchievements || accountAgeAchievements.length === 0) {
+  if (accountAgeAchievements.length === 0) {
     return [];
   }
 

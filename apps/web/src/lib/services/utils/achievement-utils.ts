@@ -1,5 +1,5 @@
 import "server-only";
-
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 
 export function getToday(timeZone: string): string {
@@ -32,7 +32,7 @@ export function addDays(dateString: string, amount: number): string {
 /**
  * Get the currently authenticated Supabase user.
  */
-export async function getAuthenticatedUser() {
+export const getAuthenticatedUser = cache(async () => {
   const supabase = await createClient();
 
   const {
@@ -45,4 +45,4 @@ export async function getAuthenticatedUser() {
   }
 
   return user;
-}
+});

@@ -52,13 +52,13 @@ function achievement(trigger: Trigger, id: string, threshold: unknown = 3) {
     id,
     title: `Achievement ${id}`,
     description: "A milestone",
-    type: "common",
+    type: "COMMON" as const,
     emoji: "🏆",
     icon_path: null,
     created_at: "2026-01-01T00:00:00.000Z",
     is_daily: false,
     is_secret: false,
-    status: "published",
+    status: "published" as const,
     trigger_type: trigger,
     trigger_config: {
       [trigger === "collection_count" ? "count" : "days"]: threshold,
@@ -343,5 +343,76 @@ describe("trigger-specific boundaries", () => {
       await evaluateCollectionCountAchievements({ userId: USER_ID }),
     ).toEqual([]);
     expect(db.from).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe("preloaded trigger definitions", () => {
+  it("evaluates preloaded streak definitions without querying the catalog", async () => {
+    const candidate = achievement("streak", "streak-award", 3);
+
+    db.enqueue("user_achievements", {
+      data: [{ achievement_id: "already-owned" }],
+    });
+
+    db.enqueue("user_achievements", {
+      data: { created_at: AWARDED_AT },
+    });
+
+    const result = await evaluateStreakAchievements({
+      userId: USER_ID,
+      currentStreak: 3,
+      definitions: [candidate],
+    });
+
+    expect(result).toHaveLength(1);
+    expect(result[0].id).toBe("streak-award");
+    expect(db.from).not.toHaveBeenCalledWith("achievements");
+    expect(mocks.getPackFilter).not.toHaveBeenCalled();
+  });
+
+  it("does not query the catalog when streak definitions are empty", async () => {
+    const result = await evaluateStreakAchievements({
+      userId: USER_ID,
+      currentStreak: 3,
+      definitions: [],
+    });
+
+    expect(result).toEqual([]);
+    expect(db.from).not.toHaveBeenCalled();
+    expect(mocks.getPackFilter).not.toHaveBeenCalled();
+  });
+
+  it("does not query the catalog when account-age definitions are empty", async () => {
+    db.enqueue("profiles", {
+      data: {
+        created_at: new Date(NOW.getTime() - 3 * DAY_MS).toISOString(),
+      },
+    });
+
+    const result = await evaluateAccountAgeAchievements({
+      userId: USER_ID,
+      definitions: [],
+    });
+
+    expect(result).toEqual([]);
+    expect(db.from).toHaveBeenCalledTimes(1);
+    expect(db.from).not.toHaveBeenCalledWith("achievements");
+    expect(mocks.getPackFilter).not.toHaveBeenCalled();
+  });
+
+  it("does not query the catalog when collection-count definitions are empty", async () => {
+    db.enqueue("user_achievements", {
+      data: [],
+    });
+
+    const result = await evaluateCollectionCountAchievements({
+      userId: USER_ID,
+      definitions: [],
+    });
+
+    expect(result).toEqual([]);
+    expect(db.from).toHaveBeenCalledTimes(1);
+    expect(db.from).not.toHaveBeenCalledWith("achievements");
+    expect(mocks.getPackFilter).not.toHaveBeenCalled();
   });
 });
