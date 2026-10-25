@@ -13,21 +13,32 @@ describe("robots", () => {
     vi.stubEnv("NEXT_PUBLIC_APP_URL", "https://example.com");
 
     expect(robots()).toEqual({
-      rules: {
-        userAgent: "*",
-        allow: "/",
-        disallow: [
-          "/admin",
-          "/dashboard",
-          "/collection",
-          "/leaderboard",
-          "/packs",
-          "/login",
-          "/signup",
-          "/auth",
-          "/api",
-        ],
-      },
+      rules: [
+        {
+          userAgent: "*",
+          allow: "/",
+          disallow: [
+            "/admin",
+            "/dashboard",
+            "/collection",
+            "/leaderboard",
+            "/packs",
+            "/login",
+            "/signup",
+            "/auth",
+            "/api",
+          ],
+        },
+        {
+          userAgent: [
+            "meta-externalagent",
+            "Meta-ExternalFetcher",
+            "FacebookBot",
+            "Meta-WebIndexer",
+          ],
+          disallow: "/",
+        },
+      ],
       sitemap: "https://example.com/sitemap.xml",
     });
   });
