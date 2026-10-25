@@ -5,21 +5,32 @@ export default function robots(): MetadataRoute.Robots {
     process.env.NEXT_PUBLIC_APP_URL || "https://www.uselessachievements.com";
 
   return {
-    rules: {
-      userAgent: "*",
-      allow: "/",
-      disallow: [
-        "/admin",
-        "/dashboard",
-        "/collection",
-        "/leaderboard",
-        "/packs",
-        "/login",
-        "/signup",
-        "/auth",
-        "/api",
-      ],
-    },
+    rules: [
+      {
+        userAgent: "*",
+        allow: "/",
+        disallow: [
+          "/admin",
+          "/dashboard",
+          "/collection",
+          "/leaderboard",
+          "/packs",
+          "/login",
+          "/signup",
+          "/auth",
+          "/api",
+        ],
+      },
+      {
+        userAgent: [
+          "meta-externalagent",
+          "Meta-ExternalFetcher",
+          "FacebookBot",
+          "Meta-WebIndexer",
+        ],
+        disallow: "/",
+      },
+    ],
     sitemap: `${baseUrl}/sitemap.xml`,
   };
 }
