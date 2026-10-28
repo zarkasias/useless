@@ -1,9 +1,10 @@
 # Task: Useless Guess gameplay
 
 - **Task ID:** UG-01; one complete feature, no implementation subtask/review gates.
-- **Status:** Blocked pending owner review of the dictionary recommendation below
-  and subsequent implementation authorization. UI/component structure, local random
-  selection and hidden lifetime statistics are accepted; gameplay is not implemented.
+- **Status:** Gameplay, shared result overlay and recording/statistics extension
+  implemented; ready for review. Current validation and limitations are in
+  [the final handoff](useless-guess-handoff.md). The earlier review does not cover
+  the subsequent recording/statistics extension.
 - **Profile:** [Useless Achievements Web](../project-profile.md), including actual
   commands and [narrow exceptions](../engineering-exceptions.md).
 - **Source baseline:** `61d42cdee8b39f2cfa79c266ef399033e3af7eb9`, `feat/ai-workflow`.
@@ -22,11 +23,22 @@ Owner decision in this chat, 2026-10-28:
   previous answer when multiple answers exist; with one answer, reuse it. Choose
   uniformly from the eligible pool without an unbounded reroll loop. No answer
   changes during a round; previous-answer memory lasts only in the mounted game.
-- Hide unsupported lifetime statistics using the proposed backwards-compatible
-  GameScreen option; do not load or record fictitious Played/Wins/Best values.
-- Keep the agreed gameplay scope and defer persistence, achievements, daily puzzles
-  and leaderboards. This turn authorizes dictionary research/documentation only;
-  stop for dictionary review before gameplay implementation.
+- Show real Played, Wins and Losses through the existing GameScreen. Omit
+  unsupported Best score; do not invent statistics.
+- Keep local round/dictionary behavior; resumable progress persistence, Guess-specific
+  achievement rules, daily puzzles and leaderboards remain deferred.
+
+Result-presentation correction, owner instruction in this chat on 2026-10-28:
+use the existing `GameResultOverlay` in the same completion pattern as other games.
+This supersedes only the earlier inline-result treatment; gameplay and exclusions
+remain unchanged. No new dismissal behavior or overlay component is requested.
+
+Recording/statistics extension, owner instruction in this chat on 2026-10-28:
+this explicitly supersedes earlier exclusions of game-session recording, lifetime
+statistics and statistics refresh. Use the existing `guess` database enum value
+and game_sessions/user_game_stats flow. Use Memory's loading/prop/GameScreen/router
+refresh pattern; retain the accepted shared result overlay. Add no Guess-specific
+achievement rules. No commit, push, merge or deploy is authorized.
 
 ## Scope and preserved behavior
 
@@ -35,9 +47,11 @@ invalid guesses, win/loss and restart. Wire the existing Useless Guess cabinet c
 and a `/games/guess` page using established route/client/auth/subscription conventions.
 Preserve all other games and current service contracts. No achievement-count gate.
 
-Exclude result recording, awards, stats queries/writes, daily scheduling, leaderboards,
-new persistence, external word services, auth/subscription redesign and dependencies.
-Rounds are ephemeral; reload starts a round. No separate preview application.
+Include validated win/loss recording, explicit-restart abandonment using existing
+game conventions, and real Played/Wins/Losses. Exclude new Guess award rules, daily
+scheduling, leaderboards, resumable round persistence, external word services,
+auth/subscription redesign and dependencies. Reload still starts a new local round;
+completed-session statistics persist through the existing database. No preview app.
 
 ## Current system and proposed boundaries
 
@@ -50,9 +64,11 @@ words, sixth-turn win/loss, post-game rejection and keyboard non-downgrade.
 Accepted component boundaries (relative to `apps/web/`, follow existing kebab-case conventions):
 
 - `src/app/games/guess/page.tsx`: server access checks and composition data only;
-  use Spider's profile/login-return URL and entitlement patterns, without stats.
+  preserve profile/login-return URL and entitlement patterns; load Guess statistics
+  through `getAuthenticatedGameStats("guess")` as existing game pages do.
 - `src/app/games/guess/guess-client.tsx`: Navbar, page width/padding and GameScreen
-  composition, passing existing profile/entitlement props.
+  composition, passing profile/entitlement/statistics props. Refresh via
+  `router.refresh()` after `onGameRecorded`, matching Memory.
 - `src/components/games/words/word-game.tsx`: one round's state and common named
   input/submit/restart handlers; lifecycle listener setup/cleanup stays with this
   owner. A separate controller hook is unnecessary for this small local round.
@@ -63,15 +79,23 @@ Accepted component boundaries (relative to `apps/web/`, follow existing kebab-ca
 - Reuse `word-rules.ts` for pure rules. A local `word-list.ts` in the same lib folder
   may hold the owner-approved accepted words/answer subset; this is data, not an API.
   Derive evaluations, status and keyboard priority instead of storing duplicates.
-- `GameScreen`: use one backwards-compatible `showStats` option, default true,
-  false for Guess. Its current mandatory/default stats would misleadingly show a
-  history the feature neither loads nor records. Test existing consumers unchanged.
+- `GameScreen`: remove Guess's temporary stats-hiding prop; pass stored games_played,
+  wins and losses. Add optional losses and `showBestScore` controls in this existing
+  component while preserving every other game's default columns. No separate header.
+- `src/app/actions/game-actions.ts`: `recordGuessGameResultAction` validates result,
+  approved answer, accepted guess sequence and PostgreSQL-compatible duration using
+  existing word rules. Store guesses used as moves/metadata; omit score/mistakes.
+  Reuse `RecordGameResultResponse` and `recordAuthenticatedGameSession`.
+- `src/lib/types/games.ts`: add `guess` to canonical GameType and define the Guess
+  result input alongside existing session/stat contracts. Existing generic stats and
+  achievement services consume this union; do not introduce parallel service layers.
 
-Do not copy Memory's result-recording effects or achievement UI. No new service,
-request library, validator wrapper, global store, cache or speculative abstraction.
-Existing auth/entitlement services remain appropriate established boundaries.
+The shared recording flow may evaluate already-published `game_session`/`game_stat`
+achievements targeting `all` or `guess`; preserve/report that behavior without
+creating Guess rules or award UI. A failure after the RPC may leave a stored session,
+so do not automatically retry a result. Resuming local rounds remains out of scope.
 
-## Dictionary recommendation — pending owner review
+## Accepted dictionary
 
 ### Existing lists and provenance
 
@@ -82,7 +106,7 @@ not contain one. `tests/world-rules.test.ts` has nine uppercase fixture words;
 no upstream source/licence is stated for that fixture. Retain it as regression
 coverage rather than presenting it as a production vocabulary or licensed corpus.
 
-### Proposed source, licence and exact counts
+### Accepted source, licence and exact counts
 
 Use **SCOWL 2020.12.07**, by Kevin Atkinson and contributors, pinned to the official
 [release archive](https://downloads.sourceforge.net/project/wordlist/SCOWL/2020.12.07/scowl-2020.12.07.tar.gz).
@@ -99,7 +123,7 @@ claim that the older release is the newest upstream database.
   admit excluded capitalized entries. Do not strip accents, punctuation or suffixes.
   Exclude proper-name, upper, abbreviation, contraction, special and variant files.
 - **Answers: 823 unique familiar words**, explicitly enumerated in the
-  [proposed answer subset](#proposed-answer-subset) below. This is a manual
+  [proposed answer subset](#approved-answer-subset) below. This is a manual
   familiarity selection from the 1,365 five-letter words produced by the same
   procedure at levels 10/20, not a claim that every SCOWL word is common. All 823
   answers are present in the proposed accepted-guess set. The broader set admits
@@ -108,8 +132,9 @@ claim that the older release is the newest upstream database.
   not estimated. Archive SHA-256:
   `5587667caa20c4891390c2d42dbb4d5c4c3f41bee77af1457ece3ba23fb859cc`.
   The release README identifies version 2020.12.07 / source checkpoint `5ef55f9`.
-  No dictionary assets, source files, dependencies or generator were installed in
-  the repository; the archive/candidates were inspected in temporary storage only.
+  During recommendation preparation the archive/candidates were inspected in
+  temporary storage only; implementation delivery and validation are recorded
+  once in the final handoff.
 
 **Redistribution verified:** the release's `Copyright` file expressly permits use,
 copying, modification, distribution and sale, including generated output, with
@@ -142,8 +167,10 @@ answer is accepted and reject an empty/invalid pool. Tests should assert these
 invariants and agreed counts, plus representative common and less-common guesses;
 word membership is data, not a reason to duplicate scoring rules.
 
-**Review decision remaining:** approve SCOWL's pinned source/composite notices,
-US-English 5,063-guess vocabulary and the explicit 823-answer subset. The local
+**Dictionary approval:** Owner accepted SCOWL 2020.12.07, the 823 answers and
+5,063 accepted guesses in this chat on 2026-10-28 and authorized implementation,
+full notices/attribution, focused tests, one final gate and one complete-feature
+review. No commit, push or merge is authorized. The local
 random/no-immediate-repeat policy and UI structure are already accepted; do not
 reopen those decisions. Client-bundled answers are inspectable, consistent with
 this local, no-stakes scope; no external word service or hidden-answer system.
@@ -167,13 +194,25 @@ this local, no-stakes scope; no external word service or hidden-answer system.
    absent and never downgrade across rounds' accepted guesses. Restart clears them.
 5. A correct guess wins, including attempt six; six incorrect accepted guesses lose.
    Both terminal states reject further board edits/submissions, reveal the answer,
-   show the completed board and offer Play again. No backend recording, awards,
-   stats refresh, storage writes or network calls on submit/end/restart.
+   retain the completed board behind the shared overlay and offer Play again. Record
+   each completed round once through the existing server action/RPC, refresh GameScreen
+   stats only on success, and preserve gameplay/overlay on save failure.
 6. Restart during play or after a result resets draft, guesses, feedback, keyboard
    and result state, selects according to the approved answer policy and restores
    focus to the game input target. Listener cleanup prevents duplicate/stale input
    after restart/navigation. No event listener blocks navigation or app controls.
-7. Board, keyboard, feedback and results pass the design criteria below; functional
+7. Deduplicate recording across rerenders, callback identity changes, overlay events
+   and Play again. Ignore older save feedback after a new round, while allowing a
+   successful old save to refresh lifetime stats. Show Saving/success/error feedback;
+   do not automatically retry ambiguous failures. Record started unfinished rounds
+   as abandoned on explicit Restart (first letter starts a round); never record a
+   fresh untouched round or infer losses from abandoned counts. Navigation/unmount
+   does not add recording, consistent with the inspected existing games.
+8. Load/pass/display/refresh statistics using Memory's pattern. Display stored games
+   played, wins and losses; no unsupported score/Best values or derived losses.
+   Preserve other GameScreen consumers and auth/access behavior. Server result
+   validation must reject malformed/contradictory inputs before writing.
+9. Board, keyboard, feedback and shared results match the existing application;
    tests alone cannot establish design acceptance. No unrelated visual changes.
 
 ## UI and design acceptance (existing-design adaptation)
@@ -206,11 +245,14 @@ setting persistent scoring keys disabled merely because a letter is absent.
 Feedback: reserve an inline readable status region near the board so invalid input
 and accepted-row summaries do not move the layout. Announce submissions/results
 politely, not each tile as it mounts. Use opaque text backing for reliable contrast.
-Results: reuse `GameResult` inline below the board, win/loss copy and answer/attempt
-metric, with Play again; no new modal or overlay focus trap. Keep the final board
-visible, announce the result, move focus to its heading/Play again deliberately,
-and return it to the game on restart. Do not add achievements, score history or
-misleading default Played/Wins/Best values.
+Results: reuse `GameResult` inside the existing `GameResultOverlay`, with the
+shared default backdrop and Spider's scroll-bounded mobile content wrapper. Preserve
+win/loss copy, answer reveal, guesses used and Play again. Keep the completed board
+mounted behind the overlay and input locked. The shared completion overlay has no
+Escape/backdrop dismissal or focus trap; do not invent one. Focus Play again on
+completion; restarting clears the overlay and restores game input focus. Do not add
+Guess-specific awards or score history. Show actual lifetime Played/Wins/Losses
+in GameScreen, and omit unsupported Best score.
 
 Verify alongside an existing Memory/Spider screen in the same app/theme: desktop
 1280x800, mobile 390x844, narrow 320px and 200% zoom; both supported theme modes.
@@ -236,10 +278,14 @@ attempt limits and record remaining gaps; no preview app, new fonts or assets.
    inputs/attempt counts, repeated scoring/key feedback, sixth-turn win/loss,
    terminal lockout, restart/focus and unmount listener cleanup. Control answer
    selection without adding page injection solely for tests. Mock auth/service
-   boundaries, not the rules under test; assert no result/award writes occur.
+   boundaries, not the rules under test. Mock the authorized recording action and
+   assert correct win/loss/abandoned calls, deduplication, failure/late-response
+   behavior and successful stats refresh. Keep localStorage progress writes absent.
 3. Test dictionary/answer validity and selection edge cases (one answer, repeat
    avoidance). Update `tests/games/games-client.test.ts` for Guess navigation
-   and `tests/games/game-screen.test.ts` for hidden stats without changing defaults.
+   and `tests/games/game-screen.test.ts` for real counters and unsupported Best
+   omission without changing other games' defaults. Test the result action, shared
+   RPC contract and existing automatic achievement evaluation for Guess.
    Keep tests behavioral; no per-presentational-component quota or new test framework.
 4. Run focused tests/targeted lint/type checks during implementation using the
    [profile's actual commands](../project-profile.md#actual-commands-and-validation).
@@ -252,18 +298,17 @@ attempt limits and record remaining gaps; no preview app, new fonts or assets.
 6. Prepare one `docs/tasks/useless-guess-handoff.md` with implementation commit or
    identified working state, actual command/environment/results, design comparison,
    limitations and exception reassessment. Do not fabricate results in planning.
-   Obtain one fresh complete-feature review from source baseline through final
-   implementation; reuse source-bound evidence. Fix deltas use workflow's focused
+   Present the recording/statistics extension ready for review; the initial feature
+   review is historical and does not approve this later scope. Reuse source-bound evidence. Fix deltas use workflow's focused
    re-review rather than a release restart. Owner accepts remaining limits.
 
-**Next action:** Owner reviews the dictionary recommendation and exact answer subset;
-then explicitly authorize gameplay implementation. Do not install dependencies,
-implement gameplay, push or merge during this documentation step.
+**Next action:** Owner reviews the implementation and documented verification limits
+in [the final handoff](useless-guess-handoff.md). Do not commit, push or merge.
 
-## Proposed answer subset
+## Approved answer subset
 
-The following 823 lowercase entries are the exact recommendation for review, not
-production code. Apply uppercase normalization when implementing the existing
+The following 823 lowercase entries are the exact owner-approved answer subset;
+production data applies the normalization described above. Apply uppercase normalization when implementing the existing
 rules contract. Membership was checked against both the common candidates and
 all 5,063 accepted guesses; there are no duplicate or malformed entries.
 

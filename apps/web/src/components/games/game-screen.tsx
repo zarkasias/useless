@@ -12,8 +12,10 @@ interface GameScreenProps {
   description: string;
   icon: string;
 
+  showBestScore?: boolean;
   gamesPlayed?: number;
   wins?: number;
+  losses?: number;
   winRate?: number;
   bestScoreLabel?: string;
   bestScore?: string | number | null;
@@ -25,13 +27,20 @@ export function GameScreen({
   title,
   description,
   icon,
+  showBestScore = true,
   gamesPlayed = 0,
   wins = 0,
+  losses,
   winRate,
   bestScoreLabel = "Best",
   bestScore = null,
   children,
 }: GameScreenProps) {
+  const columnCount = 2 + Number(losses !== undefined) + Number(winRate !== undefined) + Number(showBestScore);
+  const columnClasses: Record<number, string> = {
+    2: "grid-cols-2", 3: "grid-cols-3", 4: "grid-cols-4", 5: "grid-cols-5",
+  };
+
   return (
     <div className="space-y-4">
       {/* Game header */}
@@ -89,22 +98,14 @@ export function GameScreen({
             </div>
 
             {/* Player stats */}
-            <div
-              className={`grid shrink-0 ${winRate !== undefined ? "grid-cols-4" : "grid-cols-3"} overflow-hidden rounded-xl border bg-muted/30`}
-            >
+            <div className={`grid shrink-0 ${columnClasses[columnCount]} overflow-hidden rounded-xl border bg-muted/30`}>
               <GameStat label="Played" value={gamesPlayed} />
-
               <GameStat label="Wins" value={wins} />
-
-              {winRate !== undefined && (
-                <GameStat label="Win Rate" value={`${winRate}%`} />
+              {losses !== undefined && <GameStat label="Losses" value={losses} />}
+              {winRate !== undefined && <GameStat label="Win Rate" value={`${winRate}%`} />}
+              {showBestScore && (
+                <GameStat label={bestScoreLabel} value={bestScore ?? "—"} icon={<Trophy className="size-3.5" />} />
               )}
-
-              <GameStat
-                label={bestScoreLabel}
-                value={bestScore ?? "—"}
-                icon={<Trophy className="size-3.5" />}
-              />
             </div>
           </div>
         </div>

@@ -363,3 +363,26 @@ describe("game stats lookup", () => {
     );
   });
 });
+
+
+describe("Guess uses the existing session/statistics/achievement flow", () => {
+  it.each(["win", "loss", "abandoned"] as const)("forwards Guess %s with nullable unsupported metrics and returns stored counters", async (result) => {
+    const savedSession = { ...session(), game_type: "guess" as const, result, score: null, mistakes: null, moves: 3, metadata: { guesses_used: 3 } };
+    const savedStats = { ...stats(), game_type: "guess" as const, best_score: null, total_score: 0, wins: result === "win" ? 1 : 0, losses: result === "loss" ? 1 : 0, abandoned: result === "abandoned" ? 1 : 0 };
+    const sessionQuery = db.enqueue("game_sessions", { data: savedSession });
+    const statsQuery = db.enqueue("user_game_stats", { data: savedStats });
+    const resultData = await recordAuthenticatedGameSession({ gameType: "guess", result, moves: 3, durationSeconds: 12, metadata: { guesses_used: 3 } });
+    expect(resultData.stats).toEqual(savedStats);
+    expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("record_game_result", { p_user_id: "user-1", p_game_type: "guess", p_result: result, p_score: null, p_moves: 3, p_mistakes: null, p_duration_seconds: 12, p_metadata: { guesses_used: 3 } });
+    expect(sessionQuery.eq).toHaveBeenCalledWith("id", "session-1");
+    expect(statsQuery.eq).toHaveBeenCalledWith("game_type", "guess");
+    expect(mocks.evaluate).toHaveBeenCalledWith({ userId: "user-1", session: savedSession, stats: savedStats });
+  });
+  it("loads Guess lifetime statistics for the authenticated user", async () => {
+    const savedStats = { ...stats(), game_type: "guess" as const };
+    const query = db.enqueue("user_game_stats", { data: savedStats });
+    expect(await getAuthenticatedGameStats("guess")).toEqual(savedStats);
+    expect(query.eq).toHaveBeenCalledWith("user_id", "user-1");
+    expect(query.eq).toHaveBeenCalledWith("game_type", "guess");
+  });
+});

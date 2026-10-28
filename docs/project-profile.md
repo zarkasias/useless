@@ -27,15 +27,20 @@
 - Reuse `src/lib/games/words/word-rules.ts`: normalization, dictionary validation,
   exact-first repeated-letter scoring, submission rejection, win/loss and keyboard
   priority already exist. Current coverage is `tests/world-rules.test.ts` (existing
-  filename, not a new suite to duplicate). No production word list or Guess route exists.
+  filename, not a new suite to duplicate). At planning, no production word list or
+  Guess route existed; the accepted task now defines that extension.
 - New gameplay owns one round locally: answer, accepted guesses, draft and feedback.
   Derive evaluations, terminal status and keyboard statuses with existing rules.
-  Do not add global state, mirrored derived state, result persistence or a service layer.
+  Do not add global state, mirrored derived state or a parallel service layer.
+  The authorized recording extension uses existing server actions/RPC; local round
+  resume persistence is still excluded.
 - Follow the recent Spider page pattern for authenticated profile loading, then
   existing entitlement service; missing profile redirects to `/login?next=/games/guess`,
   unsubscribed user to `/games`. Do not change existing routes' differing policies.
   Preserve `Navbar` profile/subscription props and existing access/navigation patterns.
-  Do not fetch achievements or game statistics simply because Memory does.
+  Load Guess statistics through the existing game service and refresh on successful
+  recording using Memory's route/client/GameScreen pattern. Do not fetch achievements
+  or invent unsupported scores; new Guess-specific award rules remain deferred.
 - **API simplicity:** Preserve established server service boundaries for auth and
   subscriptions. No new gameplay API is needed for the proposed bundled dictionary.
   For a later authorized single request, keep the request and lifecycle together;
@@ -91,8 +96,9 @@ with arbitrary coverage counts or silently weaken assertions/thresholds.
 
 ## Evidence boundaries
 
-No application commands/tests/build/browser checks were executed in this planning
-session. Source/configuration inspection establishes commands, not passing baselines.
+Planning source inspection established commands, not passing baselines. Actual
+implementation commands/results, review and limitations are owned by the
+[feature handoff](tasks/useless-guess-handoff.md).
 Before touching existing rules, execute their existing regression suite and add
 missing characterization cases while those rules remain unchanged. Use focused
 red/green feature tests during implementation, one final gate, one complete-feature

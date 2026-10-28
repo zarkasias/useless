@@ -23,7 +23,7 @@ export function KlondikeGame({ onGameRecorded }: KlondikeGameProps) {
   if (!board) {
     return (
       <GameTable>
-        <div className="flex min-h-[400px] items-center justify-center">
+        <div className="flex min-h-100 items-center justify-center">
           <div className="text-sm font-semibold text-amber-100">
             Shuffling cards...
           </div>

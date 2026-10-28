@@ -1,10 +1,13 @@
 "use server";
 
 import { recordAuthenticatedGameSession } from "@/lib/services/game-service-server";
-import type { GameSession, UserGameStats } from "@/lib/types/games";
+import type { GameSession, UserGameStats, RecordGuessGameResultInput } from "@/lib/types/games";
 
 import { calculateSpiderScore } from "@/lib/games/solitaire/spider/spider-scoring";
 import type { SpiderDifficulty } from "@/lib/games/solitaire/spider/spider-types";
+
+import { answerWords, wordDictionary } from "@/lib/games/words/word-list";
+import { getWordGameStatus, MAX_GUESSES, normalizeWord, submitGuess, WORD_LENGTH } from "@/lib/games/words/word-rules";
 
 import type { Achievement } from "@/lib/supabase";
 
@@ -188,5 +191,47 @@ export async function recordSpiderGameResultAction(
       success: false,
       error: "Unable to save Spider game result",
     };
+  }
+}
+
+export async function recordGuessGameResultAction(
+  input: RecordGuessGameResultInput,
+): Promise<RecordGameResultResponse> {
+  try {
+    if (
+      !input || !["win", "loss", "abandoned"].includes(input.result) ||
+      typeof input.answer !== "string" || !Array.isArray(input.guesses) ||
+      input.guesses.length > MAX_GUESSES ||
+      input.guesses.some((guess) => typeof guess !== "string") ||
+      !Number.isSafeInteger(input.durationSeconds) || input.durationSeconds < 0 ||
+      input.durationSeconds > 2147483647
+    ) return { success: false, error: "Invalid Guess game result" };
+
+    const answer = normalizeWord(input.answer);
+    if (!answerWords.includes(answer)) {
+      return { success: false, error: "Invalid Guess game result" };
+    }
+    let guesses: string[] = [];
+    for (const guess of input.guesses) {
+      const submission = submitGuess({ guess, answer, guesses, dictionary: wordDictionary });
+      if (!submission.success) return { success: false, error: "Invalid Guess game result" };
+      guesses = submission.guesses;
+    }
+    const status = getWordGameStatus(guesses, answer);
+    const expectedResult = { playing: "abandoned", won: "win", lost: "loss" }[status];
+    if (input.result !== expectedResult) return { success: false, error: "Invalid Guess game result" };
+
+    const recorded = await recordAuthenticatedGameSession({
+      gameType: "guess",
+      result: input.result,
+      moves: guesses.length,
+      durationSeconds: input.durationSeconds,
+      metadata: { guesses_used: guesses.length, word_length: WORD_LENGTH, max_guesses: MAX_GUESSES },
+    });
+    return { success: true, ...recorded };
+  } catch (error) {
+    console.error("Failed to record Guess game result:", error);
+    // The existing flow can fail after committing the session. Do not encourage a duplicate retry.
+    return { success: false, error: "Unable to confirm that your Guess result was saved." };
   }
 }

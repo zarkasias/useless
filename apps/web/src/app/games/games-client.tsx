@@ -40,6 +40,12 @@ export default function GamesClient({
     }
   };
 
+  const toGuess = () => {
+    if (initialEntitlements.isSubscribed) {
+      router.push("/games/guess");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-transparent">
       <Navbar
@@ -165,13 +171,26 @@ export default function GamesClient({
                 />
               </div>
 
-              <div>
+              <div
+                role="link"
+                tabIndex={initialEntitlements.isSubscribed ? 0 : undefined}
+                aria-label="Play Useless Guess"
+                aria-disabled={!initialEntitlements.isSubscribed}
+                onClick={toGuess}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    toGuess();
+                  }
+                }}
+                className={initialEntitlements.isSubscribed ? "cursor-pointer rounded-2xl outline-none focus-visible:ring-[3px] focus-visible:ring-ring" : ""}
+              >
                 <GameCabinetCard
                   title="Useless Guess"
                   description="Five letters. Six guesses. With zero usefulness."
                   icon="/game_icons/guess.webp"
-                  available={false}
-                  footerText="We're still finding the words"
+                  available
+                  footerText="Find the word. Accomplish nothing."
                   theme={gameCardThemes.words}
                   subscribed={initialEntitlements.isSubscribed}
                 />

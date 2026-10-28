@@ -109,6 +109,7 @@ function card(title: string) {
 }
 
 const games = [
+  { title: "Useless Guess", path: "/games/guess" },
   { title: "Achievement Memory", path: "/games/memory" },
   { title: "Useless Solitaire", path: "/games/solitaire" },
   { title: "Useless Spider Solitaire", path: "/games/spider" },
@@ -140,19 +141,4 @@ describe("GamesClient", () => {
     expect(mocks.push).not.toHaveBeenCalled();
   });
 
-  it.each([{ isSubscribed: false }, { isSubscribed: true }])(
-    "keeps Words unavailable when subscribed is $isSubscribed",
-    async ({ isSubscribed }) => {
-      await render(isSubscribed);
-
-      const words = card("Useless Guess");
-      expect(words.getAttribute("data-available")).toBe("false");
-
-      await act(async () => {
-        words.click();
-      });
-
-      expect(mocks.push).not.toHaveBeenCalled();
-    },
-  );
 });

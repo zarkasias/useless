@@ -35,7 +35,7 @@ export interface RecordedGameResult {
   unlockedAchievements: Achievement[];
 }
 
-export type GameType = "memory" | "solitaire" | "spider";
+export type GameType = "memory" | "solitaire" | "spider" | "guess";
 
 export type GameResult = "win" | "loss" | "abandoned";
 
@@ -110,4 +110,11 @@ export interface UserGameStats {
 
   last_played_at: string | null;
   updated_at: string;
+}
+
+export interface RecordGuessGameResultInput {
+  result: GameResult;
+  answer: string;
+  guesses: readonly string[];
+  durationSeconds: number;
 }

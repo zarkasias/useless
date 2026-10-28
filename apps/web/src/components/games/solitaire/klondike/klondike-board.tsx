@@ -61,7 +61,7 @@ export function KlondikeBoard({
 
   return (
     <div className="w-full overflow-x-auto pb-3">
-      <div className="w-full space-y-4 px-1 sm:min-w-[680px] sm:space-y-6 sm:px-6">
+      <div className="w-full space-y-4 px-1 sm:min-w-170 sm:space-y-6 sm:px-6">
         {/* Stock / Waste / Foundations */}
         <div className="flex items-start justify-between gap-6">
           <div className="ml-2 flex gap-2 sm:gap-5">

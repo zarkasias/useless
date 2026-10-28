@@ -30,11 +30,13 @@ acceptance; reassess in its final handoff. No unrelated migration is authorized.
 - **Validation:** Page auth/subscription/prop tests and integrated route check.
 - **Exit:** Feature acceptance; no framework migration authorized. Reassess in handoff.
 
-## UG-03: Reuse existing word-domain type exports
+## UG-03: Reuse existing game-domain type exports
 
 - **Rule:** [React/TypeScript Types](profiles/react-typescript.md): shared domain
   contracts MUST live in a feature `.types.ts` file and not service implementations.
-- **Owner decision:** Reuse existing filenames and `word-rules.ts`; retain its exported
+- **Owner decision:** Reuse existing filenames and `word-rules.ts`; extend canonical
+  `src/lib/types/games.ts` for the explicitly authorized recording extension rather
+  than migrating its existing GameType/session/stat contracts. Retain word rules' exported
   rule-result/status types in that pure module rather than moving existing contracts.
 - **Reason/tradeoff:** Avoid unrelated contract/import refactoring for a bounded
   feature. This is a pure rules module, not an API/service implementation.

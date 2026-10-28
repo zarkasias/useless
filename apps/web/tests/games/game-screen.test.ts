@@ -50,6 +50,15 @@ describe("GameScreen", () => {
     expect(container.querySelector("img")?.getAttribute("alt")).toBe("");
   });
 
+  it("displays real losses and can omit unsupported best score without a separate header", () => {
+    const container = render({ gamesPlayed: 8, wins: 3, losses: 2, showBestScore: false });
+    expect(stat(container, "Played")).toBe("8");
+    expect(stat(container, "Wins")).toBe("3");
+    expect(stat(container, "Losses")).toBe("2");
+    expect(container.textContent).not.toContain("Best");
+    expect(container.querySelector("#game-content")?.textContent).toBe("Game board");
+  });
+
   it("defaults to zero plays and wins with no best score", () => {
     const container = render();
 

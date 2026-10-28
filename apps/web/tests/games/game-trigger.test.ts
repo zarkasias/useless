@@ -348,3 +348,16 @@ describe("game achievement database failures", () => {
     expectAllQueriesConsumed();
   });
 });
+
+
+it("continues evaluating existing all-game achievements for Guess without adding Guess-specific rules", async () => {
+  session = { ...session, game_type: "guess", result: "loss", score: null, metadata: { guesses_used: 6 } };
+  stats = { ...stats, game_type: "guess", losses: 1 };
+  const generic = candidate({ game: "all", metric: "losses", operator: ">=", value: 1 }, "game_stat", "existing-generic");
+  const unrelated = candidate({ game: "memory", metric: "losses", operator: ">=", value: 1 }, "game_stat", "memory-only");
+  enqueueCandidates([generic, unrelated]);
+  const award = db.enqueue("user_achievements", {});
+  expect(await run()).toEqual([generic]);
+  expect(award.insert).toHaveBeenCalledWith({ user_id: "user-1", achievement_id: "existing-generic" });
+  expectAllQueriesConsumed();
+});
