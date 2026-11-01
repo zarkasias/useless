@@ -7,6 +7,7 @@ import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { getAuthenticatedUserProfile } from "@/lib/services/achievement-service-server";
 
 import { getAuthenticatedUser } from "./utils/achievement-utils";
+import type { AchievementPackStatus } from "@/lib/types/achievement-pack";
 
 import type { Achievement } from "@/lib/supabase";
 
@@ -37,7 +38,7 @@ export interface StoreAchievementPack {
 
   cover_image_path: string | null;
   theme_key: string | null;
-  status: string;
+  status: AchievementPackStatus;
   isUpcoming: boolean;
 
   owned: boolean;
