@@ -74,7 +74,23 @@ export default function DashboardClient({
   const latestMetaIconUrl = getAchievementIconUrl(latestMeta?.icon_path);
   const [packs, setPacks] = useState<StoreAchievementPack[]>(initialPacks);
 
-  const featuredPack = packs[0];
+  const now = new Date().getTime();
+
+  const featuredPack = packs
+    .filter((pack) => {
+      const hasStarted = !pack.starts_at || Date.parse(pack.starts_at) <= now;
+
+      const hasEnded = !!pack.ends_at && now >= Date.parse(pack.ends_at);
+
+      return pack.status === "active" && hasStarted && !hasEnded;
+    })
+    .sort((a, b) => {
+      const startDifference =
+        (b.starts_at ? Date.parse(b.starts_at) : 0) -
+        (a.starts_at ? Date.parse(a.starts_at) : 0);
+
+      return startDifference || a.id.localeCompare(b.id);
+    })[0];
 
   const handleDailyAchievement = async () => {
     if (!user || isClaimingAchievement) return;
