@@ -435,7 +435,7 @@ describe("DashboardClient", () => {
         ends_at: null,
         cover_image_path: null,
         theme_key: null,
-        status: "published",
+        status: "active",
         isUpcoming: false,
         owned: true,
         availableForPurchase: false,
