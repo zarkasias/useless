@@ -210,7 +210,6 @@ export default async function PackDetailPage({
                     >
                       <AchievementCard
                         achievement={achievement}
-                        unlockedAt={collectedAchievement?.created_at}
                         ingrid
                         showShareButton={false}
                         variant="compact"

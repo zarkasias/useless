@@ -196,10 +196,9 @@ describe("PackDetailPage", () => {
       { id: "a1", title: "Collected" },
       { id: "a2", title: "Uncollected" },
     ];
-    const unlockedAt = "2026-10-08T12:00:00.000Z";
     mocks.getPublished.mockResolvedValue(published);
     mocks.getCollected.mockResolvedValue([
-      { id: "a1", created_at: unlockedAt },
+      { id: "a1", created_at: "2026-10-08T12:00:00.000Z" },
     ]);
 
     const container = await render();
@@ -207,14 +206,12 @@ describe("PackDetailPage", () => {
     expect(mocks.achievementCard.mock.calls.map(([props]) => props)).toEqual([
       {
         achievement: published[0],
-        unlockedAt,
         ingrid: true,
         showShareButton: false,
         variant: "compact",
       },
       {
         achievement: published[1],
-        unlockedAt: undefined,
         ingrid: true,
         showShareButton: false,
         variant: "compact",
