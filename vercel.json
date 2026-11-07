@@ -3,6 +3,7 @@
     "deploymentEnabled": {
       "main": true,
       "dev": false,
+      "feat/claude": false,
       "feat/design-system": false
     }
   }
