@@ -35,7 +35,7 @@ export function UnlockAchievement({
         }
       }}
     >
-      <DialogContent className="sm:max-w-md bg-background border-2 border-primary/20">
+      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-md bg-background border-2 border-primary/20">
         <DialogHeader className="relative z-10">
           <DialogTitle className="text-center text-3xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500">
             Achievement Unlocked!
@@ -54,6 +54,7 @@ export function UnlockAchievement({
                 achievement={achievement}
                 isCollected={true}
                 showShareButton={true}
+                variant="stacked"
               />
             </div>
           ) : (

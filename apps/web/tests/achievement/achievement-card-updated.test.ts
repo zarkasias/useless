@@ -5,50 +5,28 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { Achievement } from "@/lib/supabase";
 
-const mocks = vi.hoisted(() => ({
-  loading: vi.fn(),
-  dismiss: vi.fn(),
+const toasts = vi.hoisted(() => ({
   success: vi.fn(),
   error: vi.fn(),
-  info: vi.fn(),
 }));
 
-vi.mock("sonner", () => ({
-  toast: mocks,
-}));
+const createShareFile = vi.hoisted(() => vi.fn());
+
+vi.mock("sonner", () => ({ toast: toasts }));
 
 vi.mock("@/components/utils/title-fonts", () => ({
-  fredoka: {
-    className: "fredoka",
-    style: { fontFamily: "Fredoka" },
-  },
-  nunito: {
-    className: "nunito",
-    style: { fontFamily: "Nunito" },
-  },
+  fredoka: { className: "fredoka", style: { fontFamily: "Fredoka" } },
+  nunito: { className: "nunito", style: { fontFamily: "Nunito" } },
+}));
+
+vi.mock("@/lib/share-image", () => ({
+  createShareFile,
+  getShareCaption: (title: string) => `Caption for ${title}`,
 }));
 
 vi.mock("next/image", () => ({
-  default: ({
-    src,
-    alt,
-    width,
-    height,
-    className,
-  }: {
-    src: string;
-    alt: string;
-    width: number;
-    height: number;
-    className?: string;
-  }) =>
-    createElement("img", {
-      src,
-      alt,
-      width,
-      height,
-      className,
-    }),
+  default: ({ src, alt }: { src: string; alt: string }) =>
+    createElement("img", { src, alt }),
 }));
 
 import { AchievementCard } from "@/components/achievement-card-updated";
@@ -68,41 +46,18 @@ const achievement: Achievement = {
   status: "published",
 };
 
-const imageUrl = "data:image/png;base64,dGVzdA==";
-
-function createCanvasContext() {
-  return {
-    scale: vi.fn(),
-    createLinearGradient: vi.fn(() => ({
-      addColorStop: vi.fn(),
-    })),
-    createRadialGradient: vi.fn(() => ({
-      addColorStop: vi.fn(),
-    })),
-    beginPath: vi.fn(),
-    moveTo: vi.fn(),
-    lineTo: vi.fn(),
-    quadraticCurveTo: vi.fn(),
-    closePath: vi.fn(),
-    fill: vi.fn(),
-    stroke: vi.fn(),
-    arc: vi.fn(),
-    roundRect: vi.fn(),
-    drawImage: vi.fn(),
-    fillText: vi.fn(),
-    measureText: vi.fn((text: string) => ({
-      width: text.length * 6,
-    })),
-  };
-}
+const file = new File(["image"], "achievement.png", { type: "image/png" });
 
 let container: HTMLDivElement | undefined;
 let root: Root | undefined;
-let context: ReturnType<typeof createCanvasContext>;
+let observers: {
+  callback: IntersectionObserverCallback;
+  disconnect: ReturnType<typeof vi.fn>;
+}[];
 
-const fetchImage = vi.fn();
 const share = vi.fn();
 const canShare = vi.fn();
+const writeText = vi.fn();
 
 async function render(overrides: Partial<Props> = {}) {
   const activeRoot = root;
@@ -119,49 +74,64 @@ async function render(overrides: Partial<Props> = {}) {
   });
 }
 
-function button(label: string): HTMLButtonElement {
+function shareButton(): HTMLButtonElement {
   const result = Array.from(container?.querySelectorAll("button") ?? []).find(
-    (element) => element.textContent?.trim() === label,
+    (element) => /^(Share|Download)$/.test(element.textContent?.trim() ?? ""),
   );
 
-  if (!result) throw new Error(`Missing button: ${label}`);
+  if (!result) throw new Error("Missing Share button");
   return result;
 }
 
-async function click(label: string) {
+async function tapShare() {
   await act(async () => {
-    button(label).click();
+    shareButton().click();
+  });
+}
+
+async function scrollIntoView(index = 0) {
+  await act(async () => {
+    observers[index]!.callback(
+      [{ isIntersecting: true } as IntersectionObserverEntry],
+      {} as IntersectionObserver,
+    );
   });
 }
 
 beforeEach(() => {
-  for (const mock of Object.values(mocks)) {
-    mock.mockReset();
-  }
+  observers = [];
 
-  mocks.loading.mockReturnValue("preparing-toast");
+  for (const mock of Object.values(toasts)) mock.mockReset();
 
-  fetchImage.mockReset();
-  fetchImage.mockResolvedValue({
-    blob: async () => new Blob(["test-image"], { type: "image/png" }),
-  });
-
+  createShareFile.mockReset();
+  createShareFile.mockResolvedValue(file);
   share.mockReset();
   share.mockResolvedValue(undefined);
   canShare.mockReset();
   canShare.mockReturnValue(true);
+  writeText.mockReset();
+  writeText.mockResolvedValue(undefined);
 
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
-  vi.stubGlobal("fetch", fetchImage);
-  vi.stubGlobal("navigator", { share, canShare });
-  vi.stubGlobal("devicePixelRatio", 1);
+  vi.stubGlobal("navigator", {
+    share,
+    canShare,
+    clipboard: { writeText },
+  });
+  vi.stubGlobal(
+    "IntersectionObserver",
+    class {
+      observe = vi.fn();
+      disconnect = vi.fn();
 
-  context = createCanvasContext();
-
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(
-    context as unknown as CanvasRenderingContext2D,
+      constructor(callback: IntersectionObserverCallback) {
+        observers.push({ callback, disconnect: this.disconnect });
+      }
+    },
   );
-  vi.spyOn(HTMLCanvasElement.prototype, "toDataURL").mockReturnValue(imageUrl);
+
+  URL.createObjectURL = vi.fn(() => "blob:share-image");
+  URL.revokeObjectURL = vi.fn();
   vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
   vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -184,8 +154,8 @@ afterEach(async () => {
   }
 });
 
-describe("AchievementCard", () => {
-  it("renders the achievement and emoji without generating a share image", async () => {
+describe("AchievementCard display", () => {
+  it("renders the achievement and emoji without a share image", async () => {
     await render();
 
     expect(container?.textContent).toContain(achievement.title);
@@ -193,26 +163,18 @@ describe("AchievementCard", () => {
     expect(
       container?.querySelector('[role="img"]')?.getAttribute("aria-label"),
     ).toBe(`${achievement.title} achievement`);
-    expect(container?.querySelector('[role="img"]')?.textContent).toBe("🏆");
     expect(container?.querySelector("button")).toBeNull();
-    expect(fetchImage).not.toHaveBeenCalled();
-    expect(mocks.loading).not.toHaveBeenCalled();
+    expect(createShareFile).not.toHaveBeenCalled();
   });
 
   it("renders an image icon instead of the emoji", async () => {
     await render({
-      achievement: {
-        ...achievement,
-        icon_path: "/icons/trophy.png",
-      },
+      achievement: { ...achievement, icon_path: "/icons/trophy.png" },
     });
 
-    const icon = container?.querySelector("img");
-
-    expect(icon?.getAttribute("src")).toBe(
+    expect(container?.querySelector("img")?.getAttribute("src")).toBe(
       "https://example.supabase.co/storage/v1/object/public/achievement-assets/icons/trophy.png",
     );
-    expect(icon?.getAttribute("alt")).toBe(`${achievement.title} achievement`);
     expect(container?.querySelector('[role="img"]')).toBeNull();
   });
 
@@ -228,338 +190,261 @@ describe("AchievementCard", () => {
     expect(description?.classList.contains("line-clamp-2")).toBe(true);
   });
 
-  it("generates one PNG automatically and enables sharing and downloading", async () => {
-    await render({ showShareButton: true });
+  it.each(["default", "compact", "enlarged"] as const)(
+    "lets %s titles wrap instead of running into the icon",
+    async (variant) => {
+      await render({ variant });
 
-    expect(HTMLCanvasElement.prototype.toDataURL).toHaveBeenCalledWith(
-      "image/png",
-      1,
-    );
-    expect(context.scale).toHaveBeenCalledWith(2, 2);
-    expect(context.fillText).toHaveBeenCalledWith(
-      achievement.emoji,
-      expect.any(Number),
-      expect.any(Number),
-    );
-    expect(fetchImage).toHaveBeenCalledExactlyOnceWith(imageUrl);
-    expect(mocks.loading).toHaveBeenCalledWith(
-      "Preparing achievement to share...",
-      { description: "This will only take a moment" },
-    );
-    expect(mocks.dismiss).toHaveBeenCalledWith("preparing-toast");
-    expect(button("Share").disabled).toBe(false);
+      const title = container?.querySelector('[data-slot="card-title"]');
 
-    await render({ showShareButton: true });
+      expect(title?.classList.contains("whitespace-nowrap")).toBe(false);
+      expect(title?.parentElement?.classList.contains("min-w-0")).toBe(true);
+    },
+  );
 
-    expect(fetchImage).toHaveBeenCalledTimes(1);
+  it("centers the content in the stacked variant", async () => {
+    await render({ variant: "stacked" });
+
+    const header = container?.querySelector('[data-slot="card-header"]');
+
+    expect(header?.classList.contains("text-center")).toBe(true);
+    expect(container?.textContent).toContain(achievement.title);
+    expect(container?.querySelector('[role="img"]')?.textContent).toBe("🏆");
   });
 
-  it("keeps sharing and downloading disabled for uncollected achievements", async () => {
-    await render({ showShareButton: true, isCollected: false });
+  it("uses readable badge text on the amber Legendary badge", async () => {
+    await render({ achievement: { ...achievement, type: "LEGENDARY" } });
 
-    expect(fetchImage).toHaveBeenCalledTimes(1);
-    expect(button("Share").disabled).toBe(true);
+    const badge = Array.from(container?.querySelectorAll("span") ?? []).find(
+      (element) => element.textContent === "Legendary",
+    );
+
+    expect(badge?.style.color).toBe("rgb(69, 26, 3)");
+    expect(badge?.classList.contains("fredoka")).toBe(true);
+  });
+});
+
+describe("AchievementCard share image timing", () => {
+  it("prepares the image straight away outside of grids", async () => {
+    await render({ showShareButton: true });
+
+    expect(createShareFile).toHaveBeenCalledExactlyOnceWith({
+      title: achievement.title,
+      description: achievement.description,
+      type: achievement.type,
+      emoji: achievement.emoji,
+      iconUrl: null,
+    });
+    expect(shareButton().disabled).toBe(false);
   });
 
-  it("generates grid images without showing a preparation toast", async () => {
+  it("waits until a grid card is visible before preparing its image", async () => {
     await render({ showShareButton: true, ingrid: true });
 
-    expect(fetchImage).toHaveBeenCalledTimes(1);
-    expect(mocks.loading).not.toHaveBeenCalled();
-    expect(mocks.dismiss).not.toHaveBeenCalled();
-    expect(button("Share").disabled).toBe(false);
+    expect(createShareFile).not.toHaveBeenCalled();
+    expect(shareButton().disabled).toBe(true);
+
+    await scrollIntoView();
+
+    expect(createShareFile).toHaveBeenCalledOnce();
+    expect(observers[0]!.disconnect).toHaveBeenCalled();
+    expect(shareButton().disabled).toBe(false);
   });
 
-  it("shows the loading state until the image file is ready", async () => {
-    let resolveBlob!: (blob: Blob) => void;
+  it("never prepares an image for a locked card", async () => {
+    await render({ showShareButton: true, isCollected: false, ingrid: true });
 
-    fetchImage.mockResolvedValue({
-      blob: () =>
-        new Promise<Blob>((resolve) => {
-          resolveBlob = resolve;
-        }),
-    });
+    expect(observers).toHaveLength(0);
+    expect(createShareFile).not.toHaveBeenCalled();
+    expect(shareButton().disabled).toBe(true);
+  });
+
+  it("keeps Share disabled and shows a spinner until the image is ready", async () => {
+    let finish!: (value: File) => void;
+
+    createShareFile.mockReturnValue(
+      new Promise<File>((resolve) => {
+        finish = resolve;
+      }),
+    );
 
     await render({ showShareButton: true });
 
-    expect(container?.textContent).toContain("Preparing your achievement...");
-    expect(button("Share").disabled).toBe(true);
+    expect(shareButton().disabled).toBe(true);
+    expect(container?.querySelector(".animate-spin")).not.toBeNull();
 
     await act(async () => {
-      resolveBlob(new Blob(["test-image"], { type: "image/png" }));
+      finish(file);
     });
 
-    expect(container?.textContent).not.toContain(
-      "Preparing your achievement...",
-    );
-    expect(button("Share").disabled).toBe(false);
+    expect(shareButton().disabled).toBe(false);
+    expect(container?.querySelector(".animate-spin")).toBeNull();
   });
 
-  it("offers a retry after canvas generation fails", async () => {
-    vi.mocked(HTMLCanvasElement.prototype.getContext).mockReturnValueOnce(null);
+  it("renders images one at a time when several cards appear together", async () => {
+    let finishFirst!: (value: File) => void;
+
+    createShareFile.mockReturnValueOnce(
+      new Promise<File>((resolve) => {
+        finishFirst = resolve;
+      }),
+    );
+
+    const secondContainer = document.createElement("div");
+    const secondRoot = createRoot(secondContainer);
 
     await render({ showShareButton: true });
-
-    expect(mocks.error).toHaveBeenCalledWith("Failed to prepare image", {
-      description:
-        "Try switching between light/dark mode or using a different browser",
+    await act(async () => {
+      secondRoot.render(
+        createElement(AchievementCard, {
+          achievement: { ...achievement, id: "second", title: "Second" },
+          isCollected: true,
+          showShareButton: true,
+        }),
+      );
     });
-    expect(mocks.dismiss).toHaveBeenCalledWith("preparing-toast");
 
-    // A changed prop makes the memoized card render again,
-    // exposing the retry UI controlled by generationAttemptedRef.
-    await render({ showShareButton: true, variant: "compact" });
+    expect(createShareFile).toHaveBeenCalledOnce();
 
-    expect(button("Try Again").disabled).toBe(false);
-    expect(button("Share").disabled).toBe(true);
+    await act(async () => {
+      finishFirst(file);
+    });
 
-    await click("Try Again");
+    expect(createShareFile).toHaveBeenCalledTimes(2);
 
-    expect(fetchImage).toHaveBeenCalledTimes(1);
-    expect(button("Share").disabled).toBe(false);
-    expect(
-      Array.from(container?.querySelectorAll("button") ?? []).some(
-        (element) => element.textContent?.trim() === "Try Again",
-      ),
-    ).toBe(false);
+    await act(async () => {
+      secondRoot.unmount();
+    });
   });
+});
 
-  it("shares the generated PNG when file sharing is supported", async () => {
+describe("AchievementCard sharing", () => {
+  it("opens the native share sheet synchronously within the tap", async () => {
     await render({ showShareButton: true });
-    await click("Share");
 
-    expect(share).toHaveBeenCalledTimes(1);
+    expect(shareButton().textContent?.trim()).toBe("Share");
 
-    const payload = share.mock.calls[0]![0] as ShareData;
-    const file = payload.files?.[0];
+    // Deliberately no await or act: iOS needs this during the tap itself.
+    act(() => {
+      shareButton().click();
+      expect(share).toHaveBeenCalledExactlyOnceWith({
+        files: [file],
+        text: `Caption for ${achievement.title}`,
+      });
+    });
 
-    expect(payload.text).toBe(
-      'I just unlocked "Successfully Did Nothing" on Useless Achievements! https://www.uselessachievements.com',
-    );
-    expect(file).toBeInstanceOf(File);
-    expect(file?.name).toBe("achievement-successfully-did-nothing.png");
-    expect(file?.type).toBe("image/png");
-    expect(canShare).toHaveBeenCalledWith({ files: [file] });
-    expect(button("Share").disabled).toBe(false);
+    await act(async () => {});
+
+    expect(URL.createObjectURL).not.toHaveBeenCalled();
   });
 
-  it("shares text when the browser cannot share image files", async () => {
+  it.each([
+    ["cannot share files", () => canShare.mockReturnValue(false)],
+    ["has no share API", () => vi.stubGlobal("navigator", { clipboard: { writeText } })],
+    [
+      "has share but no canShare",
+      () => vi.stubGlobal("navigator", { share, clipboard: { writeText } }),
+    ],
+  ])(
+    "saves the image and copies the caption when the browser %s",
+    async (_label, arrange) => {
+      arrange();
+
+      await render({ showShareButton: true });
+
+      expect(shareButton().textContent?.trim()).toBe("Download");
+
+      await tapShare();
+
+      expect(share).not.toHaveBeenCalled();
+      expect(URL.createObjectURL).toHaveBeenCalledWith(file);
+      expect(HTMLAnchorElement.prototype.click).toHaveBeenCalledOnce();
+      expect(writeText).toHaveBeenCalledWith(
+        `Caption for ${achievement.title}`,
+      );
+      expect(toasts.success).toHaveBeenCalledWith(
+        "Image saved and caption copied",
+        expect.any(Object),
+      );
+    },
+  );
+
+  it("still saves the image when the clipboard is unavailable", async () => {
     canShare.mockReturnValue(false);
+    writeText.mockRejectedValue(new Error("Denied"));
 
     await render({ showShareButton: true });
-    await click("Share");
+    await tapShare();
 
-    expect(share).toHaveBeenCalledExactlyOnceWith({
-      text: 'I just unlocked "Successfully Did Nothing" on Useless Achievements! https://www.uselessachievements.com',
-    });
-    expect(mocks.error).not.toHaveBeenCalled();
-  });
-
-  it("suggests downloading when browser sharing is unavailable", async () => {
-    vi.stubGlobal("navigator", {});
-
-    await render({ showShareButton: true });
-    await click("Share");
-
-    expect(mocks.info).toHaveBeenCalledWith(
-      "Sharing is not supported in this browser",
-      { description: "Download the image and share it manually." },
+    expect(HTMLAnchorElement.prototype.click).toHaveBeenCalledOnce();
+    expect(toasts.success).toHaveBeenCalledWith(
+      "Image saved",
+      expect.any(Object),
     );
-    expect(button("Share").disabled).toBe(false);
   });
 
   it("treats a cancelled share as a normal dismissal", async () => {
-    share.mockRejectedValue(new DOMException("User cancelled", "AbortError"));
+    share.mockRejectedValue(new DOMException("Cancelled", "AbortError"));
 
     await render({ showShareButton: true });
-    await click("Share");
+    await tapShare();
 
-    expect(mocks.error).not.toHaveBeenCalled();
-    expect(button("Share").disabled).toBe(false);
+    expect(HTMLAnchorElement.prototype.click).not.toHaveBeenCalled();
+    expect(toasts.error).not.toHaveBeenCalled();
+    expect(shareButton().disabled).toBe(false);
   });
 
-  it("reports other share errors and restores the controls", async () => {
-    share.mockRejectedValue(new Error("Share unavailable"));
+  it("falls back to saving when the native share fails", async () => {
+    share.mockRejectedValue(new DOMException("Blocked", "NotAllowedError"));
 
     await render({ showShareButton: true });
-    await click("Share");
+    await tapShare();
 
-    expect(mocks.error).toHaveBeenCalledWith("Unable to share achievement", {
-      description: "Try downloading the image instead.",
-    });
-    expect(button("Share").disabled).toBe(false);
+    expect(HTMLAnchorElement.prototype.click).toHaveBeenCalledOnce();
+    expect(shareButton().disabled).toBe(false);
   });
 
-  it.each(["loaded", "failed"] as const)(
-    "generates a share image when the achievement icon is %s",
-    async (outcome) => {
-      let requestedSource = "";
+  it("blocks a second share while one is in progress", async () => {
+    share.mockReturnValue(new Promise(() => {}));
 
-      class MockImage {
-        onload: (() => void) | null = null;
-        onerror: ((event: Event) => void) | null = null;
+    await render({ showShareButton: true });
+    await tapShare();
 
-        set src(value: string) {
-          requestedSource = value;
+    expect(shareButton().disabled).toBe(true);
+  });
 
-          queueMicrotask(() => {
-            if (outcome === "loaded") {
-              this.onload?.();
-            } else {
-              this.onerror?.(new Event("error"));
-            }
-          });
-        }
-      }
-
-      vi.stubGlobal("Image", MockImage);
-
-      await render({
-        showShareButton: true,
-        achievement: {
-          ...achievement,
-          icon_path: "/icons/trophy.png",
-        },
-      });
-
-      expect(requestedSource).toBe(
-        "https://example.supabase.co/storage/v1/object/public/achievement-assets/icons/trophy.png",
-      );
-      expect(fetchImage).toHaveBeenCalledExactlyOnceWith(imageUrl);
-      expect(button("Share").disabled).toBe(false);
-
-      if (outcome === "loaded") {
-        expect(context.drawImage).toHaveBeenCalledWith(
-          expect.any(MockImage),
-          248,
-          14,
-          88,
-          88,
-        );
-        expect(context.fillText).not.toHaveBeenCalledWith(
-          achievement.emoji,
-          expect.any(Number),
-          expect.any(Number),
-        );
-      } else {
-        expect(context.drawImage).not.toHaveBeenCalled();
-        expect(context.fillText).toHaveBeenCalledWith(
-          achievement.emoji,
-          expect.any(Number),
-          expect.any(Number),
-        );
-        expect(console.error).toHaveBeenCalledWith(
-          "Failed to load achievement icon:",
-          expect.any(Event),
-        );
-        expect(mocks.error).not.toHaveBeenCalled();
-      }
-    },
-  );
-
-  it.each(["light", "dark"] as const)(
-    "includes the unlocked date in a generated %s-mode image",
-    async (mode) => {
-      const originallyDark =
-        document.documentElement.classList.contains("dark");
-
-      document.documentElement.classList.toggle("dark", mode === "dark");
-
-      try {
-        await render({
-          showShareButton: true,
-          unlockedAt: "2026-10-07T12:00:00.000Z",
-        });
-
-        expect(context.fillText).toHaveBeenCalledWith(
-          expect.stringMatching(/^Unlocked .+/),
-          20,
-          158,
-        );
-        expect(fetchImage).toHaveBeenCalledExactlyOnceWith(imageUrl);
-        expect(button("Share").disabled).toBe(false);
-      } finally {
-        document.documentElement.classList.toggle("dark", originallyDark);
-      }
-    },
-  );
-
-  it("uses the device pixel ratio when it exceeds the minimum scale", async () => {
-    vi.stubGlobal("devicePixelRatio", 3);
+  it("retries a failed image from the Share button", async () => {
+    createShareFile.mockRejectedValueOnce(new Error("No canvas"));
 
     await render({ showShareButton: true });
 
-    expect(context.scale).toHaveBeenCalledExactlyOnceWith(3, 3);
+    expect(toasts.error).not.toHaveBeenCalled();
+    expect(shareButton().disabled).toBe(false);
 
-    const canvas = vi.mocked(HTMLCanvasElement.prototype.toDataURL).mock
-      .contexts[0] as HTMLCanvasElement;
+    await tapShare();
 
-    expect(canvas.width).toBe(1050);
-    expect(canvas.height).toBe(690);
-  });
-
-  it("truncates long titles and descriptions to their canvas line limits", async () => {
-    const longText = Array(12).fill("abcdefghijklmnopqrst").join(" ");
-
-    await render({
-      showShareButton: true,
-      achievement: {
-        ...achievement,
-        title: longText,
-        description: longText,
-      },
-    });
-
-    // Title: two lines, starting at y=67 with a line height of 19.
-    expect(context.fillText).toHaveBeenCalledWith(
-      expect.stringMatching(/\.\.\.$/),
-      20,
-      86,
+    expect(createShareFile).toHaveBeenCalledTimes(2);
+    expect(share).not.toHaveBeenCalled();
+    expect(toasts.success).toHaveBeenCalledWith(
+      "Your image is ready",
+      expect.any(Object),
     );
 
-    // Description: three lines, starting at y=94 with a line height of 16.
-    expect(context.fillText).toHaveBeenCalledWith(
-      expect.stringMatching(/\.\.\.$/),
-      20,
-      126,
-    );
+    await tapShare();
 
-    expect(button("Share").disabled).toBe(false);
+    expect(share).toHaveBeenCalledOnce();
   });
 
-  it("shares text when the browser has share but no canShare API", async () => {
-    vi.stubGlobal("navigator", { share });
+  it("tells the user when a retry also fails", async () => {
+    createShareFile.mockRejectedValue(new Error("No canvas"));
 
     await render({ showShareButton: true });
-    await click("Share");
+    await tapShare();
 
-    expect(share).toHaveBeenCalledExactlyOnceWith({
-      text: 'I just unlocked "Successfully Did Nothing" on Useless Achievements! https://www.uselessachievements.com',
-    });
-    expect(canShare).not.toHaveBeenCalled();
-    expect(mocks.error).not.toHaveBeenCalled();
-  });
-
-  it("suppresses generation error toasts for cards displayed in a grid", async () => {
-    vi.mocked(HTMLCanvasElement.prototype.getContext).mockReturnValueOnce(null);
-
-    await render({ showShareButton: true, ingrid: true });
-
-    expect(console.error).toHaveBeenCalledWith(
-      "Error generating image:",
-      expect.any(Error),
+    expect(toasts.error).toHaveBeenCalledWith(
+      "Couldn't prepare your image",
+      expect.any(Object),
     );
-    expect(mocks.loading).not.toHaveBeenCalled();
-    expect(mocks.error).not.toHaveBeenCalled();
-    expect(fetchImage).not.toHaveBeenCalled();
-
-    // Render again to expose the ref-controlled retry button.
-    await render({
-      showShareButton: true,
-      ingrid: true,
-      variant: "compact",
-    });
-
-    expect(button("Try Again").disabled).toBe(false);
+    expect(shareButton().disabled).toBe(false);
   });
 });

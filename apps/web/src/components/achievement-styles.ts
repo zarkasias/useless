@@ -22,3 +22,10 @@ export const achievementCardTokens = achievementCard;
 export function getRarityToken(type: AchievementType) {
   return rarity[type.toLowerCase() as keyof typeof rarity];
 }
+
+// White is only about 2:1 on the amber Legendary badge.
+export function getBadgeTextColor(type: AchievementType) {
+  return type === "LEGENDARY"
+    ? achievementCard.badge.textColorLegendary
+    : achievementCard.badge.textColor;
+}
