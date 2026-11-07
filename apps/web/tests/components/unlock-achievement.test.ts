@@ -10,10 +10,12 @@ vi.mock("@/components/achievement-card-updated", () => ({
     achievement,
     isCollected,
     showShareButton,
+    variant,
   }: {
     achievement: Achievement;
     isCollected: boolean;
     showShareButton: boolean;
+    variant?: string;
   }) =>
     createElement(
       "article",
@@ -21,6 +23,7 @@ vi.mock("@/components/achievement-card-updated", () => ({
         "data-achievement-id": achievement.id,
         "data-collected": String(isCollected),
         "data-share": String(showShareButton),
+        "data-variant": variant,
       },
       achievement.title,
     ),
@@ -108,6 +111,7 @@ describe("UnlockAchievement", () => {
     expect(card?.getAttribute("data-achievement-id")).toBe("daily-achievement");
     expect(card?.getAttribute("data-collected")).toBe("true");
     expect(card?.getAttribute("data-share")).toBe("true");
+    expect(card?.getAttribute("data-variant")).toBe("stacked");
     expect(dialog?.querySelector('a[href="/signup"]')).toBeNull();
   });
 
