@@ -40,6 +40,9 @@ const FINE_POINTER_QUERY = "(hover: hover) and (pointer: fine)";
 // Stages narrower than this use the phone curve.
 const DESKTOP_MIN_WIDTH = 700;
 
+// Where the page itself switches to two columns (Tailwind's md breakpoint).
+const PAGE_DESKTOP_MIN_WIDTH = 768;
+
 function cardGeometry(config: HeroConfig) {
   const { width, height, radius } = config.card;
   const shape = new Shape();
@@ -116,7 +119,12 @@ interface StreamProps {
 }
 
 interface StackSpot {
-  position: Vector3;
+  /**
+   * Where the card sits relative to the reveal position. Relative, so the
+   * deck follows the revealed card when the layout changes (a resize, or
+   * turning a tablet), instead of staying where it first landed.
+   */
+  offset: Vector3;
   rotation: number;
   order: number;
 }
@@ -186,6 +194,8 @@ function Stream({
   const stackTurn = useMemo(() => new Quaternion(), []);
   const stackEuler = useMemo(() => new Euler(), []);
   const anchorPoint = useMemo(() => new Vector3(), []);
+  const deckBase = useMemo(() => new Vector3(), []);
+  const stackTarget = useMemo(() => new Vector3(), []);
   const stack = useRef<(StackSpot | null)[]>([]);
   const settled = useRef(false);
   const onSettledNow = useRef(onSettled);
@@ -591,7 +601,13 @@ function Stream({
     const path = curve.current?.path;
 
     if (path) path.getPointAt(config.focusAt, target);
-    const [x, y] = config.claim.reveal[layoutNow.current];
+    // By the page's layout, not the stage's width: on desktop the stage is
+    // only the right-hand column, which is narrow enough on a laptop to use
+    // the phone path, but the phone's raised reveal must stay on phones.
+    const [x, y] =
+      config.claim.reveal[
+        window.innerWidth >= PAGE_DESKTOP_MIN_WIDTH ? "desktop" : "mobile"
+      ];
 
     target.x += x;
     target.y += y;
@@ -604,11 +620,6 @@ function Stream({
   // just below and behind the revealed card, like cards dropped on a table.
   const startSettle = contextSafe((revealed: number, instant = false) => {
     const settings = config.settle;
-    // The revealed card's face sits `peek.lift` in front of the reveal
-    // position once turned over; the deck goes just behind that face.
-    const base = revealPosition(new Vector3());
-
-    base.z += config.peek.lift;
     const others = Array.from(
       { length: config.stream.cardCount },
       (_, i) => i,
@@ -618,11 +629,13 @@ function Stream({
     others.forEach((i, order) => {
       const depth = order + 1;
 
+      // The revealed card's face sits `peek.lift` in front of the reveal
+      // position once turned over; the deck goes just behind that face.
       stack.current[i] = {
-        position: new Vector3(
-          base.x + settings.step[0] * depth + jitter(),
-          base.y + settings.step[1] * depth + jitter(),
-          base.z - 0.01 * depth,
+        offset: new Vector3(
+          settings.step[0] * depth + jitter(),
+          settings.step[1] * depth + jitter(),
+          config.peek.lift - 0.01 * depth,
         ),
         rotation: (Math.random() * 2 - 1) * settings.rotation * DEGREES,
         order,
@@ -958,6 +971,9 @@ function Stream({
       }
     }
 
+    // Where the deck sits this frame, so it follows any layout change.
+    revealPosition(deckBase);
+
     const noiseScale = layers.noise ? motion.noise : 0;
     const noiseTime = time * config.noise.frequency;
 
@@ -1084,7 +1100,8 @@ function Stream({
       const settle = claimed > 0 || !spot ? 0 : values.settle;
 
       if (settle > 0 && spot) {
-        card.position.lerp(spot.position, settle);
+        stackTarget.copy(deckBase).add(spot.offset);
+        card.position.lerp(stackTarget, settle);
         card.scale.setScalar(
           // The same size as the revealed card, which grows by
           // `peek.scale` once turned over.
