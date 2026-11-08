@@ -10,6 +10,7 @@ vi.mock("@/components/utils/title-fonts", () => ({
 import {
   createShareFile,
   getShareCaption,
+  renderCardFace,
   renderShareImage,
   SHARE_IMAGE_HEIGHT,
   SHARE_IMAGE_WIDTH,
@@ -331,5 +332,31 @@ describe("renderShareImage", () => {
     await expect(renderShareImage(input)).rejects.toThrow(
       "Could not get canvas context",
     );
+  });
+});
+
+describe("renderCardFace", () => {
+  it("draws just the card at the requested 4:5 size, scaled from the share layout", async () => {
+    const canvas = await renderCardFace(input, 820, 1024);
+
+    expect([canvas.width, canvas.height]).toEqual([820, 1024]);
+    expect(context.scale).toHaveBeenCalledWith(
+      820 / SHARE_IMAGE_WIDTH,
+      1024 / SHARE_IMAGE_HEIGHT,
+    );
+  });
+
+  it("shows the achievement and a small wordmark, but not the share footer's site address", async () => {
+    await renderCardFace(input);
+
+    expect(drawnText().join(" ")).toContain("Successfully Did Nothing");
+    expect(drawnText()).toContain("Useless Achievements");
+    expect(drawnText()).not.toContain("uselessachievements.com");
+  });
+
+  it("leaves the share image itself unchanged", async () => {
+    await renderShareImage(input);
+
+    expect(drawnText()).toContain("uselessachievements.com");
   });
 });
