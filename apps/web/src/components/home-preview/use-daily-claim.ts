@@ -72,6 +72,9 @@ export function useDailyClaim({
   const [restored, setRestored] = useState(false);
   const [checkedStorage, setCheckedStorage] = useState(false);
   const [isClaiming, setIsClaiming] = useState(false);
+  // Goes up with every claim, from any button, so the hero can tell a fresh
+  // attempt (and a failed one) from the page simply loading.
+  const [attempt, setAttempt] = useState(0);
 
   // Decided once, on arrival. For a signed-in visitor the server knows best,
   // and a claim saved in this browser (an earlier anonymous claim, or
@@ -114,6 +117,7 @@ export function useDailyClaim({
     if (claimingRef.current) return;
 
     claimingRef.current = true;
+    setAttempt((count) => count + 1);
     setIsClaiming(true);
     trackEvent("daily_claim_tap", { signed_in: signedIn });
 
@@ -161,5 +165,5 @@ export function useDailyClaim({
     }
   };
 
-  return { claimed, restored, checkedStorage, isClaiming, claim };
+  return { claimed, restored, checkedStorage, isClaiming, attempt, claim };
 }

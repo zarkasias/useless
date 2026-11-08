@@ -1,12 +1,21 @@
+import Link from "next/link";
+
 import styles from "@/components/home/home-styles";
 
 interface FinalCtaProps {
   hasClaimed: boolean;
   isClaiming: boolean;
+  /** This browser can only claim after signing in. */
+  mustSignIn?: boolean;
   onClaim: () => void;
 }
 
-export function FinalCta({ hasClaimed, isClaiming, onClaim }: FinalCtaProps) {
+export function FinalCta({
+  hasClaimed,
+  isClaiming,
+  mustSignIn = false,
+  onClaim,
+}: FinalCtaProps) {
   return (
     <section
       className="bg-white px-5 py-16 text-center md:py-24"
@@ -22,6 +31,11 @@ export function FinalCta({ hasClaimed, isClaiming, onClaim }: FinalCtaProps) {
         <a className={styles.primaryButton} href="#top">
           Back to my achievement <span aria-hidden="true">↑</span>
         </a>
+      ) : mustSignIn ? (
+        <Link className={styles.primaryButton} href="/login?next=%2F">
+          Sign in to claim today&apos;s achievement
+          <span aria-hidden="true">↗</span>
+        </Link>
       ) : (
         <button
           type="button"

@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
   error: vi.fn(),
   share: vi.fn(),
   shareOptions: vi.fn(),
-  feed: vi.fn(),
+  scene: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -40,15 +40,27 @@ vi.mock("@/components/achievement-card-updated", () => ({
     createElement("div", { "data-testid": "ladder-card" }, achievement.title),
 }));
 
-vi.mock("@/components/home-preview/card-feed", () => ({
-  CardFeed: (props: {
-    label: string;
-    revealed: Achievement | null;
-    restored: boolean;
-    ready: boolean;
-  }) => {
-    mocks.feed(props);
-    return createElement("div", { "data-testid": "feed" }, props.label);
+// The 3D scene is loaded with next/dynamic; stand in for it with a stub
+// that records what the hero asks it to show.
+interface SceneProps {
+  claim: {
+    status: string;
+    achievement: { title: string } | null;
+    restored?: boolean;
+  };
+  onSettled?: () => void;
+}
+
+// Only shown under reduced motion or if the scene fails; it draws on
+// canvases with the brand fonts, which tests can't load.
+vi.mock("@/components/hero/hero-static-card", () => ({
+  HeroStaticCard: () => null,
+}));
+
+vi.mock("next/dynamic", () => ({
+  default: () => (props: SceneProps) => {
+    mocks.scene(props);
+    return null;
   },
 }));
 
@@ -74,7 +86,7 @@ vi.mock("next/image", () => ({
     createElement("img", { src, alt }),
 }));
 
-import HomePreviewClient from "@/app/home-preview/home-preview-client";
+import HomePageClient from "@/app/home/home-page-client";
 import { CLAIM_STORAGE_KEY } from "@/components/home-preview/use-daily-claim";
 
 function achievement(
@@ -124,6 +136,8 @@ beforeEach(() => {
     })),
   );
   vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:face");
+  // jsdom has no scrolling.
+  Element.prototype.scrollIntoView = vi.fn();
   vi.spyOn(console, "error").mockImplementation(() => {});
 
   window.localStorage.clear();
@@ -140,19 +154,47 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 
-async function render(loggedIn = false) {
+async function render(
+  loggedIn = false,
+  visitor: Partial<{
+    achievement: Achievement | null;
+    linked: boolean;
+    mustSignIn: boolean;
+  }> = {},
+) {
   await act(async () => {
     root.render(
-      createElement(HomePreviewClient, {
+      createElement(HomePageClient, {
         initialProfile: loggedIn
           ? ({ id: "u", username: "me" } as never)
           : null,
         initialEntitlements: null,
         initialPacks: [],
         featuredAchievements: featured,
+        visitor: {
+          signedIn: loggedIn,
+          linked: false,
+          achievement: null,
+          mustSignIn: false,
+          ...visitor,
+        },
       }),
     );
   });
+}
+
+/** What the hero last asked the scene to show. */
+function lastScene(): SceneProps {
+  const calls = mocks.scene.mock.calls;
+
+  if (calls.length === 0) throw new Error("The scene never rendered");
+
+  return calls[calls.length - 1]![0] as SceneProps;
+}
+
+/** The deck lands, as the scene reports once the stack has settled. */
+async function settle() {
+  await act(async () => lastScene().onSettled?.());
 }
 
 function buttons(text: string) {
@@ -166,13 +208,25 @@ async function click(element: HTMLElement | undefined) {
   await act(async () => element.click());
 }
 
-describe("HomePreviewClient", () => {
+describe("HomePageClient", () => {
   it("shows one claim button up top and one at the end, and says no account is needed", async () => {
     await render();
 
     expect(buttons("Claim my useless achievement")).toHaveLength(2);
     expect(container.textContent).toContain("No account needed");
     expect(container.textContent).not.toContain("Sign up to share");
+  });
+
+  it("keeps Share out of sight until something is claimed", async () => {
+    await render();
+
+    // The page styles disabled buttons at 0.65 opacity, so opacity alone
+    // isn't enough to hide it.
+    const [share] = buttons("Share it");
+
+    expect(share!.classList.contains("invisible")).toBe(true);
+    expect(share!.ariaHidden).toBe("true");
+    expect(share!.tabIndex).toBe(-1);
   });
 
   it("reveals the claimed achievement in place and offers to share it", async () => {
@@ -186,25 +240,29 @@ describe("HomePreviewClient", () => {
       Intl.DateTimeFormat().resolvedOptions().timeZone,
     );
     expect(mocks.refresh).toHaveBeenCalled();
+    // The share image waits until the deck has landed.
     expect(mocks.shareOptions).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        enabled: true,
+        enabled: false,
         input: expect.objectContaining({ title: "Professional Napper" }),
       }),
     );
-    expect(mocks.feed).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        label: "Your achievement: Professional Napper",
-        revealed: won,
-        restored: false,
-      }),
-    );
+    expect(lastScene().claim).toMatchObject({
+      status: "revealed",
+      achievement: { title: "Professional Napper" },
+      restored: false,
+    });
     expect(
       JSON.parse(window.localStorage.getItem(CLAIM_STORAGE_KEY)!),
     ).toMatchObject({ achievement: { id: "won" } });
     expect(container.textContent).toContain("You unlocked Professional Napper");
     expect(container.textContent).toContain("Create a free account to keep it");
 
+    // Share is prepared and usable once the deck has landed.
+    await settle();
+    expect(mocks.shareOptions).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: true }),
+    );
     await click(buttons("Share it")[0]);
     expect(mocks.share).toHaveBeenCalledOnce();
     expect(buttons("Claim my useless achievement")).toHaveLength(0);
@@ -219,7 +277,7 @@ describe("HomePreviewClient", () => {
     await render(true);
     await click(buttons("Claim my useless achievement")[0]);
 
-    expect(container.textContent).toContain("See my collection");
+    expect(container.textContent).toContain("See it in your collection");
     expect(container.textContent).not.toContain("Create a free account");
   });
 
@@ -232,7 +290,11 @@ describe("HomePreviewClient", () => {
     expect(mocks.info).toHaveBeenCalledExactlyOnceWith(
       "You've already claimed today's achievement.",
     );
-    expect(buttons("Share it")).toHaveLength(0);
+    // Share stays hidden and out of reach until a card is revealed.
+    expect(buttons("Share it").every((b) => b.ariaHidden === "true")).toBe(
+      true,
+    );
+    expect(lastScene().claim).toMatchObject({ status: "failed" });
   });
 
   it("sends visitors to Pro when a subscription is required", async () => {
@@ -269,9 +331,11 @@ describe("HomePreviewClient", () => {
     await render();
 
     expect(mocks.claim).not.toHaveBeenCalled();
-    expect(mocks.feed).toHaveBeenLastCalledWith(
-      expect.objectContaining({ revealed: saved, restored: true, ready: true }),
-    );
+    expect(lastScene().claim).toMatchObject({
+      status: "revealed",
+      achievement: { title: "Two Weeks Wasted" },
+      restored: true,
+    });
     expect(container.textContent).toContain("You unlocked Two Weeks Wasted");
     expect(buttons("Share it")).toHaveLength(1);
   });
@@ -287,9 +351,10 @@ describe("HomePreviewClient", () => {
 
     await render();
 
-    expect(mocks.feed).toHaveBeenLastCalledWith(
-      expect.objectContaining({ revealed: null, ready: true }),
-    );
+    expect(lastScene().claim).toMatchObject({
+      status: "idle",
+      achievement: null,
+    });
     expect(buttons("Claim my useless achievement")).toHaveLength(2);
   });
 
@@ -324,5 +389,47 @@ describe("HomePreviewClient", () => {
       "Title legendary",
       "Title game",
     ]);
+  });
+
+  it("opens on a claim made elsewhere today, as the server reports it", async () => {
+    await render(true, {
+      achievement: achievement("dash", "RARE", "Claimed On The Dashboard"),
+    });
+
+    expect(mocks.claim).not.toHaveBeenCalled();
+    expect(lastScene().claim).toMatchObject({
+      status: "revealed",
+      achievement: { title: "Claimed On The Dashboard" },
+      restored: true,
+    });
+    expect(buttons("Claim my useless achievement")).toHaveLength(0);
+  });
+
+  it("asks a browser linked to an account to sign in instead of claiming", async () => {
+    await render(false, { linked: true, mustSignIn: true });
+
+    expect(buttons("Claim my useless achievement")).toHaveLength(0);
+
+    const signIn = Array.from(container.querySelectorAll("a")).filter((link) =>
+      link.textContent?.includes("Sign in to claim"),
+    );
+
+    expect(signIn).toHaveLength(2);
+    expect(signIn[0]!.getAttribute("href")).toBe("/login?next=%2F");
+  });
+
+  it("reveals in the hero when claiming from the bottom of the page", async () => {
+    mocks.claim.mockResolvedValue({
+      status: "claimed",
+      achievement: achievement("won", "EPIC", "Professional Napper"),
+    });
+    const scroll = vi.fn();
+
+    await render();
+    container.querySelector("#top")!.scrollIntoView = scroll;
+    await click(buttons("Claim my useless achievement")[1]);
+
+    expect(scroll).toHaveBeenCalledOnce();
+    expect(lastScene().claim).toMatchObject({ status: "revealed" });
   });
 });

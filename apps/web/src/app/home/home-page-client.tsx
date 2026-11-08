@@ -8,38 +8,57 @@ import { useGSAP } from "@gsap/react";
 import { Navbar } from "@/components/navbar";
 import styles from "@/components/home/home-styles";
 import { getShowcaseAchievements } from "@/components/home/home-data";
+import { CardStreamHero } from "@/components/hero/card-stream-hero";
 import { FinalCta } from "@/components/home-preview/final-cta";
 import { GamesStrip } from "@/components/home-preview/games-strip";
 import { GoFurther } from "@/components/home-preview/go-further";
 import { HowItWorks } from "@/components/home-preview/how-it-works";
-import { PreviewHero } from "@/components/home-preview/preview-hero";
 import {
   pickLadder,
   RarityLadder,
 } from "@/components/home-preview/rarity-ladder";
+import { toShareInput } from "@/components/home-preview/use-card-face";
 import { useDailyClaim } from "@/components/home-preview/use-daily-claim";
 import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
 import type { StoreAchievementPack } from "@/lib/services/pack-store-service-server";
+import type { VisitorClaim } from "@/lib/services/todays-claim-service-server";
 import type { Achievement, UserProfile } from "@/lib/supabase";
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-interface HomePreviewClientProps {
+const NO_CLAIM: VisitorClaim = {
+  signedIn: false,
+  linked: false,
+  achievement: null,
+  mustSignIn: false,
+};
+
+interface HomePageClientProps {
   initialProfile: UserProfile | null;
   initialEntitlements: UserEntitlements | null;
   initialPacks: StoreAchievementPack[];
   featuredAchievements?: Achievement[];
+  /** What the server knows about this visitor's claim today. */
+  visitor?: VisitorClaim;
 }
 
-export default function HomePreviewClient({
+/**
+ * The homepage: the card stream hero, then a short story (how it works, the
+ * rarities, games, going further) and a final Claim.
+ */
+export default function HomePageClient({
   initialProfile,
   initialEntitlements,
   initialPacks,
   featuredAchievements,
-}: HomePreviewClientProps) {
+  visitor = NO_CLAIM,
+}: HomePageClientProps) {
   const rootRef = useRef<HTMLDivElement>(null);
-  const { claimed, restored, checkedStorage, isClaiming, claim } =
-    useDailyClaim();
+  const claimState = useDailyClaim({
+    signedIn: visitor.signedIn,
+    todaysClaim: visitor.achievement,
+  });
+  const { claimed, isClaiming, claim } = claimState;
   const isLoggedIn = initialProfile !== null;
   const isSubscribed = initialEntitlements?.isSubscribed ?? false;
 
@@ -52,20 +71,29 @@ export default function HomePreviewClient({
     () => pickLadder(showcase, sample),
     [showcase, sample],
   );
+  // Faces for the hero's sample peeks.
+  const samples = useMemo(
+    () => (featuredAchievements ?? []).map(toShareInput),
+    [featuredAchievements],
+  );
+
+  // The final Claim button scrolls back up first, so the reveal is seen.
+  const claimFromBottom = () => {
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    document
+      .getElementById("top")
+      ?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
+    void claim();
+  };
 
   useGSAP(
     () => {
       const media = gsap.matchMedia();
 
       media.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.from("[data-hero-enter]", {
-          y: 28,
-          autoAlpha: 0,
-          duration: 0.8,
-          stagger: 0.15,
-          ease: "power3.out",
-        });
-
         gsap.utils
           .toArray<HTMLElement>("[data-story-reveal]", rootRef.current)
           .forEach((section) => {
@@ -93,13 +121,12 @@ export default function HomePreviewClient({
         subscriptionStatus={initialEntitlements?.subscriptionStatus ?? null}
       />
 
-      <PreviewHero
-        claimed={claimed}
-        restored={restored}
-        ready={checkedStorage}
-        isClaiming={isClaiming}
-        onClaim={claim}
-        isLoggedIn={isLoggedIn}
+      <CardStreamHero
+        claimState={claimState}
+        samples={samples}
+        signedIn={visitor.signedIn}
+        linked={visitor.linked}
+        mustSignIn={visitor.mustSignIn}
       />
 
       <HowItWorks sample={sample} />
@@ -113,7 +140,8 @@ export default function HomePreviewClient({
       <FinalCta
         hasClaimed={claimed !== null}
         isClaiming={isClaiming}
-        onClaim={claim}
+        mustSignIn={visitor.mustSignIn}
+        onClaim={claimFromBottom}
       />
     </div>
   );

@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   getFeatured: vi.fn(),
   getProfileAchievements: vi.fn(),
   getStreak: vi.fn(),
+  getVisitorClaim: vi.fn(),
 }));
 
 vi.mock("@/lib/services/utils/achievement-utils", () => ({
@@ -35,15 +36,25 @@ vi.mock("@/lib/services/streak-service-server", () => ({
   getUserStreakData: mocks.getStreak,
 }));
 
-vi.mock("@/app/home/home-client", () => ({
+vi.mock("@/lib/services/todays-claim-service-server", () => ({
+  getVisitorTodaysClaim: mocks.getVisitorClaim,
+}));
+
+vi.mock("@/app/home/home-page-client", () => ({
   default: () => null,
 }));
 
 import HomePage, { metadata } from "@/app/page";
-import HomeClient from "@/app/home/home-client";
+import HomePageClient from "@/app/home/home-page-client";
 
 const profile = { id: "user-1", username: "Alice" };
 const entitlements = { isSubscribed: true };
+const visitor = {
+  signedIn: true,
+  linked: false,
+  achievement: null,
+  mustSignIn: false,
+};
 const packs = [
   { id: "active-pack", status: "active" },
   { id: "draft-pack", status: "draft" },
@@ -62,19 +73,22 @@ beforeEach(() => {
   mocks.getFeatured.mockResolvedValue([]);
   mocks.getProfileAchievements.mockResolvedValue([]);
   mocks.getStreak.mockResolvedValue({ currentStreak: 3, longestStreak: 8, achievementDates: [], claimedToday: false });
+  mocks.getVisitorClaim.mockResolvedValue(visitor);
 });
 
 describe("HomePage", () => {
-  it("passes account data and non-draft packs to HomeClient", async () => {
+  it("passes account data, non-draft packs and today's claim to the page", async () => {
     const element = await HomePage();
 
-    expect(element.type).toBe(HomeClient);
+    expect(element.type).toBe(HomePageClient);
     expect(element.props).toEqual({
       initialProfile: profile,
       initialEntitlements: entitlements,
       initialPacks: [packs[0], packs[2]],
       featuredAchievements: [],
+      visitor,
     });
+    expect(mocks.getVisitorClaim).toHaveBeenCalledExactlyOnceWith();
 
     expect(mocks.getUser).toHaveBeenCalledExactlyOnceWith();
     expect(mocks.getProfile).toHaveBeenCalledExactlyOnceWith();
@@ -86,6 +100,7 @@ describe("HomePage", () => {
 
   it("loads packs for guests without requesting account data", async () => {
     mocks.getUser.mockResolvedValue(null);
+    mocks.getVisitorClaim.mockResolvedValue({ ...visitor, signedIn: false });
 
     const element = await HomePage();
 
@@ -94,6 +109,7 @@ describe("HomePage", () => {
       initialEntitlements: null,
       initialPacks: [packs[0], packs[2]],
       featuredAchievements: [],
+      visitor: { ...visitor, signedIn: false },
     });
     expect(mocks.getPacks).toHaveBeenCalledExactlyOnceWith();
     expect(mocks.getProfile).not.toHaveBeenCalled();

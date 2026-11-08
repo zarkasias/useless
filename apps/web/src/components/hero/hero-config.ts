@@ -160,7 +160,7 @@ export const HERO_CONFIG = {
     reveal: {
       // About 15px lower than first tuned, on a 680px-tall desktop stage.
       desktop: [-0.15, 0.117] as [number, number],
-      mobile: [-0.1, 0.85] as [number, number],
+      mobile: [-0.1, 1.05] as [number, number],
     },
     flip: 1,
     waitFloat: 0.04,
