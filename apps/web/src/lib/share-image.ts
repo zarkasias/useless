@@ -36,6 +36,8 @@ const COLORS = {
 
 // Side margins stay wider than the ~34px that a 3:4 profile grid crop removes.
 const CARD = { x: 70, y: 80, width: 940, height: 1020, radius: 56, border: 8 };
+
+type CardRect = typeof CARD;
 const CARD_PADDING_X = 72;
 const CARD_PADDING_Y = 64;
 const TEXT_WIDTH = CARD.width - CARD_PADDING_X * 2;
@@ -269,9 +271,13 @@ function drawBackground(ctx: CanvasRenderingContext2D) {
   ctx.fillRect(0, 0, SHARE_IMAGE_WIDTH, SHARE_IMAGE_HEIGHT);
 }
 
-function drawCard(ctx: CanvasRenderingContext2D, type: AchievementType) {
+function drawCard(
+  ctx: CanvasRenderingContext2D,
+  type: AchievementType,
+  rect: CardRect = CARD,
+) {
   const rarity = getRarityToken(type);
-  const { x, y, width, height, radius, border } = CARD;
+  const { x, y, width, height, radius, border } = rect;
   const gradient = ctx.createLinearGradient(x, y, x + width, y + height);
 
   gradient.addColorStop(0, rarity.borderStart);
@@ -417,10 +423,12 @@ function drawFooter(ctx: CanvasRenderingContext2D) {
   ctx.fillText(SITE_LABEL, centerX, 1262);
 }
 
+/** Draws the icon, badge, title and description, centred in `area`. */
 function drawContent(
   ctx: CanvasRenderingContext2D,
   input: ShareImageInput,
   icon: HTMLImageElement | null,
+  area: { y: number; height: number } = CARD,
 ) {
   const centerX = SHARE_IMAGE_WIDTH / 2;
   const title = fitTitle(ctx, input.title);
@@ -444,10 +452,10 @@ function drawContent(
       : 0);
 
   // The icon takes whatever room long text leaves, then the stack is centered.
-  const available = CARD.height - CARD_PADDING_Y * 2;
+  const available = area.height - CARD_PADDING_Y * 2;
   const iconSize = Math.min(ICON_MAX_SIZE, available - textHeight - STACK_GAP);
   const stackHeight = iconSize + STACK_GAP + textHeight;
-  let y = CARD.y + (CARD.height - stackHeight) / 2;
+  let y = area.y + (area.height - stackHeight) / 2;
 
   if (icon) {
     drawIconImage(ctx, icon, centerX, y, iconSize);
@@ -513,6 +521,61 @@ export async function renderShareImage(input: ShareImageInput): Promise<Blob> {
       else reject(new Error("Could not encode share image"));
     }, "image/png");
   });
+}
+
+// The card on its own, filling a 4:5 face: used for the hero's 3D cards.
+const FACE_CARD: CardRect = {
+  x: 0,
+  y: 0,
+  width: SHARE_IMAGE_WIDTH,
+  height: SHARE_IMAGE_HEIGHT,
+  radius: 72,
+  border: 14,
+};
+const FACE_WORDMARK_Y = SHARE_IMAGE_HEIGHT - 92;
+const FACE_FOOTER_HEIGHT = 150;
+
+/**
+ * Draws just the achievement card, with the same layout as the share image
+ * but no background or footer around it: the rarity border fills the whole
+ * 4:5 face and a small wordmark sits inside the bottom of the card. It is
+ * drawn at `width` × `height` (keep 4:5) and returned as a canvas, ready to
+ * become a texture. The corners outside the rounded card are transparent.
+ */
+export async function renderCardFace(
+  input: ShareImageInput,
+  width = SHARE_IMAGE_WIDTH,
+  height = SHARE_IMAGE_HEIGHT,
+): Promise<HTMLCanvasElement> {
+  const [icon] = await Promise.all([
+    input.iconUrl ? loadIcon(input.iconUrl) : null,
+    loadFonts(),
+  ]);
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Could not get canvas context");
+
+  // Lay out at share-image size, then scale to the requested size.
+  ctx.scale(width / SHARE_IMAGE_WIDTH, height / SHARE_IMAGE_HEIGHT);
+  ctx.textAlign = "center";
+
+  drawCard(ctx, input.type, FACE_CARD);
+  drawContent(ctx, input, icon, {
+    y: FACE_CARD.y,
+    height: FACE_CARD.height - FACE_FOOTER_HEIGHT,
+  });
+
+  ctx.fillStyle = COLORS.description;
+  ctx.font = wordmarkFont();
+  ctx.globalAlpha = 0.75;
+  ctx.fillText(WORDMARK, SHARE_IMAGE_WIDTH / 2, FACE_WORDMARK_Y);
+  ctx.globalAlpha = 1;
+
+  return canvas;
 }
 
 export async function createShareFile(input: ShareImageInput): Promise<File> {
