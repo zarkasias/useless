@@ -1,5 +1,6 @@
 "use client";
 
+import { dailyPoolExhaustedMessage } from "@/lib/achievements/daily-pool-message";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -140,6 +141,11 @@ export function useDailyClaim({
 
       if (result.status === "subscription_required") {
         router.push("/pro");
+        return;
+      }
+
+      if (result.status === "pool_exhausted") {
+        toast.info(dailyPoolExhaustedMessage(result.nextAvailableAt));
         return;
       }
 

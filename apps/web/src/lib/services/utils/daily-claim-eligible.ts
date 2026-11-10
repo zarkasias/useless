@@ -10,17 +10,15 @@ export type DailyClaimTriggerConfig = {
   day?: number | null;
 };
 
-export function isDailyAchievementEligible(
-  achievement: Achievement,
-  timezone: string,
-  now = new Date(),
-): boolean {
-  if (achievement.trigger_type !== "daily_claim") {
-    return true;
-  }
+type ZonedParts = {
+  weekday?: string;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+};
 
-  const config = (achievement.trigger_config ?? {}) as DailyClaimTriggerConfig;
-
+function getZonedParts(timezone: string, date: Date): ZonedParts {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: timezone,
     weekday: "long",
@@ -29,15 +27,29 @@ export function isDailyAchievementEligible(
     hour: "2-digit",
     minute: "2-digit",
     hourCycle: "h23",
-  }).formatToParts(now);
+  }).formatToParts(date);
 
-  const weekday = parts
-    .find((part) => part.type === "weekday")
-    ?.value.toLowerCase();
+  const numberPart = (type: Intl.DateTimeFormatPartTypes) =>
+    Number(parts.find((part) => part.type === type)?.value ?? 0);
 
-  const month = Number(parts.find((part) => part.type === "month")?.value ?? 0);
+  return {
+    weekday: parts.find((part) => part.type === "weekday")?.value.toLowerCase(),
+    month: numberPart("month"),
+    day: numberPart("day"),
+    hour: numberPart("hour"),
+    minute: numberPart("minute"),
+  };
+}
 
-  const day = Number(parts.find((part) => part.type === "day")?.value ?? 0);
+function isEligibleForParts(
+  achievement: Achievement,
+  { weekday, month, day, hour, minute }: ZonedParts,
+): boolean {
+  if (achievement.trigger_type !== "daily_claim") {
+    return true;
+  }
+
+  const config = (achievement.trigger_config ?? {}) as DailyClaimTriggerConfig;
 
   if (
     config.month !== null &&
@@ -50,12 +62,6 @@ export function isDailyAchievementEligible(
   if (config.day !== null && config.day !== undefined && day !== config.day) {
     return false;
   }
-
-  const hour = Number(parts.find((part) => part.type === "hour")?.value ?? 0);
-
-  const minute = Number(
-    parts.find((part) => part.type === "minute")?.value ?? 0,
-  );
 
   if (config.days?.length && (!weekday || !config.days.includes(weekday))) {
     return false;
@@ -83,4 +89,45 @@ export function isDailyAchievementEligible(
     }
   }
   return true;
+}
+
+export function isDailyAchievementEligible(
+  achievement: Achievement,
+  timezone: string,
+  now = new Date(),
+): boolean {
+  return isEligibleForParts(achievement, getZonedParts(timezone, now));
+}
+
+const MINUTE_MS = 60 * 1000;
+const NEXT_ELIGIBILITY_LOOKAHEAD_MINUTES = 7 * 24 * 60;
+
+/**
+ * Find the next moment any of the given achievements becomes claimable,
+ * looking up to a week ahead. Returns null when nothing opens in that time
+ * (for example when only date-specific achievements remain).
+ */
+export function getNextDailyEligibility(
+  achievements: Achievement[],
+  timezone: string,
+  now = new Date(),
+): Date | null {
+  if (achievements.length === 0) {
+    return null;
+  }
+
+  const firstMinute = Math.floor(now.getTime() / MINUTE_MS) + 1;
+
+  for (let offset = 0; offset < NEXT_ELIGIBILITY_LOOKAHEAD_MINUTES; offset++) {
+    const candidate = new Date((firstMinute + offset) * MINUTE_MS);
+    const parts = getZonedParts(timezone, candidate);
+
+    if (
+      achievements.some((achievement) => isEligibleForParts(achievement, parts))
+    ) {
+      return candidate;
+    }
+  }
+
+  return null;
 }

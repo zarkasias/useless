@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { isDailyAchievementEligible } from "@/lib/services/utils/daily-claim-eligible";
+import {
+  getNextDailyEligibility,
+  isDailyAchievementEligible,
+} from "@/lib/services/utils/daily-claim-eligible";
 import type { Achievement } from "@/lib/supabase";
 
 function makeAchievement(
@@ -123,5 +126,64 @@ describe("isDailyAchievementEligible", () => {
         new Date("2026-09-17T05:30:00Z"),
       ),
     ).toBe(false);
+  });
+});
+
+describe("getNextDailyEligibility", () => {
+  // 2026-11-10 is a Tuesday; 15:00Z is 10:00 in New York.
+  const now = new Date("2026-11-10T15:00:00Z");
+
+  it("returns the start of the next time window today", () => {
+    const evening = makeAchievement({
+      startHour: 17,
+      startMinute: 0,
+      endHour: 20,
+      endMinute: 59,
+    });
+
+    expect(
+      getNextDailyEligibility(
+        [evening],
+        "America/New_York",
+        now,
+      )?.toISOString(),
+    ).toBe("2026-11-10T22:00:00.000Z");
+  });
+
+  it("returns the earliest opening across several achievements", () => {
+    const thursday = makeAchievement({ days: ["thursday"] });
+    const afternoon = makeAchievement({ startHour: 13, endHour: 16 });
+
+    expect(
+      getNextDailyEligibility(
+        [thursday, afternoon],
+        "America/New_York",
+        now,
+      )?.toISOString(),
+    ).toBe("2026-11-10T18:00:00.000Z");
+  });
+
+  it("rolls over to the start of the matching weekday", () => {
+    const thursday = makeAchievement({ days: ["thursday"] });
+
+    expect(
+      getNextDailyEligibility(
+        [thursday],
+        "America/New_York",
+        now,
+      )?.toISOString(),
+    ).toBe("2026-11-12T05:00:00.000Z");
+  });
+
+  it("returns null when nothing opens within a week", () => {
+    const halloween = makeAchievement({ month: 10, day: 31 });
+
+    expect(
+      getNextDailyEligibility([halloween], "America/New_York", now),
+    ).toBeNull();
+  });
+
+  it("returns null when there is nothing left to claim", () => {
+    expect(getNextDailyEligibility([], "America/New_York", now)).toBeNull();
   });
 });

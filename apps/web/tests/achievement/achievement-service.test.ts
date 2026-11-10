@@ -244,9 +244,11 @@ it("awards an unused published daily achievement from eligible packs", async () 
 it("does not award duplicates when the eligible pool is exhausted", async () => {
   beginClaim();
   finishClaim(["old"], [{ id: "old" }]);
-  expect((await claimDailyAchievementForAuthenticatedUser()).status).toBe(
-    "unavailable",
-  );
+  expect(await claimDailyAchievementForAuthenticatedUser()).toEqual({
+    status: "pool_exhausted",
+    achievement: null,
+    nextAvailableAt: null,
+  });
   expect(
     db.queries.every((query) => query.insert.mock.calls.length === 0),
   ).toBe(true);
@@ -757,6 +759,7 @@ it.each([
 const unavailableDailyPools = [
   {
     label: "database error",
+    status: "unavailable",
     result: {
       data: null,
       error: { message: "Catalog unavailable" },
@@ -764,21 +767,24 @@ const unavailableDailyPools = [
   },
   {
     label: "null catalog",
+    status: "unavailable",
     result: { data: null },
   },
   {
     label: "empty catalog",
+    status: "unavailable",
     result: { data: [] },
   },
   {
     label: "already-owned catalog",
+    status: "pool_exhausted",
     result: { data: [{ id: "owned-award" }] },
   },
 ];
 
 it.each(unavailableDailyPools)(
-  "returns unavailable for an authenticated claim with $label",
-  async ({ result }) => {
+  "returns $status for an authenticated claim with $label",
+  async ({ result, status }) => {
     beginClaim();
     db.enqueue("user_achievements", {
       data: [{ achievement_id: "owned-award" }],
@@ -788,7 +794,7 @@ it.each(unavailableDailyPools)(
     await expect(
       claimDailyAchievementForAuthenticatedUser(),
     ).resolves.toMatchObject({
-      status: "unavailable",
+      status,
       achievement: null,
     });
 
