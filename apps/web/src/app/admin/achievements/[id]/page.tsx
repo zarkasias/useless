@@ -174,6 +174,62 @@ export default async function AdminAchievementPage({
                 </select>
               </div>
 
+              <div className="flex gap-2">
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Label htmlFor="is_daily">Daily achievement</Label>
+
+                  <select
+                    id="is_daily"
+                    name="is_daily"
+                    defaultValue={achievement.is_daily ? "true" : "false"}
+                    aria-describedby="is_daily_help"
+                    className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                  >
+                    <option value="false">No</option>
+                    <option value="true">Yes</option>
+                  </select>
+
+                  <p
+                    id="is_daily_help"
+                    className="text-xs text-muted-foreground"
+                  >
+                    Include this achievement in daily claims. Publication
+                    status, pack access, and any daily eligibility conditions
+                    still apply.
+                  </p>
+                </div>
+
+                <div className="min-w-0 flex-1 space-y-2">
+                  <Label htmlFor="trigger_type">Trigger</Label>
+
+                  <select
+                    id="trigger_type"
+                    name="trigger_type"
+                    defaultValue={achievement.trigger_type ?? ""}
+                    aria-describedby="trigger_type_help"
+                    className="h-10 w-full rounded-md border bg-background px-3 text-sm"
+                  >
+                    <option value="">None (legacy)</option>
+                    <option value="daily_claim">Daily claim</option>
+
+                    {achievement.trigger_type &&
+                      achievement.trigger_type !== "daily_claim" && (
+                        <option value={achievement.trigger_type}>
+                          {achievement.trigger_type} (automatic or manual award)
+                        </option>
+                      )}
+                  </select>
+
+                  <p
+                    id="trigger_type_help"
+                    className="text-xs text-muted-foreground"
+                  >
+                    Choose Daily claim and set Daily achievement to Yes for
+                    daily rewards.
+                  </p>
+                </div>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
 
