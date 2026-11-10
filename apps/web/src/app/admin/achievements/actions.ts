@@ -18,7 +18,9 @@ if (!serviceRoleKey) {
 
 const supabaseAdmin = createAdminClient(supabaseUrl, serviceRoleKey);
 
-export async function updateAdminAchievement(formData: FormData) {
+export async function updateAdminAchievement(
+  formData: FormData,
+): Promise<void> {
   await requireAdmin();
 
   const id = String(formData.get("id") ?? "").trim();
@@ -28,16 +30,27 @@ export async function updateAdminAchievement(formData: FormData) {
   const type = String(formData.get("type") ?? "").trim();
   const emoji = String(formData.get("emoji") ?? "").trim() || null;
   const iconPath = String(formData.get("icon_path") ?? "").trim() || null;
-
   const iconConcept = String(formData.get("icon_concept") ?? "").trim() || null;
-
   const imagePrompt = String(formData.get("image_prompt") ?? "").trim() || null;
-
   const category = String(formData.get("category") ?? "").trim() || null;
-
   const packId = String(formData.get("pack_id") ?? "").trim() || null;
-
   const status = String(formData.get("status") ?? "").trim();
+
+  const dailyValue = formData.get("is_daily");
+
+  if (dailyValue !== "true" && dailyValue !== "false") {
+    throw new Error("Choose whether this is a daily achievement.");
+  }
+
+  const isDaily = dailyValue === "true";
+
+  const triggerValue = formData.get("trigger_type");
+
+  if (typeof triggerValue !== "string") {
+    throw new Error("Choose an achievement trigger.");
+  }
+
+  const triggerType = triggerValue.trim() || null;
 
   if (!id || !title || !description) {
     throw new Error("Achievement id, title, and description are required.");
@@ -70,6 +83,57 @@ export async function updateAdminAchievement(formData: FormData) {
     throw new Error("Invalid achievement status.");
   }
 
+  const { data: existingAchievement, error: lookupError } = await supabaseAdmin
+    .from("achievements")
+    .select("id, trigger_type")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (lookupError) {
+    console.error("Error loading achievement:", lookupError);
+    throw new Error("Unable to load achievement.");
+  }
+
+  if (!existingAchievement) {
+    throw new Error("Achievement not found.");
+  }
+
+  const existingTrigger = existingAchievement.trigger_type;
+
+  if (
+    existingTrigger !== null &&
+    existingTrigger !== "daily_claim" &&
+    triggerType !== existingTrigger
+  ) {
+    throw new Error(
+      "Automatic and manual-award triggers cannot be changed from this form.",
+    );
+  }
+
+  if (
+    triggerType !== null &&
+    triggerType !== "daily_claim" &&
+    triggerType !== existingTrigger
+  ) {
+    throw new Error("Invalid achievement trigger.");
+  }
+
+  if (triggerType === "daily_claim" && !isDaily) {
+    throw new Error(
+      "Set Daily achievement to Yes when using the Daily claim trigger.",
+    );
+  }
+
+  if (isDaily && triggerType !== null && triggerType !== "daily_claim") {
+    throw new Error(
+      "Automatic and manual-award achievements cannot enter the daily pool.",
+    );
+  }
+
+  if (isDaily && type === "GAME") {
+    throw new Error("Game achievements must remain outside the daily pool.");
+  }
+
   if (packId) {
     const { data: pack, error: packError } = await supabaseAdmin
       .from("achievement_packs")
@@ -77,7 +141,12 @@ export async function updateAdminAchievement(formData: FormData) {
       .eq("id", packId)
       .maybeSingle();
 
-    if (packError || !pack) {
+    if (packError) {
+      console.error("Error validating achievement pack:", packError);
+      throw new Error("Unable to validate the selected achievement pack.");
+    }
+
+    if (!pack) {
       throw new Error("Selected achievement pack does not exist.");
     }
   }
@@ -88,7 +157,7 @@ export async function updateAdminAchievement(formData: FormData) {
     );
   }
 
-  const { error } = await supabaseAdmin
+  const { data: updatedAchievement, error: updateError } = await supabaseAdmin
     .from("achievements")
     .update({
       title,
@@ -100,13 +169,21 @@ export async function updateAdminAchievement(formData: FormData) {
       image_prompt: imagePrompt,
       category,
       pack_id: packId,
+      is_daily: isDaily,
+      trigger_type: triggerType,
       status,
     })
-    .eq("id", id);
+    .eq("id", id)
+    .select("id")
+    .maybeSingle();
 
-  if (error) {
-    console.error("Error updating achievement:", error);
+  if (updateError) {
+    console.error("Error updating achievement:", updateError);
     throw new Error("Unable to update achievement.");
+  }
+
+  if (!updatedAchievement) {
+    throw new Error("Achievement no longer exists.");
   }
 
   revalidatePath("/admin/achievements");
