@@ -7,7 +7,10 @@ import { getAnonymousUser } from "@/lib/anonymous-user";
 import { getAchievementPackFilter } from "./achievement-access-service-server";
 import { Achievement, UserProfile } from "@/lib/supabase";
 import { getAuthenticatedUser, getToday } from "./utils/achievement-utils";
-import { isDailyAchievementEligible } from "./utils/daily-claim-eligible";
+import {
+  getNextDailyEligibility,
+  isDailyAchievementEligible,
+} from "./utils/daily-claim-eligible";
 
 import { getUserStreakData } from "./streak-service-server";
 import { supabaseAdmin, isFreeLimitError } from "./utils/trigger-context";
@@ -48,10 +51,24 @@ export type DailyClaimResult =
       triggeredAchievements?: never;
     }
   | {
+      // Every daily achievement the user can be given right now is already
+      // theirs; what remains is limited to a time window or day.
+      status: "pool_exhausted";
+      achievement: null;
+      // ISO timestamp of the next window to open, when one is within a week.
+      nextAvailableAt: string | null;
+      triggeredAchievements?: never;
+    }
+  | {
       status: "unavailable";
       achievement: null;
       triggeredAchievements?: never;
     };
+
+type DailyAchievementPick =
+  | { achievement: Achievement }
+  | { achievement: null; exhausted: true; nextAvailableAt: string | null }
+  | { achievement: null; exhausted: false };
 
 /**
  * Get the profile belonging to the authenticated user.
@@ -225,7 +242,7 @@ async function getRandomAvailableDailyAchievement(
   previousAchievementIds: string[],
   timezone: string,
   userId?: string,
-): Promise<Achievement | null> {
+): Promise<DailyAchievementPick> {
   const packFilter = await getAchievementPackFilter(userId);
 
   const { data: achievements, error } = await supabaseAdmin
@@ -253,32 +270,46 @@ async function getRandomAvailableDailyAchievement(
   if (error) {
     console.error("Error fetching daily achievements:", error);
 
-    return null;
+    return { achievement: null, exhausted: false };
   }
 
   if (!achievements || achievements.length === 0) {
     console.error("No daily achievements exist in the database.");
 
-    return null;
+    return { achievement: null, exhausted: false };
   }
 
-  const availableAchievements = achievements.filter(
-    (achievement) =>
-      !previousAchievementIds.includes(achievement.id) &&
-      isDailyAchievementEligible(achievement as Achievement, timezone),
+  const unclaimedAchievements = (achievements as Achievement[]).filter(
+    (achievement) => !previousAchievementIds.includes(achievement.id),
+  );
+
+  const availableAchievements = unclaimedAchievements.filter((achievement) =>
+    isDailyAchievementEligible(achievement, timezone),
   );
 
   if (availableAchievements.length === 0) {
-    console.error(
-      "User has already unlocked every available daily achievement.",
+    // Expected once a user has worked through the unrestricted pool: the
+    // rest only open at certain times or on certain days.
+    const nextAvailableAt = getNextDailyEligibility(
+      unclaimedAchievements,
+      timezone,
     );
 
-    return null;
+    console.info(
+      "User has already unlocked every daily achievement available right now.",
+      { unclaimed: unclaimedAchievements.length, nextAvailableAt },
+    );
+
+    return {
+      achievement: null,
+      exhausted: true,
+      nextAvailableAt: nextAvailableAt?.toISOString() ?? null,
+    };
   }
 
   const randomIndex = Math.floor(Math.random() * availableAchievements.length);
 
-  return availableAchievements[randomIndex] as Achievement;
+  return { achievement: availableAchievements[randomIndex] };
 }
 
 /**
@@ -449,13 +480,23 @@ export async function claimDailyAchievementForAuthenticatedUser(): Promise<Daily
   // Select a random unused DAILY achievement.
   // --------------------------------------------------
 
-  const achievement = await getRandomAvailableDailyAchievement(
+  const pick = await getRandomAvailableDailyAchievement(
     previousAchievementIds,
     timezone,
     user.id,
   );
 
+  const achievement = pick.achievement;
+
   if (!achievement) {
+    if (pick.exhausted) {
+      return {
+        status: "pool_exhausted",
+        achievement: null,
+        nextAvailableAt: pick.nextAvailableAt,
+      };
+    }
+
     return {
       status: "unavailable",
       achievement: null,
@@ -630,7 +671,7 @@ export async function claimDailyAchievementForAnonymousUser(
   // Select random unused daily achievement.
   // --------------------------------------------------
 
-  const achievement = await getRandomAvailableDailyAchievement(
+  const { achievement } = await getRandomAvailableDailyAchievement(
     previousAchievementIds,
     timezone,
   );

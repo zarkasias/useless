@@ -1,5 +1,6 @@
 "use client";
 
+import { dailyPoolExhaustedMessage } from "@/lib/achievements/daily-pool-message";
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
@@ -109,6 +110,11 @@ export default function DashboardClient({
           "You've reached the free limit of 10 achievements. Subscribe to continue collecting.",
         );
         router.push("/pro");
+        return;
+      }
+
+      if (result.status === "pool_exhausted") {
+        toast.info(dailyPoolExhaustedMessage(result.nextAvailableAt));
         return;
       }
 
