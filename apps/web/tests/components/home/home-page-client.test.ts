@@ -31,6 +31,8 @@ vi.mock("sonner", () => ({
 
 vi.mock("@/components/navbar", () => ({ Navbar: () => null }));
 
+vi.mock("@/components/card-wall/card-wall", () => ({ CardWall: () => null }));
+
 vi.mock("@/components/packs/featured-pack-promo", () => ({
   FeaturedPackPromo: () => null,
 }));

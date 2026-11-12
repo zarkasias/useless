@@ -1,11 +1,16 @@
 "use client";
 
-import { useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 
 import { Navbar } from "@/components/navbar";
+import { CardWall } from "@/components/card-wall/card-wall";
+import {
+  isLockedOnWall,
+  type CardLockState,
+} from "@/components/card-wall/card-lock";
 import styles from "@/components/home/home-styles";
 import { getShowcaseAchievements } from "@/components/home/home-data";
 import { CardStreamHero } from "@/components/hero/card-stream-hero";
@@ -56,6 +61,8 @@ export default function HomePageClient({
   initialPacks,
   featuredAchievements,
   visitor = NO_CLAIM,
+  catalog = [],
+  unlockedIds = [],
 }: HomePageClientProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const claimState = useDailyClaim({
@@ -65,6 +72,20 @@ export default function HomePageClient({
   const { claimed, isClaiming, claim } = claimState;
   const isLoggedIn = initialProfile !== null;
   const isSubscribed = initialEntitlements?.isSubscribed ?? false;
+
+  // Locked or unlocked, from the existing unlock records and today's claim.
+  const lockState = useMemo<CardLockState>(
+    () => ({
+      signedIn: visitor.signedIn,
+      unlockedIds: new Set(unlockedIds),
+      claimedId: claimed?.id ?? null,
+    }),
+    [visitor.signedIn, unlockedIds, claimed],
+  );
+  const isLockedOnWallCard = useCallback(
+    (achievement: Achievement) => isLockedOnWall(lockState, achievement.id),
+    [lockState],
+  );
 
   const showcase = useMemo(
     () => getShowcaseAchievements(featuredAchievements, 0, 12),
@@ -119,34 +140,38 @@ export default function HomePageClient({
 
   return (
     <div ref={rootRef} className={styles.home}>
-      <Navbar
-        user={initialProfile}
-        isSubscribed={isSubscribed}
-        subscriptionStatus={initialEntitlements?.subscriptionStatus ?? null}
-      />
+      <CardWall catalog={catalog} isLocked={isLockedOnWallCard} />
 
-      <CardStreamHero
-        claimState={claimState}
-        samples={samples}
-        signedIn={visitor.signedIn}
-        linked={visitor.linked}
-        mustSignIn={visitor.mustSignIn}
-      />
+      <div className="relative z-10">
+        <Navbar
+          user={initialProfile}
+          isSubscribed={isSubscribed}
+          subscriptionStatus={initialEntitlements?.subscriptionStatus ?? null}
+        />
 
-      <HowItWorks sample={sample} />
-      <RarityLadder achievements={ladder} />
-      <GamesStrip isLoggedIn={isLoggedIn} isSubscribed={isSubscribed} />
-      <GoFurther
-        packs={initialPacks}
-        isLoggedIn={isLoggedIn}
-        isSubscribed={isSubscribed}
-      />
-      <FinalCta
-        hasClaimed={claimed !== null}
-        isClaiming={isClaiming}
-        mustSignIn={visitor.mustSignIn}
-        onClaim={claimFromBottom}
-      />
+        <CardStreamHero
+          claimState={claimState}
+          samples={samples}
+          signedIn={visitor.signedIn}
+          linked={visitor.linked}
+          mustSignIn={visitor.mustSignIn}
+        />
+
+        <HowItWorks sample={sample} />
+        <RarityLadder achievements={ladder} />
+        <GamesStrip isLoggedIn={isLoggedIn} isSubscribed={isSubscribed} />
+        <GoFurther
+          packs={initialPacks}
+          isLoggedIn={isLoggedIn}
+          isSubscribed={isSubscribed}
+        />
+        <FinalCta
+          hasClaimed={claimed !== null}
+          isClaiming={isClaiming}
+          mustSignIn={visitor.mustSignIn}
+          onClaim={claimFromBottom}
+        />
+      </div>
     </div>
   );
 }

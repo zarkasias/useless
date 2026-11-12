@@ -1,0 +1,220 @@
+/*
+ * Card wall styles, ported from the approved design
+ * (homepage-card-wall-handoff/design-reference). Sizes are starting values
+ * from HANDOFF.md §2; tune them on real devices.
+ */
+
+/* Fixed, viewport-sized layer behind all page content. */
+.wall {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  background: #f6f4ff;
+}
+
+/* The one element that moves. Its offset is set from script. */
+.layer {
+  position: absolute;
+  display: grid;
+  justify-items: center;
+  align-items: center;
+  will-change: transform;
+}
+
+/* Every second column drops half a cell for the staggered look. */
+.odd {
+  position: relative;
+  top: var(--half-cell);
+}
+
+.card {
+  /* Rarity colours; overridden per rarity and when locked. */
+  --card-border: #9ca3af;
+  --card-bg: linear-gradient(135deg, #f9fafb, #e5e7eb);
+  --pill-bg: #6b7280;
+  --pill-text: #fff;
+
+  appearance: none;
+  position: relative;
+  box-sizing: border-box;
+  width: 190px;
+  height: 256px;
+  margin: 0;
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  overflow: hidden;
+  border: 2px solid var(--card-border);
+  border-radius: 22px;
+  background: var(--card-bg);
+  color: #1f2937;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(76, 29, 149, 0.1);
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+.card:hover,
+.card:focus-visible {
+  transform: scale(1.05);
+  box-shadow: 0 18px 44px rgba(76, 29, 149, 0.22);
+  outline: none;
+}
+
+.icon {
+  flex: none;
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.pill {
+  flex: none;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--pill-bg);
+  color: var(--pill-text);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/*
+ * Two lines each for title and description, so a long title never pushes
+ * the text out of the fixed-height card. The zoomed card shows it all.
+ */
+.title,
+.description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.title {
+  flex: none;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.15;
+  color: #1f2937;
+}
+
+.description {
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: #4b5563;
+}
+
+/* Rarities. */
+.common {
+  --card-border: #9ca3af;
+  --card-bg: linear-gradient(135deg, #f9fafb, #e5e7eb);
+  --pill-bg: #6b7280;
+  --pill-text: #fff;
+}
+
+.rare {
+  --card-border: #60a5fa;
+  --card-bg: linear-gradient(135deg, #f6f9ff, #dbe7fb);
+  --pill-bg: #2563eb;
+  --pill-text: #fff;
+}
+
+.epic {
+  --card-border: #c084fc;
+  --card-bg: linear-gradient(135deg, #faf6ff, #eadcfb);
+  --pill-bg: #9333ea;
+  --pill-text: #fff;
+}
+
+.legendary {
+  --card-border: #f59e0b;
+  --card-bg: linear-gradient(135deg, #fffaf2, #f8e6cd);
+  --pill-bg: linear-gradient(90deg, #f59e0b, #fbbf24);
+  --pill-text: #451a03;
+}
+
+/*
+ * Locked look: grey card and border, faded greyscale icon and a round
+ * padlock badge, like the collection page's locked cards. Text stays at
+ * 4.5:1 or better on the grey.
+ */
+.locked {
+  --card-border: #c5c8ce;
+  --card-bg: linear-gradient(135deg, #f3f4f6, #e3e5e9);
+  --pill-bg: #6b7280;
+  --pill-text: #fff;
+}
+
+.locked .icon {
+  filter: grayscale(1);
+  opacity: 0.5;
+}
+
+.locked .title {
+  color: #4b5563;
+}
+
+.locked .description {
+  color: #565d68;
+}
+
+.lockBadge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: #d5d8de;
+  color: #1f2937;
+}
+
+/* Phones: smaller cards, no description on the wall. */
+@media (max-width: 720px) {
+  .card {
+    width: 140px;
+    height: 196px;
+    padding: 12px 10px;
+    gap: 6px;
+    border-radius: 18px;
+  }
+
+  .icon {
+    width: 68px;
+    height: 68px;
+  }
+
+  .title {
+    font-size: 14px;
+  }
+
+  .description {
+    display: none;
+  }
+
+  .lockBadge {
+    top: 8px;
+    right: 8px;
+    width: 28px;
+    height: 28px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+}
