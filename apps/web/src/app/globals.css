@@ -179,10 +179,16 @@
 
 /*
  * Pages with the card wall (the homepage): the site footer lives in the root
- * layout, so lift it above the fixed wall layer.
+ * layout, so lift it above the fixed wall layer as a solid bar, and leave out
+ * the "Featured on" badges there for now.
  */
-body:has([data-card-wall]) > footer {
+body:has([data-card-wall]) [data-site-footer] {
   position: relative;
   z-index: 10;
-  background: #ffffff;
+  background-color: #ffffff;
+  isolation: isolate;
+}
+
+body:has([data-card-wall]) [data-featured-badges] {
+  display: none;
 }

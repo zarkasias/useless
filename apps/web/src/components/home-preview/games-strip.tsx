@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 import styles from "@/components/home/home-styles";
+import { panelClass } from "@/components/card-wall/wall-hero";
 
 // Same games and art as components/home/games-story.tsx, in one compact row.
 const games = [
@@ -22,7 +23,7 @@ export function GamesStrip({ isLoggedIn, isSubscribed }: GamesStripProps) {
   return (
     <section
       id="games"
-      className="bg-[linear-gradient(180deg,#eff6ff,#f5f3ff)] px-5 py-16 text-center md:px-8 md:py-20"
+      className={`${panelClass} text-center`}
       data-story-reveal
     >
       <h2 className="m-0 mb-3 text-[clamp(28px,4.5vw,44px)] font-black leading-[1.05] tracking-[-0.06em] text-gray-800">

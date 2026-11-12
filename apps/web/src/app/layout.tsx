@@ -132,10 +132,10 @@ export const metadata: Metadata = {
 
 function Footer() {
   return (
-    <footer className="border-t w-full">
+    <footer className="border-t w-full" data-site-footer>
       <div className="flex flex-col items-center gap-6 pt-2">
         {/* Featured badges */}
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-2" data-featured-badges>
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Featured on
           </p>

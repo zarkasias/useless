@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import styles from "@/components/home/home-styles";
+import { glowClass } from "@/components/card-wall/wall-hero";
 
 interface FinalCtaProps {
   hasClaimed: boolean;
@@ -18,7 +19,7 @@ export function FinalCta({
 }: FinalCtaProps) {
   return (
     <section
-      className="bg-white px-5 py-16 text-center md:py-24"
+      className={`${glowClass} box-border w-full max-w-[900px] px-6 py-[110px] text-center max-[720px]:py-20 [&_a]:pointer-events-auto [&_button]:pointer-events-auto`}
       data-story-reveal
     >
       <h2 className="mx-auto mt-0 mb-7 max-w-[520px] text-[clamp(26px,4vw,40px)] font-black leading-[1.08] tracking-[-0.05em] text-gray-800">

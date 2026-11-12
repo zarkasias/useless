@@ -13,16 +13,12 @@ import {
 } from "@/components/card-wall/card-lock";
 import styles from "@/components/home/home-styles";
 import { getShowcaseAchievements } from "@/components/home/home-data";
-import { CardStreamHero } from "@/components/hero/card-stream-hero";
 import { FinalCta } from "@/components/home-preview/final-cta";
 import { GamesStrip } from "@/components/home-preview/games-strip";
 import { GoFurther } from "@/components/home-preview/go-further";
 import { HowItWorks } from "@/components/home-preview/how-it-works";
-import {
-  pickLadder,
-  RarityLadder,
-} from "@/components/home-preview/rarity-ladder";
-import { toShareInput } from "@/components/home-preview/use-card-face";
+import { RarityTiers } from "@/components/card-wall/rarity-tiers";
+import { panelClass, WallHero } from "@/components/card-wall/wall-hero";
 import { useDailyClaim } from "@/components/home-preview/use-daily-claim";
 import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
 import type { StoreAchievementPack } from "@/lib/services/pack-store-service-server";
@@ -52,8 +48,9 @@ interface HomePageClientProps {
 }
 
 /**
- * The homepage: the card stream hero, then a short story (how it works, the
- * rarities, games, going further) and a final Claim.
+ * The homepage: a moving wall of achievement cards behind everything, with a
+ * centred hero and a column of white panels (how it works, the rarities,
+ * games, Pro and the featured pack) and a final Claim over it.
  */
 export default function HomePageClient({
   initialProfile,
@@ -92,17 +89,14 @@ export default function HomePageClient({
     [featuredAchievements],
   );
   const sample = showcase[0];
-  const ladder = useMemo(
-    () => pickLadder(showcase, sample),
-    [showcase, sample],
-  );
-  // Faces for the hero's sample peeks.
-  const samples = useMemo(
-    () => (featuredAchievements ?? []).map(toShareInput),
-    [featuredAchievements],
-  );
 
-  // The final Claim button scrolls back up first, so the reveal is seen.
+  // Claim through the existing flow. Reopening today's card is wired up
+  // with the zoom (build steps 4 and 5).
+  const onClaim = () => {
+    if (!claimed) void claim();
+  };
+
+  // The final Claim button scrolls back up first, so the result is seen.
   const claimFromBottom = () => {
     const reduced = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
@@ -111,7 +105,7 @@ export default function HomePageClient({
     document
       .getElementById("top")
       ?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
-    void claim();
+    onClaim();
   };
 
   useGSAP(
@@ -149,28 +143,30 @@ export default function HomePageClient({
           subscriptionStatus={initialEntitlements?.subscriptionStatus ?? null}
         />
 
-        <CardStreamHero
-          claimState={claimState}
-          samples={samples}
-          signedIn={visitor.signedIn}
-          linked={visitor.linked}
-          mustSignIn={visitor.mustSignIn}
-        />
-
-        <HowItWorks sample={sample} />
-        <RarityLadder achievements={ladder} />
-        <GamesStrip isLoggedIn={isLoggedIn} isSubscribed={isSubscribed} />
-        <GoFurther
-          packs={initialPacks}
-          isLoggedIn={isLoggedIn}
-          isSubscribed={isSubscribed}
-        />
-        <FinalCta
-          hasClaimed={claimed !== null}
-          isClaiming={isClaiming}
-          mustSignIn={visitor.mustSignIn}
-          onClaim={claimFromBottom}
-        />
+        {/* The page column ignores the pointer, so wall cards in the gaps
+            stay clickable; panels, links and buttons take it back. */}
+        <div className="pointer-events-none flex flex-col items-center gap-[160px] px-5 pt-6 pb-[160px] max-[720px]:gap-[110px] max-[720px]:pb-[110px]">
+          <WallHero
+            signedIn={visitor.signedIn}
+            claimState={claimState}
+            mustSignIn={visitor.mustSignIn}
+            onClaim={onClaim}
+          />
+          <HowItWorks sample={sample} />
+          <RarityTiers catalog={catalog} className={panelClass} />
+          <GamesStrip isLoggedIn={isLoggedIn} isSubscribed={isSubscribed} />
+          <GoFurther
+            packs={initialPacks}
+            isLoggedIn={isLoggedIn}
+            isSubscribed={isSubscribed}
+          />
+          <FinalCta
+            hasClaimed={claimed !== null}
+            isClaiming={isClaiming}
+            mustSignIn={visitor.mustSignIn}
+            onClaim={claimFromBottom}
+          />
+        </div>
       </div>
     </div>
   );

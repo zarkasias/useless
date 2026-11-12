@@ -201,7 +201,7 @@
     font-size: 14px;
   }
 
-  .description {
+  .card:not(.static) .description {
     display: none;
   }
 
@@ -217,4 +217,17 @@
   .card {
     transition: none;
   }
+}
+
+/* A card shown in a page panel rather than on the wall: not clickable. */
+.static {
+  width: 100%;
+  height: auto;
+  min-height: 256px;
+  cursor: default;
+}
+
+.static:hover {
+  transform: none;
+  box-shadow: 0 10px 30px rgba(76, 29, 149, 0.1);
 }
