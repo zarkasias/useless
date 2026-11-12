@@ -40,6 +40,10 @@ interface HomePageClientProps {
   featuredAchievements?: Achievement[];
   /** What the server knows about this visitor's claim today. */
   visitor?: VisitorClaim;
+  /** Every achievement on the card wall. */
+  catalog?: Achievement[];
+  /** Ids of the wall achievements this user has unlocked. */
+  unlockedIds?: string[];
 }
 
 /**

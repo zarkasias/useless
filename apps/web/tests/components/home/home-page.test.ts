@@ -9,6 +9,13 @@ const mocks = vi.hoisted(() => ({
   getProfileAchievements: vi.fn(),
   getStreak: vi.fn(),
   getVisitorClaim: vi.fn(),
+  getWallCatalog: vi.fn(),
+  getWallUnlockedIds: vi.fn(),
+}));
+
+vi.mock("@/lib/services/wall-catalog-service-server", () => ({
+  getWallCatalog: mocks.getWallCatalog,
+  getWallUnlockedIds: mocks.getWallUnlockedIds,
 }));
 
 vi.mock("@/lib/services/utils/achievement-utils", () => ({
@@ -55,6 +62,7 @@ const visitor = {
   achievement: null,
   mustSignIn: false,
 };
+const catalog = [{ id: "wall-1" }, { id: "wall-2" }];
 const packs = [
   { id: "active-pack", status: "active" },
   { id: "draft-pack", status: "draft" },
@@ -74,6 +82,10 @@ beforeEach(() => {
   mocks.getProfileAchievements.mockResolvedValue([]);
   mocks.getStreak.mockResolvedValue({ currentStreak: 3, longestStreak: 8, achievementDates: [], claimedToday: false });
   mocks.getVisitorClaim.mockResolvedValue(visitor);
+  mocks.getWallCatalog.mockResolvedValue(catalog);
+  mocks.getWallUnlockedIds.mockImplementation(async (signedIn: boolean) =>
+    signedIn ? ["wall-1"] : [],
+  );
 });
 
 describe("HomePage", () => {
@@ -87,7 +99,10 @@ describe("HomePage", () => {
       initialPacks: [packs[0], packs[2]],
       featuredAchievements: [],
       visitor,
+      catalog,
+      unlockedIds: ["wall-1"],
     });
+    expect(mocks.getWallUnlockedIds).toHaveBeenCalledExactlyOnceWith(true);
     expect(mocks.getVisitorClaim).toHaveBeenCalledExactlyOnceWith();
 
     expect(mocks.getUser).toHaveBeenCalledExactlyOnceWith();
@@ -110,7 +125,10 @@ describe("HomePage", () => {
       initialPacks: [packs[0], packs[2]],
       featuredAchievements: [],
       visitor: { ...visitor, signedIn: false },
+      catalog,
+      unlockedIds: [],
     });
+    expect(mocks.getWallUnlockedIds).toHaveBeenCalledExactlyOnceWith(false);
     expect(mocks.getPacks).toHaveBeenCalledExactlyOnceWith();
     expect(mocks.getProfile).not.toHaveBeenCalled();
     expect(mocks.getEntitlements).not.toHaveBeenCalled();
