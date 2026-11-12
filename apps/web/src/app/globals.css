@@ -179,14 +179,16 @@
 
 /*
  * Pages with the card wall (the homepage): the site footer lives in the root
- * layout, so lift it above the fixed wall layer as a solid bar, and leave out
- * the "Featured on" badges there for now.
+ * layout, so lift it above the fixed wall layer with the navbar's look
+ * (bg-background/05 backdrop-blur), and leave out the "Featured on" badges
+ * there for now.
  */
 body:has([data-card-wall]) [data-site-footer] {
   position: relative;
   z-index: 10;
-  background-color: #ffffff;
-  isolation: isolate;
+  background-color: color-mix(in oklab, var(--background) 5%, transparent);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 
 body:has([data-card-wall]) [data-featured-badges] {
