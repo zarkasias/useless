@@ -150,18 +150,29 @@ export default function HomePageClient({
       const media = gsap.matchMedia();
 
       media.add("(prefers-reduced-motion: no-preference)", () => {
-        gsap.utils
+        const cleanups = gsap.utils
           .toArray<HTMLElement>("[data-story-reveal]", rootRef.current)
-          .forEach((section) => {
-            gsap.from(section.children, {
+          .map((section) => {
+            // Opacity only: autoAlpha would also hide the content from
+            // keyboard focus until it's scrolled to, so Tab skipped it.
+            const reveal = gsap.from(section.children, {
               y: 32,
-              autoAlpha: 0,
+              opacity: 0,
               duration: 0.7,
               stagger: 0.1,
               ease: "power3.out",
               scrollTrigger: { trigger: section, start: "top 85%", once: true },
             });
+            // Tabbing into a section shows it at once, so focus never lands
+            // on something still invisible.
+            const showNow = () => reveal.progress(1);
+
+            section.addEventListener("focusin", showNow);
+
+            return () => section.removeEventListener("focusin", showNow);
           });
+
+        return () => cleanups.forEach((cleanup) => cleanup());
       });
 
       return () => media.revert();
@@ -171,13 +182,6 @@ export default function HomePageClient({
 
   return (
     <div ref={rootRef} className={styles.home}>
-      <CardWall
-        catalog={catalog}
-        isLocked={isLockedOnWallCard}
-        onOpen={openCard}
-        paused={zoom !== null}
-      />
-
       {zoom && (
         <CardZoom
           key={zoom.key}
@@ -239,6 +243,16 @@ export default function HomePageClient({
           />
         </div>
       </div>
+
+      {/* Last in reading order, so screen readers reach the page before
+          the wall's many repeating cards. It still sits behind everything:
+          it's fixed at z-index 0. */}
+      <CardWall
+        catalog={catalog}
+        isLocked={isLockedOnWallCard}
+        onOpen={openCard}
+        paused={zoom !== null}
+      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 
 import { useReducedMotion } from "@/components/hero/use-reduced-motion";
 import type { Achievement } from "@/lib/supabase";
@@ -44,7 +44,9 @@ function useWallViewport(): Viewport | null {
       timer = setTimeout(measure, 150);
     };
 
-    measure();
+    // Building the wall is the page's biggest render. As a transition, React
+    // can split it up, so the page answers taps before the wall is in.
+    startTransition(measure);
     window.addEventListener("resize", onResize);
 
     return () => {
@@ -107,7 +109,12 @@ export function CardWall({
   }, [catalog, geometry]);
 
   return (
-    <div className={styles.wall} data-card-wall>
+    <div
+      className={styles.wall}
+      role="region"
+      aria-label="Wall of achievements"
+      data-card-wall
+    >
       {geometry && (
         <div
           ref={layerRef}
