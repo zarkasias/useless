@@ -189,6 +189,18 @@ body:has([data-card-wall]) [data-site-footer] {
   background-color: color-mix(in oklab, var(--background) 5%, transparent);
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
+  /*
+   * Cards drift behind this see-through footer, so its usual grey text
+   * drops well under 4.5:1. Near-black text stays readable over the
+   * blurred cards; this only changes the footer on wall pages.
+   */
+  --muted-foreground: #111827;
+  --foreground: #111827;
+}
+
+/* The faded version number too. */
+body:has([data-card-wall]) [data-site-footer] .text-muted-foreground\/70 {
+  color: var(--muted-foreground);
 }
 
 body:has([data-card-wall]) [data-featured-badges] {
