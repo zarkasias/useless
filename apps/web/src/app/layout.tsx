@@ -132,10 +132,10 @@ export const metadata: Metadata = {
 
 function Footer() {
   return (
-    <footer className="border-t w-full">
-      <div className="flex flex-col items-center gap-6 pt-2">
+    <footer className="w-full" data-site-footer>
+      <div className="flex flex-col items-center gap-6">
         {/* Featured badges */}
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-2" data-featured-badges>
           <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
             Featured on
           </p>
@@ -206,7 +206,7 @@ function Footer() {
         </div>
 
         {/* Footer links / copyright */}
-        <div className="w-full gap-4 border-t pt-5">
+        <div className="w-full gap-4 border-t pt-4">
           <div className="px-5 container flex flex-col gap-4 pb-4 md:flex-row items-center justify-between">
             <div className="flex flex-col items-center md:items-start">
               <div className="flex flex-wrap items-baseline justify-center gap-x-2 md:justify-start">

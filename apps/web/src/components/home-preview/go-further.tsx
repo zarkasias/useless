@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 
 import styles from "@/components/home/home-styles";
+import { panelClass } from "@/components/card-wall/wall-hero";
 import { PackCard } from "./pack-card";
 import type { StoreAchievementPack } from "@/lib/services/pack-store-service-server";
 
@@ -22,7 +23,7 @@ export function GoFurther({ packs, isLoggedIn, isSubscribed }: GoFurtherProps) {
   return (
     <section
       id="pro"
-      className="bg-[linear-gradient(135deg,#ede9fe,#e0f2fe,#ffffff)] px-5 py-16 md:px-8 md:py-24"
+      className={panelClass}
       data-story-reveal
     >
       <h2 className="mx-auto mt-0 mb-10 max-w-[620px] text-center text-[clamp(30px,5vw,52px)] font-black leading-[1.02] tracking-[-0.06em] text-gray-800">
