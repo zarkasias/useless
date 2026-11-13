@@ -5,7 +5,6 @@ const mocks = vi.hoisted(() => ({
   getProfile: vi.fn(),
   getEntitlements: vi.fn(),
   getPacks: vi.fn(),
-  getFeatured: vi.fn(),
   getProfileAchievements: vi.fn(),
   getStreak: vi.fn(),
   getVisitorClaim: vi.fn(),
@@ -24,7 +23,6 @@ vi.mock("@/lib/services/utils/achievement-utils", () => ({
 
 vi.mock("@/lib/services/achievement-service-server", () => ({
   getAuthenticatedUserProfile: mocks.getProfile,
-  getFeaturedHeroAchievements: mocks.getFeatured,
 }));
 
 vi.mock("@/lib/services/entitlement-service-server", () => ({
@@ -78,7 +76,6 @@ beforeEach(() => {
   mocks.getProfile.mockResolvedValue(profile);
   mocks.getEntitlements.mockResolvedValue(entitlements);
   mocks.getPacks.mockResolvedValue(packs);
-  mocks.getFeatured.mockResolvedValue([]);
   mocks.getProfileAchievements.mockResolvedValue([]);
   mocks.getStreak.mockResolvedValue({ currentStreak: 3, longestStreak: 8, achievementDates: [], claimedToday: false });
   mocks.getVisitorClaim.mockResolvedValue(visitor);
@@ -97,7 +94,6 @@ describe("HomePage", () => {
       initialProfile: profile,
       initialEntitlements: entitlements,
       initialPacks: [packs[0], packs[2]],
-      featuredAchievements: [],
       visitor,
       catalog,
       unlockedIds: ["wall-1"],
@@ -123,7 +119,6 @@ describe("HomePage", () => {
       initialProfile: null,
       initialEntitlements: null,
       initialPacks: [packs[0], packs[2]],
-      featuredAchievements: [],
       visitor: { ...visitor, signedIn: false },
       catalog,
       unlockedIds: [],

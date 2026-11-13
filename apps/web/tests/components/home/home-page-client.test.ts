@@ -150,7 +150,6 @@ async function render(
           : null,
         initialEntitlements: entitlements,
         initialPacks: [],
-        featuredAchievements: catalog,
         catalog,
         unlockedIds,
         visitor: {

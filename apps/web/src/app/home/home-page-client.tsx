@@ -20,7 +20,6 @@ import {
 } from "@/components/card-wall/claim-reveal";
 import { ZoomShare } from "@/components/card-wall/zoom-share";
 import styles from "@/components/home/home-styles";
-import { getShowcaseAchievements } from "@/components/home/home-data";
 import { FinalCta } from "@/components/home-preview/final-cta";
 import { GamesStrip } from "@/components/home-preview/games-strip";
 import { GoFurther } from "@/components/home-preview/go-further";
@@ -46,7 +45,6 @@ interface HomePageClientProps {
   initialProfile: UserProfile | null;
   initialEntitlements: UserEntitlements | null;
   initialPacks: StoreAchievementPack[];
-  featuredAchievements?: Achievement[];
   /** What the server knows about this visitor's claim today. */
   visitor?: VisitorClaim;
   /** Every achievement on the card wall. */
@@ -64,7 +62,6 @@ export default function HomePageClient({
   initialProfile,
   initialEntitlements,
   initialPacks,
-  featuredAchievements,
   visitor = NO_CLAIM,
   catalog = [],
   unlockedIds = [],
@@ -139,11 +136,8 @@ export default function HomePageClient({
     }
   }, [claimed, restored, initialEntitlements]);
 
-  const showcase = useMemo(
-    () => getShowcaseAchievements(featuredAchievements, 0, 12),
-    [featuredAchievements],
-  );
-  const sample = showcase[0];
+  // The "How it works" share preview uses the first card on the wall.
+  const sample = catalog[0];
 
   useGSAP(
     () => {

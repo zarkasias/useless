@@ -2,7 +2,7 @@
 
 import { startTransition, useEffect, useMemo, useRef, useState } from "react";
 
-import { useReducedMotion } from "@/components/hero/use-reduced-motion";
+import { useReducedMotion } from "./use-reduced-motion";
 import type { Achievement } from "@/lib/supabase";
 import styles from "./card-wall.module.css";
 import { WallCard } from "./wall-card";
