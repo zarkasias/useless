@@ -267,6 +267,25 @@ describe("HomePageClient wall", () => {
   });
 });
 
+describe("HomePageClient clicks", () => {
+  // jsdom can't hit-test, so this guards the cause of a real bug: a wrapper
+  // above the wall that took the pointer made every wall card unclickable.
+  it("keeps everything between the wall and the panels transparent to the pointer", async () => {
+    await render();
+
+    const wall = container.querySelector("[data-card-wall]")!;
+    const pageRoot = wall.parentElement!;
+
+    for (
+      let element = container.querySelector("#top")!.parentElement;
+      element && element !== pageRoot;
+      element = element.parentElement
+    ) {
+      expect(element.className).toContain("pointer-events-none");
+    }
+  });
+});
+
 describe("HomePageClient zoom", () => {
   it("zooms a wall card, locked for a logged-out visitor who hasn't claimed it", async () => {
     await render();

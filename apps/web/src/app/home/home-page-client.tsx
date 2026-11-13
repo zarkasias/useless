@@ -167,7 +167,10 @@ export default function HomePageClient({
         />
       )}
 
-      <div className="relative z-10">
+      {/* Above the wall but transparent to the pointer, so wall cards
+          anywhere outside the panels and buttons can be clicked. The navbar
+          (its <header>) takes the pointer back. */}
+      <div className="pointer-events-none relative z-10 [&>header]:pointer-events-auto">
         <Navbar
           user={initialProfile}
           isSubscribed={isSubscribed}
