@@ -1,54 +1,27 @@
-import Link from "next/link";
+import {
+  glowClass,
+  ClaimButton,
+  type ClaimButtonProps,
+} from "@/components/card-wall/wall-hero";
 
-import styles from "@/components/home/home-styles";
-import { glowClass } from "@/components/card-wall/wall-hero";
+/**
+ * The last Claim prompt. Claiming here reveals the card right here, zoomed
+ * from this button; once claimed, the button reopens today's card.
+ */
+export function FinalCta(props: ClaimButtonProps) {
+  const hasClaimed = props.claimState.claimed !== null;
 
-interface FinalCtaProps {
-  hasClaimed: boolean;
-  isClaiming: boolean;
-  /** This browser can only claim after signing in. */
-  mustSignIn?: boolean;
-  onClaim: () => void;
-}
-
-export function FinalCta({
-  hasClaimed,
-  isClaiming,
-  mustSignIn = false,
-  onClaim,
-}: FinalCtaProps) {
   return (
     <section
-      className={`${glowClass} box-border w-full max-w-[900px] px-6 py-[110px] text-center max-[720px]:py-20 [&_a]:pointer-events-auto [&_button]:pointer-events-auto`}
+      className={`${glowClass} box-border flex w-full max-w-[900px] flex-col items-center gap-7 px-6 py-[110px] text-center max-[720px]:py-20`}
       data-story-reveal
     >
-      <h2 className="mx-auto mt-0 mb-7 max-w-[520px] text-[clamp(26px,4vw,40px)] font-black leading-[1.08] tracking-[-0.05em] text-gray-800">
+      <h2 className="m-0 max-w-[640px] text-[clamp(30px,4.2vw,48px)] leading-none font-black tracking-[-0.04em] text-gray-800">
         {hasClaimed
           ? "Your achievement is waiting to be shown off."
           : "Today's achievement isn't going to claim itself."}
       </h2>
-
-      {hasClaimed ? (
-        <a className={styles.primaryButton} href="#top">
-          Back to my achievement <span aria-hidden="true">↑</span>
-        </a>
-      ) : mustSignIn ? (
-        <Link className={styles.primaryButton} href="/login?next=%2F">
-          Sign in to claim today&apos;s achievement
-          <span aria-hidden="true">↗</span>
-        </Link>
-      ) : (
-        <button
-          type="button"
-          className={styles.primaryButton}
-          onClick={onClaim}
-          disabled={isClaiming}
-          aria-busy={isClaiming}
-        >
-          {isClaiming ? "Claiming…" : "Claim my useless achievement"}
-          <span aria-hidden="true">↗</span>
-        </button>
-      )}
+      <ClaimButton {...props} />
     </section>
   );
 }

@@ -90,7 +90,12 @@ export interface WallCardProps {
  * One card on the wall. A real button with a label, but kept out of the tab
  * order so keyboard users aren't walked through every repeat.
  */
-function WallCardComponent({ achievement, locked, odd, onOpen }: WallCardProps) {
+function WallCardComponent({
+  achievement,
+  locked,
+  odd,
+  onOpen,
+}: WallCardProps) {
   return (
     <button
       type="button"

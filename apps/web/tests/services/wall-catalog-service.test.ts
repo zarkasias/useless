@@ -42,7 +42,11 @@ describe("getWallCatalog", () => {
   it("reads published, public achievements from everyone's packs with icons, in a fixed order", async () => {
     const query = db.enqueue("achievements", {
       data: [
-        { id: "a", type: "COMMON", icon_path: " /achievement_icons/webp/a.webp " },
+        {
+          id: "a",
+          type: "COMMON",
+          icon_path: " /achievement_icons/webp/a.webp ",
+        },
         { id: "b", type: "EPIC", icon_path: "/achievement_icons/webp/b.webp" },
       ],
     });

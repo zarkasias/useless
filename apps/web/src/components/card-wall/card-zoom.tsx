@@ -242,7 +242,12 @@ export function CardZoom({
           actions && <div className={styles.zoomExtra}>{actions}</div>
         )}
         {footnote && (
-          <p className={cn(styles.zoomExtra, "text-[15px] font-bold text-gray-600")}>
+          <p
+            className={cn(
+              styles.zoomExtra,
+              "text-[15px] font-bold text-gray-600",
+            )}
+          >
             {footnote}
           </p>
         )}

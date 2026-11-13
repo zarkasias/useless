@@ -91,7 +91,9 @@ const dialog = () => container.querySelector<HTMLElement>("[role=dialog]");
 
 async function press(key: string) {
   await act(async () => {
-    document.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+    document.dispatchEvent(
+      new KeyboardEvent("keydown", { key, bubbles: true }),
+    );
   });
 }
 

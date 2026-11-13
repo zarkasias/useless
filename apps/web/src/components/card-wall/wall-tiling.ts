@@ -65,8 +65,7 @@ export function wallGeometry(
   viewportWidth: number,
   viewportHeight: number,
 ): WallGeometry {
-  const sizes =
-    viewportWidth <= PHONE_MAX_WIDTH ? PHONE_SIZES : DESKTOP_SIZES;
+  const sizes = viewportWidth <= PHONE_MAX_WIDTH ? PHONE_SIZES : DESKTOP_SIZES;
   const period = wallPeriod(count);
   const blockWidth = period.p * sizes.cellWidth;
   const blockHeight = period.q * sizes.cellHeight;

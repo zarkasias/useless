@@ -81,7 +81,11 @@ export function onPointer(
   state.lastInputAt = now;
 }
 
-export function onTouchStart(state: MotionState, clientX: number, clientY: number) {
+export function onTouchStart(
+  state: MotionState,
+  clientX: number,
+  clientY: number,
+) {
   state.touchX = clientX;
   state.touchY = clientY;
 }
@@ -103,7 +107,10 @@ export function onTouchMove(
 
 /** Advances the wall by one frame of `elapsedMs`. */
 export function step(state: MotionState, now: number, elapsedMs: number) {
-  const frames = Math.min(Math.max(elapsedMs, 0) / MOTION.frameMs, MOTION.maxFrames);
+  const frames = Math.min(
+    Math.max(elapsedMs, 0) / MOTION.frameMs,
+    MOTION.maxFrames,
+  );
   const active = now - state.lastInputAt < MOTION.idleMs;
 
   if (!active) state.touching = false;
@@ -118,7 +125,8 @@ export function step(state: MotionState, now: number, elapsedMs: number) {
   }
 
   // Ease toward the target, scaled by frame time so 120 Hz matches 60 Hz.
-  const ease = 1 - Math.pow(1 - (state.touching ? MOTION.coastEase : MOTION.ease), frames);
+  const ease =
+    1 - Math.pow(1 - (state.touching ? MOTION.coastEase : MOTION.ease), frames);
 
   state.vx += (targetX - state.vx) * ease;
   state.vy += (targetY - state.vy) * ease;

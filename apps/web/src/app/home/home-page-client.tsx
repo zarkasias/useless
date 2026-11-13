@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -13,6 +13,12 @@ import {
   type CardLockState,
 } from "@/components/card-wall/card-lock";
 import { CardZoom, type ZoomTarget } from "@/components/card-wall/card-zoom";
+import {
+  CLAIM_HEADING,
+  freeClaimLine,
+  useClaimReveal,
+} from "@/components/card-wall/claim-reveal";
+import { ZoomShare } from "@/components/card-wall/zoom-share";
 import styles from "@/components/home/home-styles";
 import { getShowcaseAchievements } from "@/components/home/home-data";
 import { FinalCta } from "@/components/home-preview/final-cta";
@@ -68,7 +74,7 @@ export default function HomePageClient({
     signedIn: visitor.signedIn,
     todaysClaim: visitor.achievement,
   });
-  const { claimed, isClaiming, claim } = claimState;
+  const { claimed, restored } = claimState;
   const isLoggedIn = initialProfile !== null;
   const isSubscribed = initialEntitlements?.isSubscribed ?? false;
 
@@ -87,43 +93,57 @@ export default function HomePageClient({
   );
 
   // The zoomed card, if any. The wall holds still while one is open.
-  const [zoom, setZoom] = useState<(ZoomTarget & { key: number }) | null>(
-    null,
-  );
-  const openCard = useCallback(
-    (achievement: Achievement, source: HTMLElement) =>
-      setZoom((current) =>
-        current
-          ? current
-          : { achievement, source, hideSource: true, key: Date.now() },
+  const [zoom, setZoom] = useState<
+    (ZoomTarget & { key: number; fromClaim: boolean }) | null
+  >(null);
+  const open = useCallback(
+    (achievement: Achievement, source: HTMLElement, fromClaim: boolean) =>
+      setZoom(
+        (current) =>
+          current ?? {
+            achievement,
+            source,
+            // A wall card hides while zoomed; a Claim button stays put.
+            hideSource: !fromClaim,
+            fromClaim,
+            key: Date.now(),
+          },
       ),
     [],
   );
+  const openCard = useCallback(
+    (achievement: Achievement, card: HTMLElement) =>
+      open(achievement, card, false),
+    [open],
+  );
+  const revealClaim = useCallback(
+    (achievement: Achievement, button: HTMLElement) =>
+      open(achievement, button, true),
+    [open],
+  );
   const closeZoom = useCallback(() => setZoom(null), []);
+
+  // Every Claim button claims through the existing flow, then reveals the
+  // card from that button; once claimed, it reopens today's card.
+  const onClaim = useClaimReveal({ claimState, reveal: revealClaim });
+
+  // A claim made just now refreshes the page's entitlements a moment later.
+  // Until they arrive, the free count shown must include this claim.
+  const entitlementsBeforeClaim = useRef<UserEntitlements | null | undefined>(
+    undefined,
+  );
+
+  useEffect(() => {
+    if (claimed && !restored && entitlementsBeforeClaim.current === undefined) {
+      entitlementsBeforeClaim.current = initialEntitlements;
+    }
+  }, [claimed, restored, initialEntitlements]);
 
   const showcase = useMemo(
     () => getShowcaseAchievements(featuredAchievements, 0, 12),
     [featuredAchievements],
   );
   const sample = showcase[0];
-
-  // Claim through the existing flow. Reopening today's card is wired up
-  // with the zoom (build steps 4 and 5).
-  const onClaim = () => {
-    if (!claimed) void claim();
-  };
-
-  // The final Claim button scrolls back up first, so the result is seen.
-  const claimFromBottom = () => {
-    const reduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-
-    document
-      .getElementById("top")
-      ?.scrollIntoView({ behavior: reduced ? "auto" : "smooth" });
-    onClaim();
-  };
 
   useGSAP(
     () => {
@@ -163,6 +183,24 @@ export default function HomePageClient({
           key={zoom.key}
           target={zoom}
           locked={isLockedWhenZoomed(lockState, zoom.achievement.id)}
+          actions={
+            <ZoomShare
+              achievement={zoom.achievement}
+              source={zoom.fromClaim ? "claim" : "wall"}
+            />
+          }
+          heading={zoom.fromClaim ? CLAIM_HEADING : undefined}
+          footnote={
+            zoom.fromClaim
+              ? freeClaimLine({
+                  signedIn: visitor.signedIn,
+                  entitlements: initialEntitlements,
+                  includesThisClaim:
+                    restored ||
+                    initialEntitlements !== entitlementsBeforeClaim.current,
+                })
+              : undefined
+          }
           onClosed={closeZoom}
         />
       )}
@@ -195,10 +233,9 @@ export default function HomePageClient({
             isSubscribed={isSubscribed}
           />
           <FinalCta
-            hasClaimed={claimed !== null}
-            isClaiming={isClaiming}
+            claimState={claimState}
             mustSignIn={visitor.mustSignIn}
-            onClaim={claimFromBottom}
+            onClaim={onClaim}
           />
         </div>
       </div>

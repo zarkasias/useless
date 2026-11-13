@@ -48,11 +48,7 @@ export function ClaimButton({
       disabled={isClaiming}
       aria-busy={isClaiming}
     >
-      {isClaiming
-        ? "Claiming…"
-        : claimed
-          ? "Open today's achievement"
-          : label}
+      {isClaiming ? "Claiming…" : claimed ? "Open today's achievement" : label}
       <ArrowUpRight className="size-[18px]" strokeWidth={2.5} aria-hidden />
     </button>
   );

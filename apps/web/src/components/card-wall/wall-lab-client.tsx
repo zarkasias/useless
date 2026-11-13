@@ -10,6 +10,7 @@ import {
 } from "./card-lock";
 import { CardWall } from "./card-wall";
 import { CardZoom, type ZoomTarget } from "./card-zoom";
+import { ZoomShare } from "./zoom-share";
 
 type PreviewAs = "visitor" | "collector";
 
@@ -46,9 +47,7 @@ export function WallLabClient({ catalog }: { catalog: Achievement[] }) {
     [lockState],
   );
 
-  const [zoom, setZoom] = useState<(ZoomTarget & { key: number }) | null>(
-    null,
-  );
+  const [zoom, setZoom] = useState<(ZoomTarget & { key: number }) | null>(null);
   const openCard = useCallback(
     (achievement: Achievement, source: HTMLElement) =>
       setZoom((current) =>
@@ -72,6 +71,7 @@ export function WallLabClient({ catalog }: { catalog: Achievement[] }) {
           key={zoom.key}
           target={zoom}
           locked={isLockedWhenZoomed(lockState, zoom.achievement.id)}
+          actions={<ZoomShare achievement={zoom.achievement} source="wall" />}
           onClosed={() => setZoom(null)}
         />
       )}
@@ -83,7 +83,9 @@ export function WallLabClient({ catalog }: { catalog: Achievement[] }) {
             type="button"
             onClick={() => setPreviewAs(option)}
             className={`rounded-full px-3 py-1.5 ${
-              previewAs === option ? "bg-violet-600 text-white" : "text-gray-700"
+              previewAs === option
+                ? "bg-violet-600 text-white"
+                : "text-gray-700"
             }`}
           >
             {option === "visitor" ? "Logged out" : "Signed-in collector"}

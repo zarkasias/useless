@@ -4,6 +4,7 @@ import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { UserEntitlements } from "@/lib/services/entitlement-service-server";
 import type { Achievement } from "@/lib/supabase";
 
 const mocks = vi.hoisted(() => ({
@@ -12,6 +13,22 @@ const mocks = vi.hoisted(() => ({
   claim: vi.fn(),
   info: vi.fn(),
   error: vi.fn(),
+  share: vi.fn(),
+  shareInput: vi.fn(),
+}));
+
+// The existing share hook, stubbed: these tests check what the page asks of
+// it, not how it draws or shares the image.
+vi.mock("@/components/use-achievement-share", () => ({
+  useAchievementShare: (options: { input: { title: string } }) => {
+    mocks.shareInput(options.input.title);
+    return {
+      share: mocks.share,
+      canShareFiles: true,
+      isBusy: false,
+      canTapShare: true,
+    };
+  },
 }));
 
 vi.mock("next/navigation", () => ({
@@ -115,12 +132,14 @@ async function render(
   loggedIn = false,
   {
     unlockedIds = [],
+    entitlements = null,
     ...visitor
   }: Partial<{
     achievement: Achievement | null;
     linked: boolean;
     mustSignIn: boolean;
     unlockedIds: string[];
+    entitlements: UserEntitlements | null;
   }> = {},
 ) {
   await act(async () => {
@@ -129,7 +148,7 @@ async function render(
         initialProfile: loggedIn
           ? ({ id: "u", username: "me" } as never)
           : null,
-        initialEntitlements: null,
+        initialEntitlements: entitlements,
         initialPacks: [],
         featuredAchievements: catalog,
         catalog,
@@ -158,6 +177,9 @@ function wallCards(id: string) {
     container.querySelectorAll<HTMLButtonElement>(`[data-wall-card="${id}"]`),
   );
 }
+
+/** The zoomed card's overlay, if one is open. */
+const zoomed = () => container.querySelector<HTMLElement>("[data-card-zoom]");
 
 async function click(element: HTMLElement | undefined) {
   if (!element) throw new Error("Missing element");
@@ -225,9 +247,7 @@ describe("HomePageClient wall", () => {
 
       expect(cards.length).toBeGreaterThan(0);
       expect(cards.every((card) => card.tabIndex === -1)).toBe(true);
-      expect(cards[0]!.getAttribute("aria-label")).toBe(
-        `Open ${entry.title}`,
-      );
+      expect(cards[0]!.getAttribute("aria-label")).toBe(`Open ${entry.title}`);
     }
   });
 
@@ -295,14 +315,41 @@ describe("HomePageClient zoom", () => {
 
     expect(dialog?.textContent).toContain("App Whisperer");
     expect(container.textContent).toContain("Locked. Unlock it to share it.");
+    expect(buttons("Share")).toHaveLength(0);
   });
 
-  it("zooms a signed-in user's unlocked card without the locked note", async () => {
+  it("zooms a signed-in user's unlocked card with Share, which uses the existing share", async () => {
     await render(true, { unlockedIds: ["epic"] });
     await click(wallCards("epic")[0]);
 
     expect(container.querySelector("[role=dialog]")).not.toBeNull();
     expect(container.textContent).not.toContain("Locked. Unlock it");
+    expect(zoomed()?.textContent).not.toContain("You unlocked this");
+
+    await click(buttons("Share")[0]);
+    expect(mocks.shareInput).toHaveBeenLastCalledWith("App Whisperer");
+    expect(mocks.share).toHaveBeenCalledOnce();
+  });
+
+  it("gives a signed-in user's locked card no Share", async () => {
+    await render(true, { unlockedIds: ["rare"] });
+    await click(wallCards("epic")[0]);
+
+    expect(zoomed()?.textContent).toContain("Locked. Unlock it to share it.");
+    expect(buttons("Share")).toHaveLength(0);
+  });
+
+  it("gives a logged-out visitor Share on the card they claimed today, from the wall", async () => {
+    window.localStorage.setItem(
+      CLAIM_STORAGE_KEY,
+      JSON.stringify({ day: today(), achievement: catalog[2] }),
+    );
+
+    await render();
+    await click(wallCards("epic")[0]);
+
+    expect(zoomed()?.textContent).not.toContain("Locked.");
+    expect(buttons("Share")).toHaveLength(1);
   });
 });
 
@@ -323,8 +370,83 @@ describe("HomePageClient claim", () => {
     expect(
       JSON.parse(window.localStorage.getItem(CLAIM_STORAGE_KEY)!),
     ).toMatchObject({ achievement: { id: "rare" } });
-    expect(buttons("Open today's achievement")).toHaveLength(1);
-    expect(container.textContent).toContain("Back to my achievement");
+    expect(buttons("Open today's achievement")).toHaveLength(2);
+  });
+
+  it("reveals the claimed card zoomed from the Claim button, ready to share", async () => {
+    mocks.claim.mockResolvedValue({
+      status: "claimed",
+      achievement: catalog[1],
+    });
+
+    await render();
+    const button = buttons("Claim my useless achievement")[0]!;
+
+    await click(button);
+
+    expect(zoomed()?.querySelector("[role=dialog]")?.textContent).toContain(
+      "Mouse Mileage",
+    );
+    expect(zoomed()?.textContent).toContain(
+      "You unlocked this. Now tell everyone.",
+    );
+    expect(zoomed()?.textContent).toContain(
+      "Your first 10 are free. Come back tomorrow for the next one.",
+    );
+    // The button stays where it is; only wall cards hide while zoomed.
+    expect(button.style.visibility).toBe("");
+
+    await click(buttons("Share")[0]);
+    expect(mocks.shareInput).toHaveBeenLastCalledWith("Mouse Mileage");
+    expect(mocks.share).toHaveBeenCalledOnce();
+  });
+
+  it("shows a signed-in free user their count, including the claim just made", async () => {
+    mocks.claim.mockResolvedValue({
+      status: "claimed",
+      achievement: catalog[1],
+    });
+
+    // Entitlements as loaded before the claim; the refresh comes later.
+    await render(true, {
+      entitlements: {
+        achievementCount: 0,
+        freeAchievementLimit: 10,
+        remainingFreeAchievements: 10,
+        isSubscribed: false,
+        subscriptionStatus: null,
+        billingInterval: null,
+        hasReachedFreeLimit: false,
+        canClaimAchievement: true,
+      },
+    });
+    await click(buttons("Claim my useless achievement")[0]);
+
+    expect(zoomed()?.textContent).toContain(
+      "1 of 10 free. Come back tomorrow for the next one.",
+    );
+  });
+
+  it("reveals from the bottom Claim button too", async () => {
+    mocks.claim.mockResolvedValue({
+      status: "claimed",
+      achievement: catalog[0],
+    });
+
+    await render();
+    await click(buttons("Claim my useless achievement")[1]);
+
+    expect(mocks.claim).toHaveBeenCalledOnce();
+    expect(zoomed()?.textContent).toContain("Just Checking");
+  });
+
+  it("opens nothing when the claim doesn't go through", async () => {
+    mocks.claim.mockResolvedValue({ status: "already_claimed" });
+
+    await render();
+    await click(buttons("Claim my useless achievement")[0]);
+
+    expect(zoomed()).toBeNull();
   });
 
   it("never claims twice in a day", async () => {
@@ -336,13 +458,18 @@ describe("HomePageClient claim", () => {
     await render();
     await click(buttons("Open today's achievement")[0]);
 
+    // A second press on the same day reopens the claimed card.
     expect(mocks.claim).not.toHaveBeenCalled();
+    expect(zoomed()?.textContent).toContain("Just Checking");
+    expect(zoomed()?.textContent).toContain(
+      "You unlocked this. Now tell everyone.",
+    );
   });
 
   it("opens on a claim made elsewhere today, as the server reports it", async () => {
     await render(true, { achievement: catalog[3] });
 
-    expect(buttons("Open today's achievement")).toHaveLength(1);
+    expect(buttons("Open today's achievement")).toHaveLength(2);
     expect(buttons("Claim my useless achievement")).toHaveLength(0);
     expect(wallCards("legendary")[0]!.getAttribute("aria-label")).toBe(
       "Open Unintentional Beta Tester",
@@ -390,18 +517,5 @@ describe("HomePageClient claim", () => {
         link.textContent?.includes("Sign in to claim"),
       ),
     ).toHaveLength(2);
-  });
-
-  it("scrolls back up when claiming from the bottom of the page", async () => {
-    mocks.claim.mockResolvedValue({
-      status: "claimed",
-      achievement: catalog[0],
-    });
-
-    await render();
-    await click(buttons("Claim my useless achievement")[1]);
-
-    expect(Element.prototype.scrollIntoView).toHaveBeenCalled();
-    expect(mocks.claim).toHaveBeenCalledOnce();
   });
 });
