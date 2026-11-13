@@ -267,6 +267,26 @@ describe("HomePageClient wall", () => {
   });
 });
 
+describe("HomePageClient zoom", () => {
+  it("zooms a wall card, locked for a logged-out visitor who hasn't claimed it", async () => {
+    await render();
+    await click(wallCards("epic")[0]);
+
+    const dialog = container.querySelector("[role=dialog]");
+
+    expect(dialog?.textContent).toContain("App Whisperer");
+    expect(container.textContent).toContain("Locked. Unlock it to share it.");
+  });
+
+  it("zooms a signed-in user's unlocked card without the locked note", async () => {
+    await render(true, { unlockedIds: ["epic"] });
+    await click(wallCards("epic")[0]);
+
+    expect(container.querySelector("[role=dialog]")).not.toBeNull();
+    expect(container.textContent).not.toContain("Locked. Unlock it");
+  });
+});
+
 describe("HomePageClient claim", () => {
   it("claims through the existing flow and remembers it for the day", async () => {
     mocks.claim.mockResolvedValue({

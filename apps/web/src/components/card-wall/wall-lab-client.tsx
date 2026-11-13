@@ -3,8 +3,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import type { Achievement } from "@/lib/supabase";
-import { isLockedOnWall, type CardLockState } from "./card-lock";
+import {
+  isLockedOnWall,
+  isLockedWhenZoomed,
+  type CardLockState,
+} from "./card-lock";
 import { CardWall } from "./card-wall";
+import { CardZoom, type ZoomTarget } from "./card-zoom";
 
 type PreviewAs = "visitor" | "collector";
 
@@ -41,9 +46,35 @@ export function WallLabClient({ catalog }: { catalog: Achievement[] }) {
     [lockState],
   );
 
+  const [zoom, setZoom] = useState<(ZoomTarget & { key: number }) | null>(
+    null,
+  );
+  const openCard = useCallback(
+    (achievement: Achievement, source: HTMLElement) =>
+      setZoom((current) =>
+        current
+          ? current
+          : { achievement, source, hideSource: true, key: Date.now() },
+      ),
+    [],
+  );
+
   return (
     <>
-      <CardWall catalog={catalog} isLocked={isLocked} />
+      <CardWall
+        catalog={catalog}
+        isLocked={isLocked}
+        onOpen={openCard}
+        paused={zoom !== null}
+      />
+      {zoom && (
+        <CardZoom
+          key={zoom.key}
+          target={zoom}
+          locked={isLockedWhenZoomed(lockState, zoom.achievement.id)}
+          onClosed={() => setZoom(null)}
+        />
+      )}
       <div className="fixed bottom-4 left-4 z-50 flex items-center gap-2 rounded-full border bg-white/95 p-1.5 text-sm font-bold shadow-lg">
         <span className="px-2 text-gray-500">{catalog.length} cards ·</span>
         {(["visitor", "collector"] as const).map((option) => (

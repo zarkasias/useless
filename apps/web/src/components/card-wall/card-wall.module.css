@@ -231,3 +231,199 @@
   transform: none;
   box-shadow: 0 10px 30px rgba(76, 29, 149, 0.1);
 }
+
+/*
+ * Zoom: a card grown from its place on the wall to the centre of the screen.
+ */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  animation: fadeIn 0.3s ease both;
+}
+
+.overlayClosing {
+  animation: fadeOut 0.35s ease both;
+}
+
+/* A light scrim over the page; clicking it closes the card. */
+.scrim {
+  appearance: none;
+  position: fixed;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgba(246, 244, 255, 0.9);
+  cursor: zoom-out;
+}
+
+/*
+ * Centred with auto margins, so a card taller than the screen scrolls
+ * instead of being cut off at the top. Nothing here clips the card's shadow.
+ */
+.zoomWrap {
+  position: relative;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  box-sizing: border-box;
+  padding: 24px;
+  pointer-events: none;
+}
+
+/* Colours come from the rarity and locked classes, which set the variables. */
+.zoomCard {
+  pointer-events: auto;
+  position: relative;
+  flex: none;
+  box-sizing: border-box;
+  width: min(340px, 84vw);
+  /*
+   * Same proportions as a wall card, so it grows from (and shrinks back
+   * onto) the card's exact box. Longer text can still make it taller.
+   */
+  aspect-ratio: 190 / 256;
+  padding: 30px 26px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  border: 3px solid var(--card-border);
+  border-radius: 32px;
+  background: var(--card-bg);
+  color: #1f2937;
+  text-align: center;
+  box-shadow: 0 40px 90px rgba(76, 29, 149, 0.3);
+  transform-origin: center center;
+  will-change: transform;
+}
+
+.zoomCard:focus {
+  outline: none;
+}
+
+.zoomCard .icon {
+  width: 176px;
+  height: 176px;
+}
+
+.zoomCard .pill {
+  padding: 5px 18px;
+  font-size: 14px;
+}
+
+/* Zoomed, the whole title and joke line show. */
+.zoomCard .title,
+.zoomCard .description {
+  display: block;
+  overflow: visible;
+}
+
+.zoomCard .title {
+  font-size: 30px;
+}
+
+.zoomCard .description {
+  font-size: 17px;
+}
+
+.zoomCard .lockBadge {
+  top: 12px;
+  left: 12px;
+  right: auto;
+  width: 44px;
+  height: 44px;
+}
+
+.close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.85);
+  color: #1f2937;
+  cursor: pointer;
+}
+
+.close:hover {
+  background: #fff;
+}
+
+.close:focus-visible {
+  outline: 3px solid #7c3aed;
+  outline-offset: 2px;
+}
+
+/* Lines and buttons under the zoomed card fade in once it has landed. */
+.zoomExtra {
+  pointer-events: auto;
+  margin: 0;
+  animation: fadeIn 0.35s ease 0.25s both;
+}
+
+.zoomHeading {
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: #1f2937;
+  text-align: center;
+}
+
+.lockedNote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border: 1px solid #e4e0f7;
+  border-radius: 999px;
+  background: #fff;
+  color: #4b5563;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .overlayClosing,
+  .zoomExtra {
+    animation: none;
+  }
+}
+
+/* Phones: match the smaller wall card's proportions. */
+@media (max-width: 720px) {
+  .zoomCard {
+    aspect-ratio: 140 / 196;
+  }
+}

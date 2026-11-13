@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
@@ -9,8 +9,10 @@ import { Navbar } from "@/components/navbar";
 import { CardWall } from "@/components/card-wall/card-wall";
 import {
   isLockedOnWall,
+  isLockedWhenZoomed,
   type CardLockState,
 } from "@/components/card-wall/card-lock";
+import { CardZoom, type ZoomTarget } from "@/components/card-wall/card-zoom";
 import styles from "@/components/home/home-styles";
 import { getShowcaseAchievements } from "@/components/home/home-data";
 import { FinalCta } from "@/components/home-preview/final-cta";
@@ -84,6 +86,21 @@ export default function HomePageClient({
     [lockState],
   );
 
+  // The zoomed card, if any. The wall holds still while one is open.
+  const [zoom, setZoom] = useState<(ZoomTarget & { key: number }) | null>(
+    null,
+  );
+  const openCard = useCallback(
+    (achievement: Achievement, source: HTMLElement) =>
+      setZoom((current) =>
+        current
+          ? current
+          : { achievement, source, hideSource: true, key: Date.now() },
+      ),
+    [],
+  );
+  const closeZoom = useCallback(() => setZoom(null), []);
+
   const showcase = useMemo(
     () => getShowcaseAchievements(featuredAchievements, 0, 12),
     [featuredAchievements],
@@ -134,7 +151,21 @@ export default function HomePageClient({
 
   return (
     <div ref={rootRef} className={styles.home}>
-      <CardWall catalog={catalog} isLocked={isLockedOnWallCard} />
+      <CardWall
+        catalog={catalog}
+        isLocked={isLockedOnWallCard}
+        onOpen={openCard}
+        paused={zoom !== null}
+      />
+
+      {zoom && (
+        <CardZoom
+          key={zoom.key}
+          target={zoom}
+          locked={isLockedWhenZoomed(lockState, zoom.achievement.id)}
+          onClosed={closeZoom}
+        />
+      )}
 
       <div className="relative z-10">
         <Navbar

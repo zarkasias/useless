@@ -27,10 +27,19 @@ export interface CardFaceProps {
   locked: boolean;
   /** Icon size in CSS pixels; the image service picks a matching file. */
   iconSize: number;
+  /** Ids for the title and description, so a dialog can point at them. */
+  titleId?: string;
+  descriptionId?: string;
 }
 
 /** What's on a card, shared by the wall card and the zoomed card. */
-export function CardFace({ achievement, locked, iconSize }: CardFaceProps) {
+export function CardFace({
+  achievement,
+  locked,
+  iconSize,
+  titleId,
+  descriptionId,
+}: CardFaceProps) {
   const iconUrl = getAchievementIconUrl(achievement.icon_path);
 
   return (
@@ -56,10 +65,13 @@ export function CardFace({ achievement, locked, iconSize }: CardFaceProps) {
       <span className={cn(styles.pill, fredoka.className)}>
         {typeNames[achievement.type]}
       </span>
-      <span className={cn(styles.title, fredoka.className)}>
+      <span id={titleId} className={cn(styles.title, fredoka.className)}>
         {achievement.title}
       </span>
-      <span className={cn(styles.description, nunito.className)}>
+      <span
+        id={descriptionId}
+        className={cn(styles.description, nunito.className)}
+      >
         {achievement.description}
       </span>
     </>
