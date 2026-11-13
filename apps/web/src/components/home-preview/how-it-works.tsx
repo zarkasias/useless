@@ -2,6 +2,7 @@
 
 import type { Achievement } from "@/lib/supabase";
 import styles from "@/components/home/home-styles";
+import { panelClass } from "@/components/card-wall/wall-hero";
 import { useCardFace } from "./use-card-face";
 
 const RARITY_CHIPS = [
@@ -20,10 +21,10 @@ export function HowItWorks({ sample }: { sample: Achievement | undefined }) {
   return (
     <section
       id="how-it-works"
-      className="bg-white px-5 py-16 md:px-8 md:py-16"
+      className={panelClass}
       data-story-reveal
     >
-      <div className="mx-auto max-w-[1040px]">
+      <div>
         <h2 className="mx-auto mb-10 max-w-[620px] text-center text-[clamp(30px,5vw,52px)] font-black leading-[1.02] tracking-[-0.06em] text-gray-800">
           Claim it. Collect it. Share it.
         </h2>

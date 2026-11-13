@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "notes": "One entry per achievement shown on the homepage wall. Add or remove entries freely; the wall re-tiles itself. rarity is one of: common, rare, epic, legendary. icon is the file name in the achievement icon folder. Entries with an empty icon need the file name filled in.",
+  "achievements": [
+    {
+      "id": "apprentice-lurker",
+      "title": "Apprentice Lurker",
+      "rarity": "common",
+      "description": "Visited the site 10 times without interacting. Just observing!",
+      "icon": "apprentice-lurker.png"
+    },
+    {
+      "id": "mouse-mileage",
+      "title": "Mouse Mileage",
+      "rarity": "rare",
+      "description": "Moved cursor 1km worth of screen distance. Marathon runner!",
+      "icon": "mouse-mileage.png"
+    },
+    {
+      "id": "app-whisperer",
+      "title": "App Whisperer",
+      "rarity": "epic",
+      "description": "Found a hidden feature that even the developers didn't know about. How?!",
+      "icon": "app-whisperer.png"
+    },
+    {
+      "id": "process-supervisor",
+      "title": "Process Supervisor",
+      "rarity": "rare",
+      "description": "Inspected the running processes with the authority of someone who recognizes three of them.",
+      "icon": ""
+    },
+    {
+      "id": "gifsaurus-rex",
+      "title": "GIFsaurus Rex",
+      "rarity": "epic",
+      "description": "Sent 50 GIFs in one conversation. Motion sickness!",
+      "icon": "gifsaurus-rex.png"
+    },
+    {
+      "id": "midnight-oil",
+      "title": "Midnight Oil",
+      "rarity": "rare",
+      "description": "Active between 12-1 AM. Burning that late-night fuel!",
+      "icon": "midnight-oil.png"
+    },
+    {
+      "id": "cookie-policy-reader",
+      "title": "Cookie Policy Reader",
+      "rarity": "epic",
+      "description": "Actually read a cookie policy from start to finish. Legal scholar!",
+      "icon": ""
+    },
+    {
+      "id": "just-checking",
+      "title": "Just Checking",
+      "rarity": "common",
+      "description": "Claimed today's tiny digital crumb. Important? Absolutely not.",
+      "icon": "just-checking.png"
+    },
+    {
+      "id": "link-collector",
+      "title": "Link Collector",
+      "rarity": "rare",
+      "description": "Shared 10 links in one day. Viral potential!",
+      "icon": "link-collector.png"
+    },
+    {
+      "id": "fullscreen-fanatic",
+      "title": "Fullscreen Fanatic",
+      "rarity": "rare",
+      "description": "Toggled fullscreen mode 5 times in one session. Can't decide?",
+      "icon": "full-screen-fanatic.png"
+    },
+    {
+      "id": "unintentional-beta-tester",
+      "title": "Unintentional Beta Tester",
+      "rarity": "legendary",
+      "description": "Discovered a bug that nobody knew existed. You broke the matrix!",
+      "icon": ""
+    }
+  ]
+}

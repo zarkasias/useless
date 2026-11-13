@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Useless Achievements homepage, card wall</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap">
+<style>
+body{margin:0}
+a{color:#5b21b6}a:hover{color:#1d4ed8}
+.pg{--fw:190px;--fh:256px;--bw:104px;--gap:160px;position:relative;overflow-x:clip;background:#f6f4ff;color:#1f2937;font-family:-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue","Noto Sans",Arial,sans-serif;-webkit-font-smoothing:antialiased}
+.wall{position:absolute;inset:0;overflow:hidden;z-index:0}
+sc-for,sc-if{display:contents}
+.wl{position:absolute;display:grid;justify-items:center;align-items:center;will-change:transform}
+.od{position:relative;top:var(--half)}
+.fc{appearance:none;font:inherit;color:inherit;margin:0;width:var(--fw);height:var(--fh);box-sizing:border-box;padding:16px 14px;border-radius:22px;border:2px solid var(--cb);background:var(--cbg);display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;cursor:pointer;box-shadow:0 10px 30px rgba(76,29,149,.10);transition:transform .25s ease,box-shadow .25s ease}
+.fc:hover,.fc:focus-visible{transform:scale(1.05);box-shadow:0 18px 44px rgba(76,29,149,.22);outline:none}
+.fc.st{cursor:default;width:100%;height:auto;min-height:var(--fh)}
+.fc.st:hover{transform:none;box-shadow:0 10px 30px rgba(76,29,149,.10)}
+.fc img{width:96px;height:96px;object-fit:contain}
+.pill{font-family:Fredoka,sans-serif;font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:3px 12px;border-radius:999px;background:var(--pb);color:var(--pc)}
+.ct{font-family:Fredoka,sans-serif;font-weight:600;font-size:17px;line-height:1.15;color:#1f2937}
+.cd{font-family:Nunito,sans-serif;font-size:12.5px;line-height:1.35;color:#4b5563}
+.r-common{--cb:#9ca3af;--cbg:linear-gradient(135deg,#f9fafb,#e5e7eb);--pb:#6b7280;--pc:#fff}
+.r-rare{--cb:#60a5fa;--cbg:linear-gradient(135deg,#f6f9ff,#dbe7fb);--pb:#2563eb;--pc:#fff}
+.r-epic{--cb:#c084fc;--cbg:linear-gradient(135deg,#faf6ff,#eadcfb);--pb:#9333ea;--pc:#fff}
+.r-legendary{--cb:#f59e0b;--cbg:linear-gradient(135deg,#fffaf2,#f8e6cd);--pb:linear-gradient(90deg,#f59e0b,#fbbf24);--pc:#451a03}
+.fc,.zc{position:relative}
+.lk{--cb:#c5c8ce;--cbg:linear-gradient(135deg,#f3f4f6,#e3e5e9);--pb:#6b7280;--pc:#fff}
+.lk img{filter:grayscale(1);opacity:.5}
+.lk .ct{color:#4b5563}
+.lk .cd{color:#565d68}
+.lb{display:none}
+.lk .lb{display:grid;place-items:center;position:absolute;top:10px;right:10px;width:34px;height:34px;border-radius:999px;background:#d5d8de;color:#1f2937}
+.zc.lk .lb{top:12px;left:12px;right:auto;width:44px;height:44px}
+.cnt{position:relative;z-index:1;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:var(--gap);padding:24px 20px 56px}
+.pe{pointer-events:auto}
+.glow{background:radial-gradient(closest-side,rgba(246,244,255,.98) 58%,rgba(246,244,255,0) 100%)}
+.panel{pointer-events:auto;width:100%;max-width:1040px;box-sizing:border-box;background:#fff;border:1px solid #e4e0f7;border-radius:32px;padding:56px;box-shadow:0 24px 60px rgba(76,29,149,.10)}
+.h1{margin:0;font-weight:900;font-size:clamp(44px,7.4vw,92px);line-height:.95;letter-spacing:-.05em;color:#1f2937}
+.h2{margin:0;font-weight:900;font-size:clamp(30px,4.2vw,48px);line-height:1;letter-spacing:-.04em;color:#1f2937}
+.grad{background:linear-gradient(100deg,#7c3aed,#2563eb);-webkit-background-clip:text;background-clip:text;color:transparent}
+.btn{appearance:none;border:0;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:56px;padding:0 30px;border-radius:999px;font:inherit;font-weight:800;font-size:17px;color:#fff;background:linear-gradient(100deg,#6d28d9,#2563eb);box-shadow:0 12px 30px rgba(109,40,217,.30);text-decoration:none;transition:transform .2s ease}
+.btn:hover{transform:translateY(-2px);color:#fff}
+.btn2{appearance:none;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 22px;border-radius:999px;font:inherit;font-weight:700;font-size:15px;color:#1f2937;background:#fff;border:1px solid #cfc9ec;text-decoration:none}
+.btn2:hover{color:#1f2937;border-color:#7c3aed}
+.sub{margin:0;font-size:19px;line-height:1.5;color:#4b5563}
+.sm{margin:0;font-size:15px;line-height:1.5;color:#4b5563}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px}
+.g4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+.g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;width:100%;max-width:1040px}
+.gm{width:104px;height:104px;background-image:url(/_blob/e10a0034a39503a0d850b5776cd6cafb);background-size:400% 100%;background-repeat:no-repeat}
+.gx0{background-position:0 0}.gx1{background-position:33.333% 0}.gx2{background-position:66.666% 0}.gx3{background-position:100% 0}
+.lock{aspect-ratio:1;border-radius:16px;background:#f1eefb;border:1px dashed #b9b1e0;display:grid;place-items:center;color:#6b6399}
+.ov{position:fixed;inset:0;z-index:50;display:flex;justify-content:center;align-items:center;animation:ovin .3s ease both}
+.ov.out{animation:ovout .35s ease both}
+.scrim{position:absolute;inset:0;appearance:none;border:0;padding:0;background:rgba(246,244,255,.9);cursor:zoom-out}
+.zw{position:relative;display:flex;flex-direction:column;align-items:center;gap:20px;padding:24px;pointer-events:none}
+.zc{pointer-events:auto;width:min(340px,84vw);box-sizing:border-box;padding:30px 26px 28px;border-radius:32px;border:3px solid var(--cb);background:var(--cbg);display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;box-shadow:0 40px 90px rgba(76,29,149,.30);transform-origin:center center;will-change:transform}
+.zc{position:relative}
+.zx{position:absolute;top:10px;right:10px;width:44px;height:44px;border-radius:999px;border:0;padding:0;background:rgba(255,255,255,.85);color:#1f2937;display:grid;place-items:center;cursor:pointer}
+.zx:hover{background:#fff}
+.zl{margin:0;display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;color:#4b5563;background:#fff;border:1px solid #e4e0f7;border-radius:999px;padding:12px 20px}
+.zc img{width:176px;height:176px;object-fit:contain}
+.zc .pill{font-size:14px;padding:5px 18px}
+.zc .ct{font-size:30px}
+.zc .cd{font-size:17px}
+.za{pointer-events:auto;display:flex;flex-wrap:wrap;gap:12px;justify-content:center;animation:ovin .35s ease .25s both}
+@keyframes ovin{from{opacity:0}to{opacity:1}}
+@keyframes ovout{from{opacity:1}to{opacity:0}}
+@media (max-width:720px){
+.pg{--fw:140px;--fh:196px;--bw:76px;--gap:110px}
+.fc{padding:12px 10px;gap:6px;border-radius:18px}
+.fc img{width:68px;height:68px}
+.fc .ct{font-size:14px}
+.wall .cd{display:none}
+.panel{padding:32px 22px;border-radius:26px}
+.g3{grid-template-columns:minmax(0,1fr);gap:24px}
+.g4{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.g2{grid-template-columns:minmax(0,1fr)}
+.sub{font-size:17px}
+.wm{display:none}
+}
+@media (prefers-reduced-motion:reduce){.fc,.btn{transition:none}.ov,.ov.out,.za{animation:none}}
+</style>
+</helmet>
+<div class="pg" data-pg>
+<div class="wall" data-wall>
+<div class="wl wf" data-layer="front">
+<sc-for list="{{ front }}" as="c" hint-placeholder-count="12">
+<button type="button" tabindex="-1" class="fc {{ c.cls }}" aria-label="{{ c.aria }}" onClick="{{ c.open }}">
+<img src="{{ c.icon }}" alt="" draggable="false">
+<span class="lb" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></span>
+<span class="pill">{{ c.rarity }}</span>
+<span class="ct">{{ c.title }}</span>
+<span class="cd">{{ c.desc }}</span>
+</button>
+</sc-for>
+</div>
+</div>
+
+<div class="cnt">
+<header class="pe" style="width: 100%; max-width: 1120px; box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px 10px 16px; background: #ffffff; border: 1px solid #e4e0f7; border-radius: 999px; box-shadow: 0 10px 30px rgba(76,29,149,.08); margin-bottom: -100px">
+<a href="https://www.uselessachievements.com/" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #1f2937; font-weight: 800; font-size: 18px; letter-spacing: -0.02em">
+<img src="/_blob/bfba439ac935580cf271f4a4dd86771c" alt="" width="36" height="36">
+<span class="wm">Useless Achievements</span>
+</a>
+<nav style="display: flex; align-items: center; gap: 8px">
+<a href="https://www.instagram.com/uselessachievements/" aria-label="Useless Achievements on Instagram" style="display: grid; place-items: center; width: 44px; height: 44px; border-radius: 999px; color: #1f2937">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.5" cy="6.5" r="0.6"></circle></svg>
+</a>
+<a class="btn2" href="https://www.uselessachievements.com/login" style="min-height: 44px">Login</a>
+<a class="btn" href="https://www.uselessachievements.com/signup" style="min-height: 44px; padding: 0 20px; font-size: 15px; box-shadow: none">Sign Up</a>
+</nav>
+</header>
+
+<section class="glow" style="width: 100%; max-width: 980px; box-sizing: border-box; min-height: 780px; padding: 150px 24px 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px; text-align: center">
+<p style="margin: 0; font-size: 13px; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; color: #5b21b6">Achievements nobody asked for.</p>
+<h1 class="h1">Accomplish absolutely <span class="grad">nothing useful.</span></h1>
+<p class="sub" style="max-width: 520px">Tap the button. Get a pointless achievement. Feel weirdly proud.</p>
+<button type="button" class="btn pe" onClick="{{ claim }}">Claim my useless achievement
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"></path><path d="M8 7h9v9"></path></svg>
+</button>
+<p class="sm" style="max-width: 420px">No account needed. One new achievement a day. Your first 10 are free; Pro keeps them coming.</p>
+<p style="margin: 14px 0 0; font-size: 13px; font-weight: 700; color: #5b5578">Move around the wall. Tap any card to open it.</p>
+</section>
+
+<section class="panel" style="display: flex; flex-direction: column; gap: 36px; text-align: center">
+<h2 class="h2">Claim it. Collect it. Share it.</h2>
+<div class="g3">
+<div style="display: flex; flex-direction: column; gap: 8px"><h3 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.02em">Claim</h3><p class="sm">One tap, one new achievement every day. No account needed.</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><h3 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.02em">Collect</h3><p class="sm">Common to Legendary. Make a free account to keep your streak and collection.</p></div>
+<div style="display: flex; flex-direction: column; gap: 8px"><h3 style="margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.02em">Share</h3><p class="sm">Every achievement becomes a ready-to-post image for Stories, chats or wherever.</p></div>
+</div>
+</section>
+
+<section class="panel" style="display: flex; flex-direction: column; gap: 36px; text-align: center">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<h2 class="h2">From Common to Legendary.</h2>
+<p class="sub">Some are rarer than others. All are equally useless.</p>
+</div>
+<div class="g4">
+<sc-for list="{{ tiers }}" as="t" hint-placeholder-count="4">
+<div class="fc st {{ t.cls }}">
+<img src="{{ t.icon }}" alt="">
+<span class="pill">{{ t.rarity }}</span>
+<span class="ct">{{ t.title }}</span>
+<span class="cd">{{ t.desc }}</span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section class="panel" style="display: flex; flex-direction: column; gap: 36px; text-align: center">
+<div style="display: flex; flex-direction: column; gap: 12px">
+<h2 class="h2">Your collection plays games, too.</h2>
+<p class="sub">Pointless card games powered by your achievements. Included with Pro.</p>
+</div>
+<div class="g4">
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><span class="gm gx0" role="img" aria-label="Memory game icon"></span><span style="font-weight: 800; font-size: 16px">Memory</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><span class="gm gx1" role="img" aria-label="Solitaire game icon"></span><span style="font-weight: 800; font-size: 16px">Solitaire</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><span class="gm gx2" role="img" aria-label="Spider Solitaire game icon"></span><span style="font-weight: 800; font-size: 16px">Spider Solitaire</span></div>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 10px"><span class="gm gx3" role="img" aria-label="Guess game icon"></span><span style="font-weight: 800; font-size: 16px">Guess <span style="font-size: 12px; font-weight: 800; color: #5b21b6; background: #ede9fe; padding: 2px 8px; border-radius: 999px; vertical-align: 2px">Soon</span></span></div>
+</div>
+<div><a class="btn2" href="https://www.uselessachievements.com/login?next=/games">See the games</a></div>
+</section>
+
+<div class="g2">
+<section class="panel" style="display: flex; flex-direction: column; gap: 18px; padding: 44px">
+<p style="margin: 0; font-size: 12px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #5b21b6">Pro · Most useless</p>
+<h2 class="h2" style="font-size: 36px">Hooked? Get more useless.</h2>
+<p style="margin: 0; font-weight: 900; font-size: 56px; letter-spacing: -0.04em; line-height: 1">$24.99<span style="font-size: 18px; font-weight: 700; letter-spacing: 0; color: #4b5563"> /year</span></p>
+<p class="sm">Annual saves 30%. Monthly is available too.</p>
+<ul style="margin: 0; padding: 0 0 0 20px; display: flex; flex-direction: column; gap: 8px; font-size: 16px; line-height: 1.4; color: #1f2937">
+<li>Unlimited achievements</li>
+<li>Achievement-powered games</li>
+<li>Keep building your streak</li>
+<li>Full leaderboard participation</li>
+</ul>
+<a class="btn" href="https://www.uselessachievements.com/signup?next=/pro&amp;plan=year" style="margin-top: 6px">Create account to subscribe</a>
+<p class="sm" style="text-align: center">Cancel anytime. Your dignity is already gone.</p>
+</section>
+<section class="panel" style="display: flex; flex-direction: column; gap: 18px; padding: 44px">
+<p style="margin: 0; font-size: 12px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: #166534">Featured pack</p>
+<h2 class="h2" style="font-size: 36px">Holidays 2026</h2>
+<p class="sm">A joyful collection of achievements to celebrate the holiday season.</p>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px">
+<sc-for list="{{ locks }}" as="l" hint-placeholder-count="8">
+<div class="lock" role="img" aria-label="Locked achievement"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></div>
+</sc-for>
+</div>
+<p style="margin: 0; font-size: 16px; font-weight: 700">8 achievements · $2.99 one-time</p>
+<a class="btn2" href="https://www.uselessachievements.com/packs" style="margin-top: auto">Explore pack</a>
+</section>
+</div>
+
+<section class="glow" style="width: 100%; max-width: 900px; box-sizing: border-box; padding: 110px 24px; display: flex; flex-direction: column; align-items: center; gap: 28px; text-align: center">
+<h2 class="h2" style="max-width: 640px">Today's achievement isn't going to claim itself.</h2>
+<button type="button" class="btn pe" onClick="{{ claim }}">Claim my useless achievement</button>
+</section>
+
+<footer class="pe" style="width: 100%; max-width: 1040px; box-sizing: border-box; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; padding: 18px 28px; background: #ffffff; border: 1px solid #e4e0f7; border-radius: 24px; font-size: 14px; color: #4b5563; margin-top: -60px">
+<span>© 2026 Useless Achievements</span>
+<span style="display: flex; flex-wrap: wrap; gap: 8px 20px">
+<a href="https://www.instagram.com/uselessachievements/">New one daily on Instagram</a>
+<a href="https://www.uselessachievements.com/faq">FAQ</a>
+<a href="https://www.uselessachievements.com/privacy-policy">Privacy Policy</a>
+<a href="https://www.uselessachievements.com/terms-of-service">Terms of Service</a>
+</span>
+</footer>
+</div>
+
+<sc-if value="{{ zOpen }}" hint-placeholder-val="{{ false }}">
+<div class="ov" data-ov>
+<button type="button" class="scrim" aria-label="Close and go back to the wall" onClick="{{ close }}"></button>
+<div class="zw" data-zw>
+<sc-if value="{{ claimed }}" hint-placeholder-val="{{ false }}">
+<p class="za" style="margin: 0; font-weight: 900; font-size: 26px; letter-spacing: -0.03em; color: #1f2937">You unlocked this. Now tell everyone.</p>
+</sc-if>
+<div class="zc {{ zCls }}" data-zc>
+<button type="button" class="zx" aria-label="Close" onClick="{{ close }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12"></path><path d="M18 6 6 18"></path></svg></button>
+<img src="{{ zIcon }}" alt="">
+<span class="lb" aria-hidden="true"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg></span>
+<span class="pill">{{ zRarity }}</span>
+<span class="ct">{{ zTitle }}</span>
+<span class="cd">{{ zDesc }}</span>
+</div>
+<sc-if value="{{ zUnlocked }}" hint-placeholder-val="{{ false }}">
+<div class="za">
+<button type="button" class="btn" onClick="{{ share }}">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"></path><path d="m7 8 5-5 5 5"></path><path d="M5 13v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"></path></svg>
+Share</button>
+</div>
+</sc-if>
+<sc-if value="{{ zLocked }}" hint-placeholder-val="{{ false }}">
+<p class="za zl"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>Locked. Unlock it to share it.</p>
+</sc-if>
+<sc-if value="{{ claimed }}" hint-placeholder-val="{{ false }}">
+<p class="za sm" style="font-weight: 700">1 of 10 free. Come back tomorrow for the next one.</p>
+</sc-if>
+</div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"previewAs":{"editor":"enum","options":["New visitor","Signed-in collector"],"default":"New visitor","section":"Who is looking"},"driftSpeed":{"editor":"range","default":1,"min":0,"max":3,"step":0.25,"section":"Wall motion"},"followStrength":{"editor":"range","default":1,"min":0,"max":2,"step":0.25,"section":"Wall motion"},"$preview":{"width":1440,"height":4000}}'>
+class Component extends DCLogic {
+  // CONTENT LIST. Add or remove achievements here; the wall re-tiles itself.
+  // Front cards (clickable, full text). rarity: common | rare | epic | legendary.
+  achievements() {
+    return [
+  { title: 'Apprentice Lurker', rarity: 'common', desc: 'Visited the site 10 times without interacting. Just observing!', icon: '/_blob/3327a32cf7698d560b3d1ca0887fbf2a' },
+  { title: 'Mouse Mileage', rarity: 'rare', desc: 'Moved cursor 1km worth of screen distance. Marathon runner!', icon: '/_blob/8a0828aa9ddf76c05eafb23d8a59043e' },
+  { title: 'App Whisperer', rarity: 'epic', desc: "Found a hidden feature that even the developers didn't know about. How?!", icon: '/_blob/48180e801f8468ba425ed40b5ae646f5' },
+  { title: 'Process Supervisor', rarity: 'rare', desc: 'Inspected the running processes with the authority of someone who recognizes three of them.', icon: '/_blob/8fd0d4bcc36b5c5b6bac53c92d177f94' },
+  { title: 'GIFsaurus Rex', rarity: 'epic', desc: 'Sent 50 GIFs in one conversation. Motion sickness!', icon: '/_blob/d793467bc1fed3e9bce332528c7e98aa' },
+  { title: 'Midnight Oil', rarity: 'rare', desc: 'Active between 12-1 AM. Burning that late-night fuel!', icon: '/_blob/e6e9f3fcd1283ee6643d7ec9dc5a921f' },
+  { title: 'Cookie Policy Reader', rarity: 'epic', desc: 'Actually read a cookie policy from start to finish. Legal scholar!', icon: '/_blob/5137e04768861e56a54f270dfca2ddec' },
+  { title: 'Just Checking', rarity: 'common', desc: 'Claimed today’s tiny digital crumb. Important? Absolutely not.', icon: '/_blob/baeb2877f0f13fdbe7b2d386ba3d9997' },
+  { title: 'Link Collector', rarity: 'rare', desc: 'Shared 10 links in one day. Viral potential!', icon: '/_blob/4ef1a4fc098a40941cd938e58f32fa90' },
+  { title: 'Fullscreen Fanatic', rarity: 'rare', desc: "Toggled fullscreen mode 5 times in one session. Can't decide?", icon: '/_blob/121713d37f2864292a6d2cf2c7de5109' },
+  { title: 'Unintentional Beta Tester', rarity: 'legendary', desc: 'Discovered a bug that nobody knew existed. You broke the matrix!', icon: '/_blob/526982f15b192562d7ffb375463e4bb9' }
+];
+  }
+  gcd(a, b) { return b ? this.gcd(b, a % b) : a; }
+  period(n) {
+    let p = Math.ceil(Math.sqrt(n)); if (p % 2) p++;
+    const q = Math.max(1, Math.ceil(n / p));
+    const step = [7, 5, 3, 1].find((s) => this.gcd(s, n) === 1);
+    return { p, q, step };
+  }
+  geom() {
+    const ACHIEVEMENTS = this.achievements();
+    const pg = document.querySelector('[data-pg]');
+    const vw = (pg && pg.offsetWidth) || window.innerWidth || 1440, small = vw <= 720;
+    const vh = Math.ceil(((pg && pg.offsetHeight) || (small ? 5000 : 4000)) / 240) * 240;
+    const mk = (n, cw, ch) => {
+      const { p, q, step } = this.period(n);
+      return { n, cw, ch, p, q, step, W: p * cw, H: q * ch, cols: Math.ceil(vw / cw) + p, rows: Math.ceil(vh / ch) + q + 1 };
+    };
+    return { key: vw + 'x' + vh, f: small ? mk(ACHIEVEMENTS.length, 196, 268) : mk(ACHIEVEMENTS.length, 310, 390) };
+  }
+  build() {
+    const g = this.geom();
+    const collector = (this.props.previewAs ?? 'New visitor') === 'Signed-in collector';
+    const owned = collector ? [0, 1, 3, 5, 7, 8, 10] : [], wonNow = (this.state && this.state.won) || [];
+    g.key += '|' + collector + '|' + wonNow.join(',');
+    if (this._g && this._g.key === g.key) return;
+    this._g = g;
+    const ACHIEVEMENTS = this.achievements();
+    const idx = (L, c, r) => (((c % L.p) + (r % L.q) * L.p) * L.step) % L.n;
+    const front = [];
+    for (let r = 0; r < g.f.rows; r++) for (let c = 0; c < g.f.cols; c++) {
+      const i = idx(g.f, c, r), a = ACHIEVEMENTS[i];
+      front.push({ title: a.title, desc: a.desc, rarity: a.rarity, icon: a.icon, cls: 'r-' + a.rarity + (c % 2 ? ' od' : '') + (collector && !owned.includes(i) && !wonNow.includes(i) ? ' lk' : ''), aria: 'Open ' + a.title, open: (e) => this.openCard(i, e.currentTarget, false) });
+    }
+    this._front = front; this._laid = false;
+  }
+  layout() {
+    const g = this._g; if (!g) return;
+    [['front', g.f]].forEach(([name, L]) => {
+      const el = document.querySelector('[data-layer="' + name + '"]'); if (!el) return;
+      el.style.left = -L.W + 'px'; el.style.top = -L.H + 'px';
+      el.style.width = L.cols * L.cw + 'px';
+      el.style.gridTemplateColumns = 'repeat(' + L.cols + ',' + L.cw + 'px)';
+      el.style.gridAutoRows = L.ch + 'px';
+      el.style.setProperty('--half', L.ch / 2 + 'px');
+      L.el = el;
+    });
+    this._laid = true;
+  }
+  componentDidMount() {
+    this._reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+    this.ox = 0; this.oy = 0; this.vx = 0; this.vy = 0; this.mx = 0; this.my = 0; this._move = 0; this._last = 0;
+    this._onMove = (e) => {
+      if (e.pointerType === 'touch') return;
+      this.mx = (e.clientX / window.innerWidth - 0.5) * 2;
+      const now = performance.now(), tall = window.innerHeight > 1400;
+      if (tall && (now - this._move > 2500 || this._ay == null)) this._ay = e.clientY;
+      this.my = tall ? Math.max(-1, Math.min(1, (e.clientY - this._ay) / 450)) : (e.clientY / window.innerHeight - 0.5) * 2;
+      this._move = now;
+    };
+    this._onTouchStart = (e) => { const t = e.touches[0]; this._tx = t.clientX; this._ty = t.clientY; };
+    this._onTouchMove = (e) => {
+      const t = e.touches[0]; if (this._paused || this._reduce) return;
+      this.vx = (t.clientX - this._tx) * 0.9; this.vy = (t.clientY - this._ty) * 0.35;
+      this._tx = t.clientX; this._ty = t.clientY; this._move = performance.now(); this._touch = true;
+    };
+    this._onResize = () => { clearTimeout(this._rz); this._rz = setTimeout(() => this.forceUpdate(), 150); };
+    window.addEventListener('pointermove', this._onMove, { passive: true });
+    window.addEventListener('touchstart', this._onTouchStart, { passive: true });
+    window.addEventListener('touchmove', this._onTouchMove, { passive: true });
+    window.addEventListener('resize', this._onResize);
+    const tick = (now) => {
+      this._raf = requestAnimationFrame(tick);
+      if (!this._laid) this.layout();
+      const g = this._g; if (!g || !g.f.el) return;
+      const f = Math.min((now - (this._last || now)) / 16.7, 3); this._last = now;
+      if (!this._paused && !this._reduce) {
+        const drift = this.props.driftSpeed ?? 1, follow = this.props.followStrength ?? 1;
+        const active = now - this._move < 2500;
+        let tx = 0.35 * drift, ty = 0.18 * drift;
+        if (active && !this._touch) { tx = -this.mx * 6 * follow; ty = -this.my * 4.5 * follow; }
+        if (!active) this._touch = false;
+        const ease = this._touch ? 0.03 : 0.06;
+        this.vx += (tx - this.vx) * ease * f; this.vy += (ty - this.vy) * ease * f;
+        this.ox += this.vx * f; this.oy += this.vy * f;
+      }
+      const sy = -(window.scrollY || 0) * 0.25;
+      [[g.f, 1]].forEach(([L, d]) => {
+        const x = (((this.ox * d) % L.W) + L.W) % L.W, y = ((((this.oy - sy) * d) % L.H) + L.H) % L.H;
+        L.el.style.transform = 'translate3d(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px,0)';
+      });
+    };
+    this._raf = requestAnimationFrame(tick);
+    this.forceUpdate();
+  }
+  componentWillUnmount() {
+    cancelAnimationFrame(this._raf); clearTimeout(this._rz); clearTimeout(this._ct);
+    window.removeEventListener('pointermove', this._onMove);
+    window.removeEventListener('touchstart', this._onTouchStart);
+    window.removeEventListener('touchmove', this._onTouchMove);
+    window.removeEventListener('resize', this._onResize);
+  }
+  flipFrom(zc) {
+    const s = this._src.getBoundingClientRect(), z = zc.getBoundingClientRect();
+    const k = Math.max(0.12, s.width / z.width);
+    return 'translate(' + (s.left + s.width / 2 - (z.left + z.width / 2)).toFixed(1) + 'px,' + (s.top + s.height / 2 - (z.top + z.height / 2)).toFixed(1) + 'px) scale(' + k.toFixed(3) + ')';
+  }
+  openCard(i, src, claimed) {
+    if (this._paused) return;
+    this._paused = true; this._src = src; this._hide = !claimed; this._flip = true;
+    const won = (this.state && this.state.won) || [];
+    this.setState({ z: i, claimed: claimed, won: claimed && !won.includes(i) ? won.concat(i) : won });
+  }
+  componentDidUpdate() {
+    if (!this._flip) return;
+    const ov = document.querySelector('[data-ov]'), zw = document.querySelector('[data-zw]'), zc = document.querySelector('[data-zc]');
+    if (!ov || !zw || !zc || !this._src) return;
+    this._flip = false;
+    const vh = window.innerHeight;
+    if (vh > 1200) {
+      const s = this._src.getBoundingClientRect(), h = zw.getBoundingClientRect().height;
+      ov.style.alignItems = 'flex-start';
+      zw.style.marginTop = Math.max(16, Math.min(vh - h - 16, s.top + s.height / 2 - h / 2)) + 'px';
+    }
+    if (this._reduce) { if (this._hide) this._src.style.visibility = 'hidden'; return; }
+    zc.style.transition = 'none'; zc.style.transform = this.flipFrom(zc);
+    zc.getBoundingClientRect();
+    if (this._hide) this._src.style.visibility = 'hidden';
+    zc.style.transition = 'transform .5s cubic-bezier(.2,.85,.25,1)'; zc.style.transform = 'none';
+  }
+  close() {
+    if (this._closing || this.state == null || this.state.z == null) return;
+    this._closing = true;
+    const ov = document.querySelector('[data-ov]'), zc = document.querySelector('[data-zc]');
+    const done = () => {
+      if (this._src) this._src.style.visibility = '';
+      this._closing = false; this._paused = false; this._src = null; this._move = 0;
+      this.setState({ z: null, claimed: false });
+    };
+    if (this._reduce || !ov || !zc) { done(); return; }
+    zc.style.transition = 'none'; zc.style.transform = 'none';
+    const to = this.flipFrom(zc);
+    zc.getBoundingClientRect();
+    zc.style.transition = 'transform .4s cubic-bezier(.4,0,.2,1)'; zc.style.transform = to;
+    ov.classList.add('out');
+    this._ct = setTimeout(done, 400);
+  }
+  renderVals() {
+    this.build();
+    const ACHIEVEMENTS = this.achievements(), TIER_PICKS = [7, 5, 4, 10];
+    const st = this.state || {}, z = st.z != null ? ACHIEVEMENTS[st.z] : null;
+    const won = st.won || [];
+    const owned = (this.props.previewAs ?? 'New visitor') === 'Signed-in collector' ? [0, 1, 3, 5, 7, 8, 10] : [];
+    const unlocked = !!z && (owned.includes(st.z) || won.includes(st.z));
+    const pool = ACHIEVEMENTS.map((a, i) => i).filter((i) => !owned.includes(i));
+    return {
+      front: this._front,
+      tiers: TIER_PICKS.map((i) => { const a = ACHIEVEMENTS[i]; return { title: a.title, desc: a.desc, rarity: a.rarity, icon: a.icon, cls: 'r-' + a.rarity }; }),
+      locks: [1, 2, 3, 4, 5, 6, 7, 8],
+      claim: (e) => this.openCard(won.length ? won[won.length - 1] : pool[Math.floor(Math.random() * pool.length)], e.currentTarget, true),
+      close: () => this.close(),
+      share: () => {},
+      zOpen: !!z, claimed: !!st.claimed, zUnlocked: unlocked, zLocked: !!z && !unlocked,
+      zCls: z ? 'r-' + z.rarity + (unlocked ? '' : ' lk') : '', zIcon: z ? z.icon : '', zRarity: z ? z.rarity : '', zTitle: z ? z.title : '', zDesc: z ? z.desc : ''
+    };
+  }
+}
+</script>
+</body>
+</html>
