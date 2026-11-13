@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useMemo, useState, type RefObject } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
+import { useReducedMotion } from "@/components/hero/use-reduced-motion";
 import type { Achievement } from "@/lib/supabase";
 import styles from "./card-wall.module.css";
 import { WallCard } from "./wall-card";
-import { cellIndex, wallGeometry, type WallGeometry } from "./wall-tiling";
+import { useWallMotion } from "./use-wall-motion";
+import { cellIndex, wallGeometry } from "./wall-tiling";
 
 interface Viewport {
   width: number;
@@ -59,25 +61,24 @@ export interface CardWallProps {
   /** True when this card shows the locked look on the wall. */
   isLocked: (achievement: Achievement) => boolean;
   onOpen?: (achievement: Achievement, card: HTMLButtonElement) => void;
-  /** The moving layer, for the motion loop. */
-  layerRef?: RefObject<HTMLDivElement | null>;
-  /** Called whenever the grid is rebuilt (first layout, resize). */
-  onGeometry?: (geometry: WallGeometry) => void;
+  /** True while a card is zoomed: the wall holds still. */
+  paused?: boolean;
 }
 
 /**
- * A fixed, viewport-sized wall of achievement cards behind the page. It
- * renders after mount, once the viewport size is known, so the server and
- * the first client render agree.
+ * A fixed, viewport-sized wall of achievement cards behind the page, moving
+ * as one layer. It renders after mount, once the viewport size is known, so
+ * the server and the first client render agree.
  */
 export function CardWall({
   catalog,
   isLocked,
   onOpen,
-  layerRef,
-  onGeometry,
+  paused = false,
 }: CardWallProps) {
   const viewport = useWallViewport();
+  const layerRef = useRef<HTMLDivElement>(null);
+  const reducedMotion = useReducedMotion();
 
   const geometry = useMemo(
     () =>
@@ -87,9 +88,7 @@ export function CardWall({
     [catalog.length, viewport],
   );
 
-  useEffect(() => {
-    if (geometry) onGeometry?.(geometry);
-  }, [geometry, onGeometry]);
+  useWallMotion({ layerRef, geometry, paused, reducedMotion });
 
   const cells = useMemo(() => {
     if (!geometry) return [];
