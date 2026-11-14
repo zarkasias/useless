@@ -67,8 +67,8 @@ describe("cellIndex", () => {
 
 describe("wallGeometry", () => {
   it("uses the phone sizes at 720px and under", () => {
-    expect(wallGeometry(84, 720, 800).cellWidth).toBe(196);
-    expect(wallGeometry(84, 721, 800).cellWidth).toBe(310);
+    expect(wallGeometry(84, 720, 800).cellWidth).toBe(228);
+    expect(wallGeometry(84, 721, 800).cellWidth).toBe(380);
   });
 
   it.each([

@@ -13,9 +13,13 @@ export interface WallSizes {
   cellHeight: number;
 }
 
-/** Sizes from HANDOFF.md §2. Phones are 720px wide and under. */
-export const DESKTOP_SIZES: WallSizes = { cellWidth: 310, cellHeight: 390 };
-export const PHONE_SIZES: WallSizes = { cellWidth: 196, cellHeight: 268 };
+/**
+ * Phones are 720px wide and under. Cells are larger than HANDOFF.md §2
+ * (310 × 390 and 196 × 268) to give the cards more white space; the cards
+ * themselves keep their size.
+ */
+export const DESKTOP_SIZES: WallSizes = { cellWidth: 380, cellHeight: 470 };
+export const PHONE_SIZES: WallSizes = { cellWidth: 228, cellHeight: 310 };
 export const PHONE_MAX_WIDTH = 720;
 
 export interface WallPeriod {
